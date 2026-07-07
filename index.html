@@ -957,7 +957,7 @@
                 </div>
                 <div class="header-right">
                     <span class="page-title" id="headerTitle">Inicio</span>
-                    <button class="btn-menu" id="menuBtn" onclick="toggleMenu()" aria-label="Menú">⋮</button>
+                    <button class="btn-menu" id="menuBtn">⋮</button>
                 </div>
             </div>
         </header>
@@ -1250,56 +1250,53 @@
         }
 
         // ================================================================
+        // MENÚ ADMIN
+        // ================================================================
+
+        // El menú se controla con eventos en el DOMContentLoaded
+
+        // ================================================================
         // BACKUP AUTOMÁTICO Y RESTAURACIÓN
         // ================================================================
 
         // --- BACKUP AUTOMÁTICO (se genera solo al guardar/editar/eliminar) ---
         function generarBackupAutomatico() {
             try {
-                const datos = {
-                    version: '1.0',
-                    fecha: new Date().toISOString(),
-                    carName: getCarName(),
-                    initialKm: getInitialKm(),
-                    lastPrice: getLastPrice(),
-                    fuels: getAllFuels(),
-                    services: getAllServices()
-                };
+                // Obtener datos de forma asíncrona
+                const promesaFuels = getAllFuels();
+                const promesaServices = getAllServices();
 
-                const json = JSON.stringify(datos, null, 2);
-                const blob = new Blob([json], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
+                Promise.all([promesaFuels, promesaServices]).then(([fuels, services]) => {
+                    const datos = {
+                        version: '1.0',
+                        fecha: new Date().toISOString(),
+                        carName: getCarName(),
+                        initialKm: getInitialKm(),
+                        lastPrice: getLastPrice(),
+                        fuels: fuels,
+                        services: services
+                    };
 
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'gasapp-backup.json';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+                    const json = JSON.stringify(datos, null, 2);
+                    const blob = new Blob([json], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
 
-                console.log('✅ Backup automático guardado');
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'gasapp-backup.json';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+
+                    console.log('✅ Backup automático guardado');
+                }).catch(error => {
+                    console.error('Error al obtener datos para backup:', error);
+                });
             } catch (error) {
                 console.error('Error en backup automático:', error);
             }
         }
-
-        // --- MENÚ ADMIN ---
-        function toggleMenu() {
-            const menu = document.getElementById('adminMenu');
-            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-        }
-
-        // Cerrar menú al hacer clic fuera
-        document.addEventListener('click', function(e) {
-            const menu = document.getElementById('adminMenu');
-            const btn = document.getElementById('menuBtn');
-            if (menu && btn) {
-                if (!btn.contains(e.target) && !menu.contains(e.target)) {
-                    menu.style.display = 'none';
-                }
-            }
-        });
 
         // --- IMPORTAR BACKUP (MANUAL) ---
         function importarBackup() {
@@ -1342,7 +1339,8 @@
                     }
 
                     showToast('✅ Backup restaurado correctamente', 'success');
-                    toggleMenu();
+                    // Cerrar menú
+                    document.getElementById('adminMenu').style.display = 'none';
                     location.reload();
 
                 } catch (error) {
@@ -1650,6 +1648,31 @@
         // ================================================================
 
         document.addEventListener('DOMContentLoaded', async () => {
+            // Configurar menú de 3 puntos
+            const menuBtn = document.getElementById('menuBtn');
+            const adminMenu = document.getElementById('adminMenu');
+
+            if (menuBtn) {
+                menuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (adminMenu.style.display === 'block') {
+                        adminMenu.style.display = 'none';
+                    } else {
+                        adminMenu.style.display = 'block';
+                    }
+                });
+            }
+
+            // Cerrar menú al hacer clic fuera
+            document.addEventListener('click', function(e) {
+                if (adminMenu && menuBtn) {
+                    if (!menuBtn.contains(e.target) && !adminMenu.contains(e.target)) {
+                        adminMenu.style.display = 'none';
+                    }
+                }
+            });
+
+            // Resto del código de inicialización
             const carName = getCarName();
             const carNameSpan = document.querySelector('.car-name');
             if (carNameSpan) {
