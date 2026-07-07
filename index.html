@@ -1250,19 +1250,37 @@
         }
 
         // ================================================================
-        // MENÚ ADMIN
+        // MENÚ ADMIN - FUNCIONA CON ONCLICK EN EL BOTÓN
         // ================================================================
 
-        // El menú se controla con eventos en el DOMContentLoaded
+        // Esta función se ejecuta desde el HTML con onclick en el botón
+        function toggleMenu() {
+            var menu = document.getElementById('adminMenu');
+            if (menu.style.display === 'block') {
+                menu.style.display = 'none';
+            } else {
+                menu.style.display = 'block';
+            }
+        }
+
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            var menu = document.getElementById('adminMenu');
+            var btn = document.getElementById('menuBtn');
+            if (menu && btn) {
+                if (!btn.contains(e.target) && !menu.contains(e.target)) {
+                    menu.style.display = 'none';
+                }
+            }
+        });
 
         // ================================================================
         // BACKUP AUTOMÁTICO Y RESTAURACIÓN
         // ================================================================
 
-        // --- BACKUP AUTOMÁTICO (se genera solo al guardar/editar/eliminar) ---
+        // --- BACKUP AUTOMÁTICO ---
         function generarBackupAutomatico() {
             try {
-                // Obtener datos de forma asíncrona
                 const promesaFuels = getAllFuels();
                 const promesaServices = getAllServices();
 
@@ -1298,7 +1316,7 @@
             }
         }
 
-        // --- IMPORTAR BACKUP (MANUAL) ---
+        // --- IMPORTAR BACKUP ---
         function importarBackup() {
             const input = document.createElement('input');
             input.type = 'file';
@@ -1648,30 +1666,6 @@
         // ================================================================
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // Configurar menú de 3 puntos
-            const menuBtn = document.getElementById('menuBtn');
-            const adminMenu = document.getElementById('adminMenu');
-
-            if (menuBtn) {
-                menuBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    if (adminMenu.style.display === 'block') {
-                        adminMenu.style.display = 'none';
-                    } else {
-                        adminMenu.style.display = 'block';
-                    }
-                });
-            }
-
-            // Cerrar menú al hacer clic fuera
-            document.addEventListener('click', function(e) {
-                if (adminMenu && menuBtn) {
-                    if (!menuBtn.contains(e.target) && !adminMenu.contains(e.target)) {
-                        adminMenu.style.display = 'none';
-                    }
-                }
-            });
-
             // Resto del código de inicialización
             const carName = getCarName();
             const carNameSpan = document.querySelector('.car-name');
