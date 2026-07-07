@@ -3,77 +3,1331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasApp</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Gestión Evangelización</title>
+
+    <!-- ============================================================ -->
+    <!-- PWA CONFIGURACIÓN - OPTIMIZADA PARA XIAOMI -->
+    <!-- ============================================================ -->
     <link rel="manifest" href="manifest.json">
+    
+    <!-- Iconos para PWA -->
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    
+    <!-- Meta tags para PWA -->
+    <meta name="theme-color" content="#1a2634">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Gestión Evang">
+    
+    <!-- ===== ESPECÍFICO PARA XIAOMI (icono más grande) ===== -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="x5-fullscreen" content="true">
+    <meta name="x5-page-mode" content="app">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; color: #333; font-size: 14px; display: flex; flex-direction: column; }
+        .header { background: #1a2634; color: white; padding: 12px; text-align: center; flex-shrink: 0; z-index: 100; }
+        .header h1 { font-size: 17px; font-weight: 600; }
+
+        .tabs { display: flex; background: #2c3e50; flex-shrink: 0; z-index: 99; }
+        .tab { flex: 1; padding: 10px; text-align: center; color: #bdc3c7; background: transparent; border: none; font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; }
+        .tab.active { color: white; border-bottom-color: #3498db; }
+
+        ::-webkit-scrollbar { width: 3px; height: 3px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #c1c7cd; border-radius: 10px; }
+
+        .content { display: none; padding: 12px; max-width: 600px; margin: 0 auto; flex: 1; overflow: hidden; padding-bottom: 12px; min-height: 0; }
+        .content.active { display: flex; flex-direction: column; }
+
+        .card { background: white; border-radius: 10px; padding: 12px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); flex-shrink: 0; }
+        .card-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #2c3e50; display: flex; align-items: center; justify-content: space-between; }
+
+        .search-box { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; margin-bottom: 8px; }
+        .search-box:focus { outline: none; border-color: #3498db; }
+
+        .participant-list-container { flex: 1; overflow-y: auto; min-height: 100px; max-height: 400px; }
+        .participant-list-container::-webkit-scrollbar { width: 3px; }
+        .participant-list-container::-webkit-scrollbar-thumb { background: #c1c7cd; border-radius: 10px; }
+
+        .participant-item { display: flex; align-items: center; padding: 8px 6px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
+        .participant-item:hover { background: #f8f9fa; }
+        .participant-item.inactive { opacity: 0.7; background: #f5f5f5; }
+        .participant-name { flex: 1; font-size: 13px; font-weight: 500; }
+        .participant-status { display: flex; gap: 6px; margin-left: 6px; align-items: center; }
+
+        .status-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 10px; font-weight: bold; color: white; flex-shrink: 0; }
+        .status-icon.pagado { background: #27ae60; }
+        .status-icon.pendiente { background: #e74c3c; }
+        .status-icon.activo-icon { font-size: 14px; color: #22aa44 !important; background: none !important; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold; }
+        .status-icon.inactivo-icon { font-size: 14px; color: #cc2222 !important; background: none !important; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold; }
+
+        .cabecera-participantes { display: flex; align-items: center; padding: 4px 6px 6px 6px; border-bottom: 2px solid #e0e0e0; margin-bottom: 4px; font-weight: 600; font-size: 12px; color: #555; flex-shrink: 0; }
+        .cabecera-participantes .col-nombre { flex: 1; }
+        .cabecera-participantes .col-iconos { display: flex; gap: 4px; align-items: center; }
+        .cabecera-participantes .col-iconos .filtro-icono-cabecera { font-size: 15px; cursor: pointer; padding: 2px 3px; border-radius: 4px; border: 2px solid transparent; transition: all 0.2s; background: none; line-height: 1; width: 24px; text-align: center; }
+        .cabecera-participantes .col-iconos .filtro-icono-cabecera:hover { background: #e9ecef; }
+        .cabecera-participantes .col-iconos .filtro-icono-cabecera.active { border-color: #3498db; background: #e9ecef; }
+
+        .posicion-relativa { position: relative; display: inline-block; }
+        .dropdown-filtro { display: none; position: absolute; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 6px 0; min-width: 120px; z-index: 50; border: 1px solid #e0e0e0; top: 100%; left: 50%; transform: translateX(-50%); }
+        .dropdown-filtro.visible { display: block; }
+        .dropdown-filtro .opcion { padding: 6px 12px; cursor: pointer; font-size: 12px; transition: background 0.2s; border: none; background: none; width: 100%; text-align: left; color: #333; }
+        .dropdown-filtro .opcion:hover { background: #f0f2f5; }
+        .dropdown-filtro .opcion.activa { background: #e9ecef; font-weight: bold; }
+
+        .limpiar-filtro { font-size: 11px; color: #e74c3c; cursor: pointer; padding: 2px 6px; border-radius: 10px; background: #fde8e8; border: 1px solid #f5c6cb; display: none; margin-left: 4px; }
+        .limpiar-filtro.visible { display: inline-block; }
+
+        .summary { background: #1a2634; color: white; padding: 10px 12px; border-radius: 10px; margin-top: 8px; flex-shrink: 0; }
+        .summary .fila-superior { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; flex-wrap: wrap; gap: 4px; }
+        .summary .fila-superior .titulo { font-weight: bold; color: #fff; }
+        .summary .fila-superior .activos { color: #22aa44; }
+        .summary .fila-superior .inactivos { color: #cc2222; }
+        .summary .fila-nombres { display: flex; justify-content: space-around; align-items: center; margin-top: 4px; font-size: 11px; color: #bdc3c7; gap: 8px; flex-wrap: wrap; }
+        .summary .fila-nombres .item { flex: 1; text-align: center; font-weight: 500; letter-spacing: 0.3px; }
+        .summary .fila-inferior { display: flex; justify-content: space-around; align-items: center; margin-top: 2px; font-size: 13px; gap: 8px; flex-wrap: wrap; }
+        .summary .fila-inferior .item { display: flex; align-items: center; gap: 4px; flex: 1; justify-content: center; }
+        .summary .fila-inferior .item .icono { font-size: 14px; }
+        .summary .fila-inferior .item .numero { font-weight: bold; font-size: 14px; }
+
+        .btn { padding: 6px 14px; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-sm { padding: 4px 10px; font-size: 11px; width: auto; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-warning { background: #f39c12; color: white; }
+        .btn-secondary { background: #95a5a6; color: white; }
+        .btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; border-radius: 14px; padding: 20px; max-width: 400px; width: 100%; max-height: 90vh; overflow-y: auto; }
+        .modal h2 { font-size: 16px; margin-bottom: 12px; color: #2c3e50; }
+        .modal-close { float: right; background: none; border: none; font-size: 22px; cursor: pointer; color: #999; }
+        .modal-close:hover { color: #333; }
+
+        .pago-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .pago-item:last-child { border-bottom: none; }
+        .pago-label { font-weight: 500; flex: 1; font-size: 13px; }
+        .pago-fecha { font-size: 11px; color: #666; margin: 0 6px; }
+
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        .switch input:checked + .slider { background-color: #27ae60; }
+        .switch input:checked + .slider:before { transform: translateX(20px); }
+
+        .finanzas-container { display: flex; flex-direction: column; flex: 1; min-height: 0; height: 100%; }
+
+        .finanzas-form-row { 
+            display: flex; 
+            flex-wrap: nowrap; 
+            align-items: center; 
+            gap: 6px; 
+        }
+        .finanzas-form-row .form-group { margin-bottom: 0; }
+        .finanzas-form-row .form-group.tipo { flex: 0 0 85px; min-width: 70px; }
+        .finanzas-form-row .form-group.concepto { flex: 1; min-width: 70px; }
+        .finanzas-form-row .form-group.monto { flex: 0 0 85px; min-width: 70px; }
+        .finanzas-form-row .form-group.fecha { flex: 0 0 85px; min-width: 70px; }
+        .finanzas-form-row .btn-guardar { flex: 0 0 32px; padding: 4px 0; font-size: 18px; background: none; border: none; cursor: pointer; color: #27ae60; display: flex; align-items: center; justify-content: center; }
+        .finanzas-form-row .btn-guardar:hover { color: #1e8449; }
+        .finanzas-form-row .form-control { padding: 5px 6px; font-size: 12px; border: 1px solid #ddd; border-radius: 4px; width: 100%; }
+        .finanzas-form-row .form-control:focus { outline: none; border-color: #3498db; }
+        .finanzas-form-row .form-control.tipo-input { padding: 5px 4px; font-size: 12px; }
+
+        .form-control.monto-input { text-align: right; font-weight: 600; }
+        .form-control.monto-input::placeholder { text-align: left; font-weight: normal; }
+
+        .fecha-wrapper { position: relative; }
+        .fecha-wrapper input[type="date"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .fecha-wrapper .fecha-display {
+            padding: 5px 6px;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            width: 100%;
+            cursor: pointer;
+            color: #333;
+            text-align: center;
+        }
+        .fecha-wrapper .fecha-display.placeholder { color: #aaa; }
+
+        .finanzas-scroll-area { flex: 1; overflow-y: auto; min-height: 80px; max-height: 400px; }
+        .finanzas-scroll-area::-webkit-scrollbar { width: 3px; }
+        .finanzas-scroll-area::-webkit-scrollbar-thumb { background: #c1c7cd; border-radius: 10px; }
+
+        .movimiento-item { display: flex; align-items: center; padding: 5px 6px; border-bottom: 1px solid #f0f0f0; gap: 6px; font-size: 12px; }
+        .movimiento-item .fecha { color: #666; min-width: 70px; font-size: 11px; flex-shrink: 0; }
+        .movimiento-item .concepto { flex: 1; }
+        .movimiento-item .monto { font-weight: bold; min-width: 50px; text-align: right; flex-shrink: 0; }
+        .movimiento-item .monto.ingreso { color: #27ae60; }
+        .movimiento-item .monto.gasto { color: #e74c3c; }
+        .btn-accion { background: none; border: none; font-size: 13px; cursor: pointer; padding: 0 3px; flex-shrink: 0; }
+        .btn-editar { color: #3498db; }
+        .btn-eliminar { color: #e74c3c; }
+
+        .form-group { margin-bottom: 6px; }
+        .form-group label { display: block; font-size: 11px; font-weight: 600; color: #555; margin-bottom: 2px; }
+
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center; flex-direction: column; }
+        .loading-overlay.active { display: flex; }
+        .loading-spinner { width: 36px; height: 36px; border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading-text { color: white; margin-top: 10px; font-size: 13px; }
+
+        .empty-state { text-align: center; padding: 20px 0; color: #999; font-size: 13px; }
+
+        .menu-inferior-finanzas { background: #1a2634; color: white; padding: 10px 12px; border-radius: 10px; margin-top: 8px; flex-shrink: 0; }
+        .menu-inferior-finanzas .titulo { text-align: center; font-weight: bold; font-size: 12px; color: #fff; margin-bottom: 4px; }
+
+        .menu-inferior-finanzas .fila-totales { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; text-align: center; margin-bottom: 4px; }
+        .menu-inferior-finanzas .fila-totales .item { font-size: 11px; cursor: pointer; }
+        .menu-inferior-finanzas .fila-totales .item .label { opacity: 0.7; font-weight: normal; }
+        .menu-inferior-finanzas .fila-totales .item .valor { font-weight: bold; font-size: 13px; }
+        .menu-inferior-finanzas .fila-totales .item .valor.ingresos { color: #1e8449; }
+        .menu-inferior-finanzas .fila-totales .item .valor.gastos { color: #d35400; }
+        .menu-inferior-finanzas .fila-totales .item .valor.disponible { color: #2ecc71; }
+
+        .menu-inferior-finanzas .fila-conceptos { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; text-align: center; padding-top: 4px; border-top: 1px solid rgba(255,255,255,0.15); }
+        .menu-inferior-finanzas .fila-conceptos .item { font-size: 11px; cursor: pointer; padding: 3px 2px; border-radius: 4px; transition: all 0.2s; }
+        .menu-inferior-finanzas .fila-conceptos .item:hover { background: rgba(255,255,255,0.08); }
+        .menu-inferior-finanzas .fila-conceptos .item .label { opacity: 0.7; font-weight: normal; font-size: 10px; display: block; }
+        .menu-inferior-finanzas .fila-conceptos .item .valor { font-weight: bold; font-size: 15px; }
+        .menu-inferior-finanzas .fila-conceptos .item .valor.inscripcion { color: #e67e22; }
+        .menu-inferior-finanzas .fila-conceptos .item .valor.compendio { color: #27ae60; }
+        .menu-inferior-finanzas .fila-conceptos .item .valor.crucifijo { color: #3498db; }
+        .menu-inferior-finanzas .fila-conceptos .item.active { background: rgba(52,152,219,0.2); border-left: 3px solid #3498db; }
+
+        .resumen-periodo .linea { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+        .resumen-periodo .linea .label { flex: 1; }
+        .resumen-periodo .linea .monto { font-weight: bold; text-align: right; flex-shrink: 0; margin-left: 12px; }
+        .periodo-item { padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+        .periodo-item .total { float: right; font-weight: bold; color: #27ae60; }
+
+        .toast { position: fixed; top: 70px; left: 50%; transform: translateX(-50%) translateY(-20px); background: #27ae60; color: white; padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; white-space: nowrap; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.error { background: #e74c3c; }
+
+        @media (max-width: 480px) {
+            .summary .fila-superior { font-size: 12px; }
+            .summary .fila-nombres { font-size: 10px; }
+            .summary .fila-inferior { font-size: 12px; }
+            .finanzas-form-row { flex-wrap: wrap; gap: 4px; }
+            .finanzas-form-row .form-group.tipo { flex: 0 0 70px; min-width: 60px; }
+            .finanzas-form-row .form-group.concepto { flex: 1; min-width: 60px; }
+            .finanzas-form-row .form-group.monto { flex: 0 0 70px; min-width: 60px; }
+            .finanzas-form-row .form-group.fecha { flex: 0 0 70px; min-width: 60px; }
+            .menu-inferior-finanzas .fila-totales { grid-template-columns: 1fr 1fr 1fr; gap: 2px; }
+            .menu-inferior-finanzas .fila-conceptos { grid-template-columns: 1fr 1fr 1fr; gap: 2px; }
+            .menu-inferior-finanzas .fila-conceptos .item .valor { font-size: 13px; }
+            .cabecera-participantes .col-iconos .filtro-icono-cabecera { font-size: 13px; width: 20px; }
+            .status-icon { width: 18px; height: 18px; font-size: 9px; }
+            .status-icon.activo-icon, .status-icon.inactivo-icon { font-size: 12px; width: 18px; height: 18px; }
+            .toast { top: 60px; font-size: 13px; padding: 8px 16px; }
+        }
+    </style>
 </head>
 <body>
-    <div class="app">
-        <!-- Header minimalista -->
-        <header class="header-mini">
-            <div class="header-top">
-                <div class="car-name-row">
-                    <span class="car-name" id="carName">Mi Auto</span>
-                    <button class="btn-edit-car" id="editCarName">✏️</button>
+
+    <div id="toast" class="toast"></div>
+
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Cargando datos...</div>
+    </div>
+
+    <div class="header"><h1>📋 Gestión Evangelización</h1></div>
+
+    <div class="tabs">
+        <button class="tab active" data-tab="cobros">👥 Cobros</button>
+        <button class="tab" data-tab="finanzas">💰 Finanzas</button>
+        <button class="tab" data-tab="admin">⚙️ Admin</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- COBROS -->
+    <!-- ============================================================ -->
+    <div id="cobros" class="content active">
+        <div class="card">
+            <div class="card-title" style="font-size:13px;">
+                🔍 Buscar participante
+                <span style="display:flex; align-items:center; gap:6px;">
+                    <span style="font-size:14px; color:#666; cursor:pointer;" onclick="recargarDatos()" title="Sincronizar">🔄</span>
+                </span>
+            </div>
+            <input type="text" id="searchInput" class="search-box" placeholder="Escribe el nombre...">
+            <div class="btn-group">
+                <button class="btn btn-primary btn-sm" onclick="abrirModalAgregar()">➕ Agregar</button>
+                <button class="btn btn-warning btn-sm" onclick="abrirModalMontos()">💰 Cambiar montos</button>
+            </div>
+        </div>
+
+        <div class="card" style="padding: 10px 12px; flex: 1; display: flex; flex-direction: column; min-height: 0;">
+            <div class="cabecera-participantes">
+                <span class="col-nombre" style="font-weight:600; color:#2c3e50;">Participantes</span>
+                <span class="col-iconos">
+                    <span class="posicion-relativa">
+                        <button class="filtro-icono-cabecera" data-concepto="inscripcion" onclick="toggleDropdownFiltro(event, 'inscripcion')" title="Filtrar por Inscripción">📝</button>
+                        <div class="dropdown-filtro" id="dropdown-inscripcion">
+                            <button class="opcion" data-filtro="todos" onclick="aplicarFiltroCobros('inscripcion', 'todos')">📋 Todos</button>
+                            <button class="opcion" data-filtro="pagados" onclick="aplicarFiltroCobros('inscripcion', 'pagados')">✅ Pagados</button>
+                            <button class="opcion" data-filtro="pendientes" onclick="aplicarFiltroCobros('inscripcion', 'pendientes')">❌ Pendientes</button>
+                        </div>
+                    </span>
+                    <span class="posicion-relativa">
+                        <button class="filtro-icono-cabecera" data-concepto="compendio" onclick="toggleDropdownFiltro(event, 'compendio')" title="Filtrar por Compendio">📚</button>
+                        <div class="dropdown-filtro" id="dropdown-compendio">
+                            <button class="opcion" data-filtro="todos" onclick="aplicarFiltroCobros('compendio', 'todos')">📋 Todos</button>
+                            <button class="opcion" data-filtro="pagados" onclick="aplicarFiltroCobros('compendio', 'pagados')">✅ Pagados</button>
+                            <button class="opcion" data-filtro="pendientes" onclick="aplicarFiltroCobros('compendio', 'pendientes')">❌ Pendientes</button>
+                        </div>
+                    </span>
+                    <span class="posicion-relativa">
+                        <button class="filtro-icono-cabecera" data-concepto="crucifijo" onclick="toggleDropdownFiltro(event, 'crucifijo')" title="Filtrar por Crucifijo">✝️</button>
+                        <div class="dropdown-filtro" id="dropdown-crucifijo">
+                            <button class="opcion" data-filtro="todos" onclick="aplicarFiltroCobros('crucifijo', 'todos')">📋 Todos</button>
+                            <button class="opcion" data-filtro="pagados" onclick="aplicarFiltroCobros('crucifijo', 'pagados')">✅ Pagados</button>
+                            <button class="opcion" data-filtro="pendientes" onclick="aplicarFiltroCobros('crucifijo', 'pendientes')">❌ Pendientes</button>
+                        </div>
+                    </span>
+                    <span class="posicion-relativa">
+                        <button class="filtro-icono-cabecera" data-concepto="activo" onclick="toggleDropdownFiltro(event, 'activo')" title="Filtrar por Estado" style="font-size:15px;">👤</button>
+                        <div class="dropdown-filtro" id="dropdown-activo">
+                            <button class="opcion" data-filtro="todos" onclick="aplicarFiltroCobros('activo', 'todos')">📋 Todos</button>
+                            <button class="opcion" data-filtro="activos" onclick="aplicarFiltroCobros('activo', 'activos')">🟢 Activos</button>
+                            <button class="opcion" data-filtro="inactivos" onclick="aplicarFiltroCobros('activo', 'inactivos')">🔴 Inactivos</button>
+                        </div>
+                    </span>
+                    <span class="limpiar-filtro" id="limpiarFiltroCobros" onclick="limpiarFiltroCobros()">✕ Limpiar</span>
+                </span>
+            </div>
+            <div class="participant-list-container" id="participantList"></div>
+        </div>
+
+        <div class="summary" id="summary">
+            <div class="fila-superior">
+                <span class="titulo">📊 Resumen</span>
+                <span>
+                    <span class="activos" id="resumenActivos">0 activos</span>
+                    <span style="opacity:0.5; margin:0 4px;">|</span>
+                    <span class="inactivos" id="resumenInactivos">0 inactivos</span>
+                </span>
+            </div>
+            <div class="fila-nombres" id="summaryNombres">
+                <span class="item">Inscripción</span>
+                <span class="item">Compendio</span>
+                <span class="item">Crucifijo</span>
+            </div>
+            <div class="fila-inferior" id="summaryContent"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- FINANZAS -->
+    <!-- ============================================================ -->
+    <div id="finanzas" class="content">
+        <div class="finanzas-container">
+            <div class="card" style="padding: 10px; flex-shrink: 0;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                    <span style="font-size:13px; font-weight:600; color:#2c3e50;">➕ Agregar movimiento</span>
+                    <button class="btn-guardar" onclick="agregarMovimiento()" title="Guardar movimiento" style="font-size:18px; background:none; border:none; cursor:pointer; color:#27ae60; padding:0;">💾</button>
                 </div>
-                <span class="app-name">⛽ GasApp</span>
+                <div class="finanzas-form-row">
+                    <div class="form-group tipo">
+                        <select id="finTipo" class="form-control tipo-input">
+                            <option value="ingreso">Ingreso</option>
+                            <option value="gasto">Gasto</option>
+                        </select>
+                    </div>
+                    <div class="form-group concepto">
+                        <input type="text" id="finConcepto" class="form-control" placeholder="Concepto">
+                    </div>
+                    <div class="form-group monto">
+                        <input type="text" id="finMonto" class="form-control monto-input" placeholder="$0.00" inputmode="decimal">
+                    </div>
+                    <div class="form-group fecha">
+                        <div class="fecha-wrapper">
+                            <input type="date" id="finFechaInput" onchange="actualizarFechaDisplay()">
+                            <div class="fecha-display placeholder" id="finFechaDisplay">05-jul-26</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="odometer-row">
-                <span class="odo-label">Odómetro</span>
-                <span class="odo-value clickable" id="currentOdometer">0</span>
-                <span class="odo-unit">km</span>
-            </div>
-        </header>
 
-        <!-- Alerta servicio (compacta) -->
-        <div class="service-alert-mini" id="serviceAlert" style="display:none;">
-            <span class="alert-icon">🔧</span>
-            <div class="alert-text">
-                <strong id="serviceDetail">Cambio de aceite</strong>
-                <span id="serviceKm">Faltan 500 km</span>
+            <div class="card" style="padding: 8px; flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0;">
+                <div id="finanzasList" class="finanzas-scroll-area"></div>
+            </div>
+
+            <div class="menu-inferior-finanzas" id="menuInferiorFinanzas">
+                <div class="titulo">📊 Resumen de movimientos</div>
+                <div class="fila-totales">
+                    <div class="item" onclick="filtrarFinanzas('ingreso')">
+                        <div class="label">💰 Ingresos</div>
+                        <div class="valor ingresos" id="menuIngresos">$0</div>
+                    </div>
+                    <div class="item" onclick="filtrarFinanzas('gasto')">
+                        <div class="label">💸 Gastos</div>
+                        <div class="valor gastos" id="menuGastos">$0</div>
+                    </div>
+                    <div class="item" style="cursor:default;">
+                        <div class="label">📈 Disponible</div>
+                        <div class="valor disponible" id="menuDisponible">$0</div>
+                    </div>
+                </div>
+                <div class="fila-conceptos">
+                    <div class="item" data-filtro="inscripcion" onclick="filtrarFinanzas('inscripcion')">
+                        <span class="label">📝 Inscripción</span>
+                        <span class="valor inscripcion" id="menuInscripcion">0/0 $0</span>
+                    </div>
+                    <div class="item" data-filtro="compendio" onclick="filtrarFinanzas('compendio')">
+                        <span class="label">📚 Compendio</span>
+                        <span class="valor compendio" id="menuCompendio">0/0 $0</span>
+                    </div>
+                    <div class="item" data-filtro="crucifijo" onclick="filtrarFinanzas('crucifijo')">
+                        <span class="label">✝️ Crucifijo</span>
+                        <span class="valor crucifijo" id="menuCrucifijo">0/0 $0</span>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <!-- Últimas cargas (una línea) -->
-        <div class="section-label">Últimas cargas</div>
-        <div id="lastFuels" class="fuel-list-compact">
-            <div class="empty-state-mini">Sin registros</div>
-        </div>
-
-        <!-- Botón flotante -->
-        <button class="fab-mini" id="addFuelBtn">+</button>
-
-        <!-- Navegación inferior -->
-        <nav class="bottom-nav-mini">
-            <button class="nav-item active" onclick="location.href='index.html'">
-                <span>📊</span>
-                <span>Inicio</span>
-            </button>
-            <button class="nav-item" onclick="location.href='history.html'">
-                <span>📈</span>
-                <span>Historial</span>
-            </button>
-            <button class="nav-item" id="serviceBtn">
-                <span>🔧</span>
-                <span>Servicios</span>
-            </button>
-        </nav>
     </div>
 
-    <!-- Modal para editar odómetro -->
-    <div class="modal-overlay" id="odoModal">
-        <div class="modal-box">
-            <h3>Editar odómetro</h3>
-            <input type="number" id="odoInput" class="modal-input" placeholder="Kilometraje actual">
-            <div class="modal-actions">
-                <button class="btn-modal-cancel" id="odoCancel">Cancelar</button>
-                <button class="btn-modal-save" id="odoSave">Guardar</button>
-            </div>
+    <!-- ============================================================ -->
+    <!-- ADMIN -->
+    <!-- ============================================================ -->
+    <div id="admin" class="content">
+        <div class="card">
+            <div class="card-title">📊 Resumen del periodo</div>
+            <div id="resumenPeriodo" class="resumen-periodo"></div>
+            <button class="btn btn-danger" onclick="cerrarPeriodo()" style="width:100%; font-size:13px; padding:8px;">🔒 CERRAR PERIODO</button>
+            <p style="font-size:11px; color:#666; margin-top:6px; text-align:center;">⚠️ Se guardará el resumen y se creará uno nuevo en blanco.</p>
+        </div>
+        <div class="card">
+            <div class="card-title">📂 Períodos anteriores</div>
+            <div id="historialPeriodos" class="historial-periodos"></div>
         </div>
     </div>
 
-    <script src="js/utils.js"></script>
-    <script src="js/db.js"></script>
-    <script src="js/dashboard.js"></script>
+    <!-- ============================================================ -->
+    <!-- MODALES -->
+    <!-- ============================================================ -->
+    <div id="modalParticipante" class="modal-overlay">
+        <div class="modal">
+            <button class="modal-close" onclick="cerrarModal()">✕</button>
+            <h2 id="modalTitle">Editar participante</h2>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <div id="modalAgregar" class="modal-overlay">
+        <div class="modal">
+            <button class="modal-close" onclick="cerrarModalAgregar()">✕</button>
+            <h2>➕ Agregar participante</h2>
+            <div class="form-group">
+                <label>Nombre completo</label>
+                <input type="text" id="nuevoNombre" class="form-control" placeholder="Ej: Juan Pérez">
+            </div>
+            <button class="btn btn-success" onclick="agregarParticipante()" style="width:100%;">✅ Agregar</button>
+        </div>
+    </div>
+
+    <div id="modalEditarMovimiento" class="modal-overlay">
+        <div class="modal">
+            <button class="modal-close" onclick="cerrarModalEditarMovimiento()">✕</button>
+            <h2>✏️ Editar movimiento</h2>
+            <div id="modalEditarMovimientoContent"></div>
+        </div>
+    </div>
+
+    <div id="modalMontos" class="modal-overlay">
+        <div class="modal">
+            <button class="modal-close" onclick="cerrarModalMontos()">✕</button>
+            <h2>💰 Actualizar montos</h2>
+            <div class="form-group">
+                <label>Inscripción ($)</label>
+                <input type="number" id="montoInscripcion" class="form-control" step="1">
+            </div>
+            <div class="form-group">
+                <label>Compendio ($)</label>
+                <input type="number" id="montoCompendio" class="form-control" step="1">
+            </div>
+            <div class="form-group">
+                <label>Crucifijo ($)</label>
+                <input type="number" id="montoCrucifijo" class="form-control" step="1">
+            </div>
+            <button class="btn btn-primary" onclick="guardarMontos()" style="width:100%;">💾 Guardar montos</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // FORMATO DE MONEDA
+        // ============================================
+        function formatearMoneda(valor) {
+            if (!valor) return '';
+            const numero = parseFloat(valor.replace(/[^0-9.]/g, ''));
+            if (isNaN(numero)) return '';
+            return '$' + numero.toFixed(2);
+        }
+
+        // ============================================
+        // FECHA
+        // ============================================
+        function actualizarFechaDisplay() {
+            const input = document.getElementById('finFechaInput');
+            const display = document.getElementById('finFechaDisplay');
+            if (input.value) {
+                const fecha = new Date(input.value + 'T00:00:00');
+                if (!isNaN(fecha.getTime())) {
+                    const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+                    const dia = String(fecha.getDate()).padStart(2,'0');
+                    const mes = meses[fecha.getMonth()];
+                    const anio = String(fecha.getFullYear()).slice(-2);
+                    display.textContent = `${dia}-${mes}-${anio}`;
+                    display.classList.remove('placeholder');
+                    return;
+                }
+            }
+            display.textContent = '05-jul-26';
+            display.classList.add('placeholder');
+        }
+
+        // ============================================
+        // TOAST
+        // ============================================
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            void toast.offsetWidth;
+            toast.classList.add('show');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 1500);
+        }
+
+        // ============================================
+        // CONFIGURACIÓN
+        // ============================================
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyqy6bF784Bc-qCrOnkqm8lZzNGxf5hqLi4V4vEtR1WHwienqcQH0fOs4M-1FrvYqyf/exec';
+
+        let data = null;
+        let filtroFinanzasActual = 'todos';
+        let filtroCobrosConcepto = null;
+        let filtroCobrosEstado = null;
+        let participanteEditando = null;
+        let movimientoEditando = null;
+        let cargando = false;
+
+        // ============================================
+        // API
+        // ============================================
+        async function fetchData() {
+            try {
+                const response = await fetch(API_URL + '?action=getData');
+                return await response.json();
+            } catch (e) {
+                console.error(e);
+                return null;
+            }
+        }
+
+        async function sendData(action, data) {
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: action, data: data })
+                });
+                return { success: true };
+            } catch (error) {
+                console.error('Error en sendData:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // ============================================
+        // CARGA DE DATOS
+        // ============================================
+        async function cargarDatos() {
+            if (cargando) return;
+            cargando = true;
+            mostrarLoading(true);
+
+            const result = await fetchData();
+            mostrarLoading(false);
+            cargando = false;
+
+            if (result && result.success) {
+                data = result.data;
+                if (!data.finanzas) data.finanzas = [];
+                if (!data.historial) data.historial = [];
+                return true;
+            } else {
+                showToast('❌ Error al cargar datos', 'error');
+                return false;
+            }
+        }
+
+        async function recargarDatos() {
+            await cargarDatos();
+            renderizarTodo();
+        }
+
+        function mostrarLoading(show) {
+            document.getElementById('loadingOverlay').classList.toggle('active', show);
+        }
+
+        function renderizarTodo() {
+            if (!data) return;
+            renderizarParticipantes();
+            renderizarResumen();
+            renderizarFinanzas();
+            renderizarResumenFinanzas();
+            renderizarAdmin();
+        }
+
+        // ============================================
+        // COBROS
+        // ============================================
+        function renderizarParticipantes() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const list = document.getElementById('participantList');
+
+            let participantes = data.participantes;
+            participantes = [...participantes].sort((a, b) => {
+                if (a.activo && !b.activo) return -1;
+                if (!a.activo && b.activo) return 1;
+                return 0;
+            });
+
+            if (filtroCobrosConcepto && filtroCobrosEstado) {
+                if (filtroCobrosConcepto === 'activo') {
+                    if (filtroCobrosEstado === 'activos') {
+                        participantes = participantes.filter(p => p.activo === true);
+                    } else if (filtroCobrosEstado === 'inactivos') {
+                        participantes = participantes.filter(p => p.activo === false);
+                    }
+                } else {
+                    participantes = participantes.filter(p => {
+                        if (!p.activo) return false;
+                        const pago = p.pagos[filtroCobrosConcepto];
+                        if (!pago) return false;
+                        if (filtroCobrosEstado === 'pagados') return pago.pagado === true;
+                        if (filtroCobrosEstado === 'pendientes') return pago.pagado === false;
+                        return true;
+                    });
+                }
+            }
+
+            const filtrados = participantes.filter(p => p.nombre.toLowerCase().includes(searchTerm));
+
+            if (filtrados.length === 0) {
+                list.innerHTML = '<div class="empty-state">No hay participantes</div>';
+                return;
+            }
+
+            const mostrarUnaColumna = filtroCobrosConcepto && filtroCobrosEstado &&
+                filtroCobrosConcepto !== 'activo';
+
+            list.innerHTML = filtrados.map(p => {
+                const statusClass = p.activo ? '' : 'inactive';
+                const iconoActivo = p.activo ?
+                    '<span class="status-icon activo-icon">●</span>' :
+                    '<span class="status-icon inactivo-icon">○</span>';
+
+                let iconosHTML = '';
+                if (mostrarUnaColumna) {
+                    const pago = p.pagos[filtroCobrosConcepto];
+                    const estado = pago && pago.pagado ? 'pagado' : 'pendiente';
+                    const simbolo = pago && pago.pagado ? '✅' : '❌';
+                    iconosHTML = `<span class="status-icon ${estado}">${simbolo}</span>`;
+                } else {
+                    const insc = p.pagos.inscripcion;
+                    const comp = p.pagos.compendio;
+                    const cru = p.pagos.crucifijo;
+                    iconosHTML = `
+                        <span class="status-icon ${insc && insc.pagado ? 'pagado' : 'pendiente'}">${insc && insc.pagado ? '✓' : '✗'}</span>
+                        <span class="status-icon ${comp && comp.pagado ? 'pagado' : 'pendiente'}">${comp && comp.pagado ? '✓' : '✗'}</span>
+                        <span class="status-icon ${cru && cru.pagado ? 'pagado' : 'pendiente'}">${cru && cru.pagado ? '✓' : '✗'}</span>
+                        ${iconoActivo}
+                    `;
+                }
+
+                if (filtroCobrosConcepto === 'activo' && filtroCobrosEstado) {
+                    iconosHTML = iconoActivo;
+                }
+
+                return `<div class="participant-item ${statusClass}" onclick="editarParticipante('${p.nombre}')">
+                    <span class="participant-name">${p.nombre}</span>
+                    <div class="participant-status">${iconosHTML}</div>
+                </div>`;
+            }).join('');
+
+            const limpiarBtn = document.getElementById('limpiarFiltroCobros');
+            if (filtroCobrosConcepto && filtroCobrosEstado) {
+                limpiarBtn.classList.add('visible');
+            } else {
+                limpiarBtn.classList.remove('visible');
+            }
+        }
+
+        function renderizarResumen() {
+            const activos = data.participantes.filter(p => p.activo);
+            const inactivos = data.participantes.filter(p => !p.activo);
+
+            document.getElementById('resumenActivos').textContent = `${activos.length} activos`;
+            document.getElementById('resumenInactivos').textContent = `${inactivos.length} inactivos`;
+
+            const pagadosInsc = activos.filter(p => p.pagos.inscripcion.pagado).length;
+            const pagadosComp = activos.filter(p => p.pagos.compendio.pagado).length;
+            const pagadosCruc = activos.filter(p => p.pagos.crucifijo.pagado).length;
+            const total = activos.length;
+
+            document.getElementById('summaryContent').innerHTML = `
+                <div class="item"><span class="icono">📝</span><span class="numero">${pagadosInsc}/${total}</span></div>
+                <div class="item"><span class="icono">📚</span><span class="numero">${pagadosComp}/${total}</span></div>
+                <div class="item"><span class="icono">✝️</span><span class="numero">${pagadosCruc}/${total}</span></div>
+            `;
+        }
+
+        function toggleDropdownFiltro(event, concepto) {
+            event.stopPropagation();
+            document.querySelectorAll('.dropdown-filtro').forEach(d => d.classList.remove('visible'));
+            const dropdown = document.getElementById('dropdown-' + concepto);
+            dropdown.classList.toggle('visible');
+
+            document.querySelectorAll('.filtro-icono-cabecera').forEach(icon => {
+                icon.classList.remove('active');
+            });
+            if (filtroCobrosConcepto === concepto) {
+                document.querySelector(`.filtro-icono-cabecera[data-concepto="${concepto}"]`).classList.add('active');
+            }
+        }
+
+        function aplicarFiltroCobros(concepto, estado) {
+            filtroCobrosConcepto = concepto;
+            filtroCobrosEstado = estado;
+            document.querySelectorAll('.dropdown-filtro').forEach(d => d.classList.remove('visible'));
+            document.querySelectorAll('.filtro-icono-cabecera').forEach(icon => {
+                icon.classList.remove('active');
+            });
+            const selector = `.filtro-icono-cabecera[data-concepto="${concepto}"]`;
+            const icono = document.querySelector(selector);
+            if (icono) icono.classList.add('active');
+            renderizarParticipantes();
+        }
+
+        function limpiarFiltroCobros() {
+            filtroCobrosConcepto = null;
+            filtroCobrosEstado = null;
+            document.querySelectorAll('.filtro-icono-cabecera').forEach(icon => {
+                icon.classList.remove('active');
+            });
+            document.querySelectorAll('.dropdown-filtro').forEach(d => d.classList.remove('visible'));
+            document.getElementById('limpiarFiltroCobros').classList.remove('visible');
+            renderizarParticipantes();
+        }
+
+        document.addEventListener('click', function() {
+            document.querySelectorAll('.dropdown-filtro').forEach(d => d.classList.remove('visible'));
+        });
+
+        // ============================================
+        // FINANZAS
+        // ============================================
+        function renderizarFinanzas() {
+            const list = document.getElementById('finanzasList');
+            let movimientos = [];
+
+            if (filtroFinanzasActual === 'todos') {
+                movimientos = (data.finanzas || []).map(m => ({
+                    id: m.id,
+                    fecha: m.fecha,
+                    tipo: m.tipo,
+                    concepto: m.concepto,
+                    monto: m.monto,
+                    esPago: false
+                }));
+            } else if (filtroFinanzasActual === 'ingreso') {
+                movimientos = (data.finanzas || []).filter(m => m.tipo === 'ingreso').map(m => ({
+                    id: m.id,
+                    fecha: m.fecha,
+                    tipo: 'ingreso',
+                    concepto: m.concepto,
+                    monto: m.monto,
+                    esPago: false
+                }));
+            } else if (filtroFinanzasActual === 'gasto') {
+                movimientos = (data.finanzas || []).filter(m => m.tipo === 'gasto').map(m => ({
+                    id: m.id,
+                    fecha: m.fecha,
+                    tipo: 'gasto',
+                    concepto: m.concepto,
+                    monto: m.monto,
+                    esPago: false
+                }));
+            } else if (filtroFinanzasActual === 'inscripcion') {
+                data.participantes.forEach(p => {
+                    if (!p.activo) return;
+                    const pago = p.pagos.inscripcion;
+                    if (pago && pago.pagado && pago.fecha) {
+                        movimientos.push({
+                            id: `pago_${p.id}_inscripcion`,
+                            fecha: pago.fecha,
+                            tipo: 'ingreso',
+                            concepto: p.nombre,
+                            monto: data.config.montoInscripcion || 0,
+                            esPago: true
+                        });
+                    }
+                });
+            } else if (filtroFinanzasActual === 'compendio') {
+                data.participantes.forEach(p => {
+                    if (!p.activo) return;
+                    const pago = p.pagos.compendio;
+                    if (pago && pago.pagado && pago.fecha) {
+                        movimientos.push({
+                            id: `pago_${p.id}_compendio`,
+                            fecha: pago.fecha,
+                            tipo: 'ingreso',
+                            concepto: p.nombre,
+                            monto: data.config.montoCompendio || 0,
+                            esPago: true
+                        });
+                    }
+                });
+            } else if (filtroFinanzasActual === 'crucifijo') {
+                data.participantes.forEach(p => {
+                    if (!p.activo) return;
+                    const pago = p.pagos.crucifijo;
+                    if (pago && pago.pagado && pago.fecha) {
+                        movimientos.push({
+                            id: `pago_${p.id}_crucifijo`,
+                            fecha: pago.fecha,
+                            tipo: 'ingreso',
+                            concepto: p.nombre,
+                            monto: data.config.montoCrucifijo || 0,
+                            esPago: true
+                        });
+                    }
+                });
+            }
+
+            movimientos.sort((a, b) => a.fecha.localeCompare(b.fecha));
+
+            if (movimientos.length === 0) {
+                list.innerHTML = '<div class="empty-state">No hay movimientos</div>';
+                return;
+            }
+
+            list.innerHTML = movimientos.map(m => {
+                const signo = m.tipo === 'ingreso' ? '+' : '-';
+                const clase = m.tipo === 'ingreso' ? 'ingreso' : 'gasto';
+                const acciones = m.esPago ? '' : `
+                    <button class="btn-accion btn-editar" onclick="abrirModalEditarMovimiento('${m.id}')">✏️</button>
+                    <button class="btn-accion btn-eliminar" onclick="eliminarMovimiento('${m.id}')">🗑️</button>
+                `;
+                return `<div class="movimiento-item">
+                    <span class="fecha">${formatearFechaCorto(m.fecha)}</span>
+                    <span class="concepto">${m.concepto}</span>
+                    <span class="monto ${clase}">${signo}$${m.monto.toFixed(2)}</span>
+                    ${acciones}
+                </div>`;
+            }).join('');
+        }
+
+        function renderizarResumenFinanzas() {
+            const todos = data.participantes;
+            const total = todos.length;
+            const pagadosInsc = todos.filter(p => p.pagos.inscripcion.pagado).length;
+            const pagadosComp = todos.filter(p => p.pagos.compendio.pagado).length;
+            const pagadosCruc = todos.filter(p => p.pagos.crucifijo.pagado).length;
+
+            const totalInsc = pagadosInsc * data.config.montoInscripcion;
+            const totalComp = pagadosComp * data.config.montoCompendio;
+            const totalCruc = pagadosCruc * data.config.montoCrucifijo;
+
+            const finanzas = data.finanzas || [];
+            const ingresosManuales = finanzas.filter(m => m.tipo === 'ingreso').reduce((sum, m) => sum + m.monto, 0);
+            const gastosManuales = finanzas.filter(m => m.tipo === 'gasto').reduce((sum, m) => sum + m.monto, 0);
+
+            const totalIngresos = totalComp + totalCruc + ingresosManuales;
+            const totalGastos = gastosManuales;
+            const disponible = totalIngresos - totalGastos;
+
+            document.getElementById('menuIngresos').textContent = `$${totalIngresos.toFixed(2)}`;
+            document.getElementById('menuGastos').textContent = `$${totalGastos.toFixed(2)}`;
+            document.getElementById('menuDisponible').textContent = `$${disponible.toFixed(2)}`;
+
+            document.getElementById('menuInscripcion').textContent = `${pagadosInsc}/${total} $${totalInsc.toFixed(0)}`;
+            document.getElementById('menuCompendio').textContent = `${pagadosComp}/${total} $${totalComp.toFixed(0)}`;
+            document.getElementById('menuCrucifijo').textContent = `${pagadosCruc}/${total} $${totalCruc.toFixed(0)}`;
+
+            document.querySelectorAll('.fila-conceptos .item').forEach(item => {
+                const filtro = item.dataset.filtro;
+                item.classList.toggle('active', filtro === filtroFinanzasActual);
+            });
+        }
+
+        function filtrarFinanzas(tipo) {
+            filtroFinanzasActual = tipo;
+            renderizarFinanzas();
+            renderizarResumenFinanzas();
+        }
+
+        // ============================================
+        // ADMIN
+        // ============================================
+        function renderizarAdmin() {
+            const activos = data.participantes.filter(p => p.activo);
+            const total = activos.length;
+            const pagadosInsc = activos.filter(p => p.pagos.inscripcion.pagado).length;
+            const pagadosComp = activos.filter(p => p.pagos.compendio.pagado).length;
+            const pagadosCruc = activos.filter(p => p.pagos.crucifijo.pagado).length;
+            const totalInsc = pagadosInsc * data.config.montoInscripcion;
+            const totalComp = pagadosComp * data.config.montoCompendio;
+            const totalCruc = pagadosCruc * data.config.montoCrucifijo;
+            const finanzas = data.finanzas || [];
+            const totalIngresosManual = finanzas.filter(m => m.tipo === 'ingreso').reduce((sum, m) => sum + m.monto, 0);
+            const totalGastosManual = finanzas.filter(m => m.tipo === 'gasto').reduce((sum, m) => sum + m.monto, 0);
+            const disponible = totalComp + totalCruc + totalIngresosManual - totalGastosManual;
+
+            document.getElementById('resumenPeriodo').innerHTML = `
+                <div class="linea"><span class="label">👥 Participantes activos</span><span class="monto">${total}</span></div>
+                <div class="linea"><span class="label">📝 Inscripción (${pagadosInsc}/${total}) (Parroquia)</span><span class="monto">$${totalInsc.toFixed(2)}</span></div>
+                <div class="linea"><span class="label">📚 Compendio (${pagadosComp}/${total})</span><span class="monto">$${totalComp.toFixed(2)}</span></div>
+                <div class="linea"><span class="label">✝️ Crucifijo (${pagadosCruc}/${total})</span><span class="monto">$${totalCruc.toFixed(2)}</span></div>
+                <div class="linea"><span class="label">📊 Ingresos adicionales</span><span class="monto">$${totalIngresosManual.toFixed(2)}</span></div>
+                <div class="linea"><span class="label">💸 Gastos</span><span class="monto">$${totalGastosManual.toFixed(2)}</span></div>
+                <div class="linea" style="font-weight:bold; font-size:14px; border-top:2px solid #2c3e50; margin-top:6px; padding-top:6px; border-bottom:none; color:#27ae60;"><span class="label">📈 Disponible</span><span class="monto">$${disponible.toFixed(2)}</span></div>
+            `;
+            const historial = data.historial || [];
+            const list = document.getElementById('historialPeriodos');
+            if (historial.length === 0) {
+                list.innerHTML = '<div class="empty-state">No hay períodos cerrados</div>';
+                return;
+            }
+            list.innerHTML = historial.map(h =>
+                `<div class="periodo-item"><div><strong>${h.nombre}</strong><span class="total">$${h.total.toFixed(2)}</span></div><div style="color:#666; font-size:11px;">Cerrado: ${formatearFechaCorto(h.fechaCierre)}</div></div>`
+            ).join('');
+        }
+
+        // ============================================
+        // ACCIONES - PARTICIPANTES
+        // ============================================
+        async function guardarCambiosParticipante(nombre) {
+            const participante = data.participantes.find(p => p.nombre === nombre);
+            if (!participante) return;
+
+            const cambios = [];
+            const conceptos = ['inscripcion', 'compendio', 'crucifijo'];
+
+            conceptos.forEach(concepto => {
+                const checkbox = document.getElementById(`chk_${concepto}`);
+                if (checkbox) {
+                    const estadoActual = checkbox.checked;
+                    const estadoOriginal = participante.pagos[concepto].pagado;
+                    if (estadoActual !== estadoOriginal) {
+                        cambios.push({
+                            concepto: concepto,
+                            pagado: estadoActual,
+                            fecha: estadoActual ? obtenerFechaISO() : null
+                        });
+                    }
+                }
+            });
+
+            const activoCheckbox = document.getElementById('chk_activo');
+            if (activoCheckbox) {
+                const estadoActual = activoCheckbox.checked;
+                const estadoOriginal = participante.activo;
+                if (estadoActual !== estadoOriginal) {
+                    mostrarLoading(true);
+                    const result = await sendData('updateActivo', { nombre: nombre, activo: estadoActual });
+                    mostrarLoading(false);
+                    if (!result || !result.success) {
+                        showToast('❌ Error', 'error');
+                        return;
+                    }
+                    participante.activo = estadoActual;
+                }
+            }
+
+            if (cambios.length === 0) {
+                showToast('⚠️ Sin cambios');
+                return;
+            }
+
+            mostrarLoading(true);
+            const result = await sendData('updateMultiplePagos', { nombre: nombre, cambios: cambios });
+            mostrarLoading(false);
+
+            if (result && result.success) {
+                conceptos.forEach(concepto => {
+                    const checkbox = document.getElementById(`chk_${concepto}`);
+                    if (checkbox) {
+                        participante.pagos[concepto].pagado = checkbox.checked;
+                        participante.pagos[concepto].fecha = checkbox.checked ? obtenerFechaISO() : null;
+                    }
+                });
+                await recargarDatos();
+                cerrarModal();
+                showToast('✅ Guardado');
+            } else {
+                showToast('❌ Error', 'error');
+            }
+        }
+
+        async function agregarParticipante() {
+            const nombre = document.getElementById('nuevoNombre').value.trim();
+            if (!nombre) { showToast('⚠️ Escribe un nombre', 'error'); return; }
+            mostrarLoading(true);
+            const result = await sendData('addParticipante', { nombre });
+            mostrarLoading(false);
+            if (result && result.success) {
+                await recargarDatos();
+                cerrarModalAgregar();
+                showToast('✅ Guardado');
+            } else {
+                showToast('❌ Error', 'error');
+            }
+        }
+
+        function editarParticipante(nombre) {
+            const participante = data.participantes.find(p => p.nombre === nombre);
+            if (!participante) return;
+            participanteEditando = nombre;
+            const modal = document.getElementById('modalParticipante');
+            const content = document.getElementById('modalContent');
+
+            document.getElementById('modalTitle').textContent = `✏️ Editar: ${participante.nombre}`;
+
+            content.innerHTML = `
+                <div class="pago-item">
+                    <span class="pago-label">📝 Inscripción ($${data.config.montoInscripcion})</span>
+                    <span class="pago-fecha">${participante.pagos.inscripcion.fecha ? formatearFechaCorto(participante.pagos.inscripcion.fecha) : 'Sin fecha'}</span>
+                    <label class="switch">
+                        <input type="checkbox" id="chk_inscripcion" ${participante.pagos.inscripcion.pagado ? 'checked' : ''}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="pago-item">
+                    <span class="pago-label">📚 Compendio ($${data.config.montoCompendio})</span>
+                    <span class="pago-fecha">${participante.pagos.compendio.fecha ? formatearFechaCorto(participante.pagos.compendio.fecha) : 'Sin fecha'}</span>
+                    <label class="switch">
+                        <input type="checkbox" id="chk_compendio" ${participante.pagos.compendio.pagado ? 'checked' : ''}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="pago-item">
+                    <span class="pago-label">✝️ Crucifijo ($${data.config.montoCrucifijo})</span>
+                    <span class="pago-fecha">${participante.pagos.crucifijo.fecha ? formatearFechaCorto(participante.pagos.crucifijo.fecha) : 'Sin fecha'}</span>
+                    <label class="switch">
+                        <input type="checkbox" id="chk_crucifijo" ${participante.pagos.crucifijo.pagado ? 'checked' : ''}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <hr style="margin:8px 0;">
+                <div class="pago-item">
+                    <span class="pago-label">👤 Estado</span>
+                    <label class="switch">
+                        <input type="checkbox" id="chk_activo" ${participante.activo ? 'checked' : ''}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <hr style="margin:8px 0;">
+                <div style="display:flex; gap:8px; margin-top:10px;">
+                    <button class="btn btn-success" onclick="guardarCambiosParticipante('${participante.nombre}')" style="flex:2;">💾 Guardar cambios</button>
+                    <button class="btn btn-secondary" onclick="cerrarModal()" style="flex:1;">❌ Cancelar</button>
+                </div>
+            `;
+
+            modal.classList.add('active');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalParticipante').classList.remove('active');
+            participanteEditando = null;
+        }
+
+        function abrirModalAgregar() {
+            document.getElementById('modalAgregar').classList.add('active');
+            document.getElementById('nuevoNombre').value = '';
+            document.getElementById('nuevoNombre').focus();
+        }
+
+        function cerrarModalAgregar() {
+            document.getElementById('modalAgregar').classList.remove('active');
+        }
+
+        // ============================================
+        // ACCIONES - FINANZAS
+        // ============================================
+        async function agregarMovimiento() {
+            const tipo = document.getElementById('finTipo').value;
+            const concepto = document.getElementById('finConcepto').value.trim();
+            const montoStr = document.getElementById('finMonto').value;
+            const monto = parseFloat(montoStr.replace(/[^0-9.]/g, ''));
+            const fechaInput = document.getElementById('finFechaInput');
+            const fecha = fechaInput.value || obtenerFechaISO();
+
+            if (!concepto) { showToast('⚠️ Escribe un concepto', 'error'); return; }
+            if (!monto || monto <= 0) { showToast('⚠️ Ingresa un monto válido', 'error'); return; }
+            if (!fecha) { showToast('⚠️ Selecciona una fecha', 'error'); return; }
+
+            mostrarLoading(true);
+            const result = await sendData('addFinanza', { tipo, concepto, monto, fecha });
+            mostrarLoading(false);
+            if (result && result.success) {
+                await recargarDatos();
+                document.getElementById('finConcepto').value = '';
+                document.getElementById('finMonto').value = '';
+                document.getElementById('finFechaInput').value = '';
+                actualizarFechaDisplay();
+                showToast('✅ Guardado');
+            } else {
+                showToast('❌ Error', 'error');
+            }
+        }
+
+        async function eliminarMovimiento(id) {
+            if (!confirm('¿Eliminar este movimiento?')) return;
+            mostrarLoading(true);
+            const result = await sendData('deleteFinanza', { id: parseInt(id) });
+            mostrarLoading(false);
+            if (result && result.success) {
+                await recargarDatos();
+                showToast('✅ Guardado');
+            } else {
+                showToast('❌ Error', 'error');
+            }
+        }
+
+        function abrirModalEditarMovimiento(id) {
+            const movimiento = data.finanzas.find(m => m.id == id);
+            if (!movimiento) return;
+            movimientoEditando = id;
+            const modal = document.getElementById('modalEditarMovimiento');
+            const content = document.getElementById('modalEditarMovimientoContent');
+            content.innerHTML = `
+                <div class="form-group"><label>Tipo</label><select id="editFinTipo" class="form-control"><option value="ingreso" ${movimiento.tipo === 'ingreso' ? 'selected' : ''}>Ingreso</option><option value="gasto" ${movimiento.tipo === 'gasto' ? 'selected' : ''}>Gasto</option></select></div>
+                <div class="form-group"><label>Concepto</label><input type="text" id="editFinConcepto" class="form-control" value="${movimiento.concepto}"></div>
+                <div class="form-row"><div class="form-group"><label>Monto ($)</label><input type="number" id="editFinMonto" class="form-control" value="${movimiento.monto}" step="0.01"></div><div class="form-group"><label>Fecha</label><input type="date" id="editFinFecha" class="form-control" value="${movimiento.fecha}"></div></div>
+                <button class="btn btn-primary" onclick="guardarEdicionMovimiento()" style="width:100%;">💾 Guardar</button>
+            `;
+            modal.classList.add('active');
+        }
+
+        async function guardarEdicionMovimiento() {
+            const tipo = document.getElementById('editFinTipo').value;
+            const concepto = document.getElementById('editFinConcepto').value.trim();
+            const monto = parseFloat(document.getElementById('editFinMonto').value);
+            const fecha = document.getElementById('editFinFecha').value;
+            if (!concepto) { showToast('⚠️ Escribe un concepto', 'error'); return; }
+            if (!monto || monto <= 0) { showToast('⚠️ Ingresa un monto válido', 'error'); return; }
+            if (!fecha) { showToast('⚠️ Selecciona una fecha', 'error'); return; }
+            mostrarLoading(true);
+            const result = await sendData('updateFinanza', { id: parseInt(movimientoEditando), tipo, concepto, monto, fecha });
+            mostrarLoading(false);
+            if (result && result.success) {
+                await recargarDatos();
+                cerrarModalEditarMovimiento();
+                showToast('✅ Guardado');
+            } else {
+                showToast('❌ Error', 'error');
+            }
+        }
+
+        function cerrarModalEditarMovimiento() {
+            document.getElementById('modalEditarMovimiento').classList.remove('active');
+            movimientoEditando = null;
+        }
+
+        // ============================================
+        // ADMIN - CERRAR PERIODO
+        // ============================================
+        async function cerrarPeriodo() {
+            if (!confirm('¿Cerrar el periodo actual?')) return;
+            const activos = data.participantes.filter(p => p.activo);
+            const total = activos.length;
+            const pagadosInsc = activos.filter(p => p.pagos.inscripcion.pagado).length;
+            const pagadosComp = activos.filter(p => p.pagos.compendio.pagado).length;
+            const pagadosCruc = activos.filter(p => p.pagos.crucifijo.pagado).length;
+            const totalInsc = pagadosInsc * data.config.montoInscripcion;
+            const totalComp = pagadosComp * data.config.montoCompendio;
+            const totalCruc = pagadosCruc * data.config.montoCrucifijo;
+            const totalGeneral = totalInsc + totalComp + totalCruc;
+            const finanzas = data.finanzas || [];
+            const totalIngresosManual = finanzas.filter(m => m.tipo === 'ingreso').reduce((sum, m) => sum + m.monto, 0);
+            const totalGastosManual = finanzas.filter(m => m.tipo === 'gasto').reduce((sum, m) => sum + m.monto, 0);
+            const totalFinal = totalGeneral + totalIngresosManual - totalGastosManual;
+            const periodoNombre = `Periodo ${new Date().toLocaleDateString()}`;
+            const fechaCierre = obtenerFechaISO();
+            mostrarLoading(true);
+            const result = await sendData('closePeriod', { nombre: periodoNombre, fechaCierre, total: totalFinal });
+            mostrarLoading(false);
+            if (result && result.success) {
+                await recargarDatos();
+                showToast('✅ Guardado');
+            } else {
+                showToast('❌ Error', 'error');
+            }
+        }
+
+        // ============================================
+        // CONFIGURACIÓN - MONTOS
+        // ============================================
+        function abrirModalMontos() {
+            document.getElementById('montoInscripcion').value = data.config.montoInscripcion;
+            document.getElementById('montoCompendio').value = data.config.montoCompendio;
+            document.getElementById('montoCrucifijo').value = data.config.montoCrucifijo;
+            document.getElementById('modalMontos').classList.add('active');
+        }
+
+        function cerrarModalMontos() {
+            document.getElementById('modalMontos').classList.remove('active');
+        }
+
+        async function guardarMontos() {
+            const insc = parseFloat(document.getElementById('montoInscripcion').value);
+            const comp = parseFloat(document.getElementById('montoCompendio').value);
+            const cruc = parseFloat(document.getElementById('montoCrucifijo').value);
+            if (isNaN(insc) || isNaN(comp) || isNaN(cruc)) { showToast('⚠️ Ingresa montos válidos', 'error'); return; }
+            mostrarLoading(true);
+            const result = await sendData('updateMontos', { montoInscripcion: insc, montoCompendio: comp, montoCrucifijo: cruc });
+            mostrarLoading(false);
+            if (result && result.success) {
+                await recargarDatos();
+                cerrarModalMontos();
+                showToast('✅ Guardado');
+            } else {
+                showToast('❌ Error', 'error');
+            }
+        }
+
+        // ============================================
+        // UTILIDADES
+        // ============================================
+        function obtenerFechaISO() { return new Date().toISOString().split('T')[0]; }
+
+        function formatearFechaCorto(fecha) {
+            if (!fecha) return 'Sin fecha';
+            try {
+                const d = new Date(fecha);
+                if (isNaN(d.getTime())) return fecha;
+                const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+                const dia = String(d.getDate()).padStart(2,'0');
+                const mes = meses[d.getMonth()];
+                const anio = String(d.getFullYear()).slice(-2);
+                return `${dia}-${mes}-${anio}`;
+            } catch(e) { return fecha; }
+        }
+
+        function convertirFechaCortaAIso(fechaStr) {
+            if (!fechaStr) return null;
+            if (fechaStr.includes('-') && fechaStr.length === 10) return fechaStr;
+            const meses = { 'ene':0,'feb':1,'mar':2,'abr':3,'may':4,'jun':5,'jul':6,'ago':7,'sep':8,'oct':9,'nov':10,'dic':11 };
+            const parts = fechaStr.split('-');
+            if (parts.length === 3) {
+                const dia = parseInt(parts[0]);
+                const mes = meses[parts[1].toLowerCase()];
+                const anio = parseInt(parts[2]) + 2000;
+                if (dia && mes !== undefined && anio) {
+                    return `${anio}-${String(mes+1).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+                }
+            }
+            return null;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const montoInput = document.getElementById('finMonto');
+            if (montoInput) {
+                montoInput.addEventListener('input', function() {
+                    let valor = this.value.replace(/[^0-9.]/g, '');
+                    const partes = valor.split('.');
+                    if (partes.length > 2) {
+                        valor = partes[0] + '.' + partes.slice(1).join('');
+                    }
+                    this.value = valor;
+                });
+                montoInput.addEventListener('blur', function() {
+                    if (this.value) {
+                        const num = parseFloat(this.value);
+                        if (!isNaN(num)) {
+                            this.value = '$' + num.toFixed(2);
+                        }
+                    }
+                });
+                montoInput.addEventListener('focus', function() {
+                    if (this.value.startsWith('$')) {
+                        this.value = this.value.substring(1);
+                    }
+                });
+            }
+        });
+
+        function configurarTabs() {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById(this.dataset.tab).classList.add('active');
+                    if (this.dataset.tab === 'finanzas') {
+                        filtroFinanzasActual = 'todos';
+                        renderizarFinanzas();
+                        renderizarResumenFinanzas();
+                    }
+                });
+            });
+        }
+
+        function configurarBusqueda() {
+            document.getElementById('searchInput').addEventListener('input', renderizarParticipantes);
+        }
+
+        async function init() {
+            const success = await cargarDatos();
+            if (success) {
+                renderizarTodo();
+                configurarTabs();
+                configurarBusqueda();
+                const fechaInput = document.getElementById('finFechaInput');
+                if (fechaInput) {
+                    fechaInput.value = obtenerFechaISO();
+                    actualizarFechaDisplay();
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(registration => { console.log('✅ Service Worker registrado:', registration); })
+                .catch(error => { console.log('❌ Error al registrar Service Worker:', error); });
+        }
+    </script>
+
 </body>
 </html>
