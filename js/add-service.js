@@ -1,18 +1,14 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // Fecha actual
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('serviceDate').value = today;
     
-    // Precargar odómetro actual
-    const lastFuel = await getLastFuel();
-    if (lastFuel) {
-        document.getElementById('serviceOdometer').value = lastFuel.odometer;
-        // Sugerir próximo servicio (odómetro + 5000 como ejemplo)
-        document.getElementById('serviceNextKm').placeholder = `Ej: ${lastFuel.odometer + 5000}`;
+    const currentOdometer = await getCurrentOdometer();
+    if (currentOdometer > 0) {
+        document.getElementById('serviceOdometer').value = currentOdometer;
+        document.getElementById('serviceNextKm').placeholder = `Ej: ${currentOdometer + 5000}`;
     }
 });
 
-// Enviar formulario
 document.getElementById('serviceForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -22,7 +18,6 @@ document.getElementById('serviceForm').addEventListener('submit', async (e) => {
     const nextKm = parseFloat(document.getElementById('serviceNextKm').value);
     const notes = document.getElementById('serviceNotes').value;
     
-    // Validaciones
     if (!date || !type || !odometer || !nextKm) {
         showToast('❌ Todos los campos son obligatorios', 'error');
         return;
@@ -53,3 +48,11 @@ document.getElementById('serviceForm').addEventListener('submit', async (e) => {
         showToast('❌ Error al guardar el servicio', 'error');
     }
 });
+
+// Función auxiliar para obtener el odómetro actual
+async function getCurrentOdometer() {
+    const lastFuel = await getLastFuel();
+    if (lastFuel) return lastFuel.odometer;
+    const initialKm = getInitialKm();
+    return initialKm || 0;
+}
