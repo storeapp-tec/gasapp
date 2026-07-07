@@ -241,7 +241,7 @@
             color: #888;
         }
 
-        /* ===== RESUMEN HISTORIAL (COMPACTO) ===== */
+        /* ===== RESUMEN HISTORIAL ===== */
         .summary-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -270,6 +270,70 @@
             font-weight: 700;
             color: #1a1a2e;
             margin-top: 0px;
+        }
+
+        /* ===== HISTORIAL LISTA (CORREGIDO) ===== */
+        .history-list-compact {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .history-item-compact {
+            background: white;
+            border-radius: 10px;
+            padding: 10px 14px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+
+        .history-item-compact:active {
+            background: #f8f9fa;
+        }
+
+        .history-row1 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2px;
+        }
+
+        .history-date {
+            font-size: 13px;
+            font-weight: 500;
+            color: #444;
+        }
+
+        .history-km {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .history-km-diff {
+            font-size: 12px;
+            color: #10b981;
+            font-weight: 500;
+            margin-left: 4px;
+        }
+
+        .history-row2 {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 8px 14px;
+            font-size: 13px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .history-consumption-badge {
+            font-weight: 600;
+            padding: 0 6px;
+            border-radius: 3px;
+            font-size: 13px;
         }
 
         /* ===== RESTO DE ESTILOS ===== */
@@ -457,68 +521,6 @@
             background: white;
             appearance: auto;
             font-weight: 500;
-        }
-
-        .history-list-compact {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .history-item-compact {
-            background: white;
-            border-radius: 10px;
-            padding: 10px 14px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-            cursor: pointer;
-            transition: background 0.1s;
-        }
-
-        .history-item-compact:active {
-            background: #f8f9fa;
-        }
-
-        .history-row1 {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2px;
-        }
-
-        .history-date {
-            font-size: 13px;
-            font-weight: 500;
-            color: #444;
-        }
-
-        .history-km {
-            font-size: 14px;
-            font-weight: 600;
-            color: #1a1a2e;
-        }
-
-        .history-km-diff {
-            font-size: 12px;
-            color: #10b981;
-            font-weight: 500;
-            margin-left: 4px;
-        }
-
-        .history-row2 {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px 14px;
-            font-size: 13px;
-            color: #666;
-            margin-top: 2px;
-            justify-content: center;
-        }
-
-        .history-consumption-badge {
-            font-weight: 600;
-            padding: 0 6px;
-            border-radius: 3px;
-            font-size: 13px;
         }
 
         .service-list-compact {
@@ -934,6 +936,10 @@
             }
             .summary-item {
                 padding: 6px 8px;
+            }
+            .history-row2 {
+                gap: 4px 8px;
+                font-size: 12px;
             }
         }
     </style>
