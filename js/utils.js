@@ -4,22 +4,21 @@ function formatNumber(num) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-// Formatear fecha corta
-function formatShortDate(dateStr) {
+// Formato corto: 01-May-26
+function formatDateShort(dateStr) {
     if (!dateStr) return '--/--';
     const d = new Date(dateStr + 'T00:00:00');
-    return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][d.getMonth()];
+    const year = String(d.getFullYear()).slice(-2);
+    return `${day}-${month}-${year}`;
 }
 
-// Formatear fecha completa
-function formatDate(dateStr) {
+// Formato completo: 01 de Mayo 2026
+function formatDateFull(dateStr) {
     if (!dateStr) return 'Fecha no disponible';
     const d = new Date(dateStr + 'T00:00:00');
-    return d.toLocaleDateString('es-ES', { 
-        day: '2-digit', 
-        month: 'short', 
-        year: 'numeric' 
-    });
+    return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
 }
 
 // Calcular consumo km/l
@@ -67,7 +66,7 @@ function getMonthName(month) {
     return months[month];
 }
 
-// ===== FUNCIONES PARA CONFIGURACIÓN =====
+// ===== CONFIGURACIÓN =====
 
 function saveCarName(name) {
     localStorage.setItem('carName', name);
@@ -92,8 +91,4 @@ function saveInitialKm(km) {
 function getInitialKm() {
     const km = localStorage.getItem('initialKm');
     return km ? parseFloat(km) : null;
-}
-
-function isFirstTime() {
-    return !getInitialKm();
 }
