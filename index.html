@@ -62,7 +62,7 @@
             border-radius: 10px;
         }
 
-        /* ===== HEADER SUPER COMPACTO ===== */
+        /* ===== HEADER ===== */
         .header-mini {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 0;
@@ -101,7 +101,7 @@
             margin-top: -2px;
         }
 
-        /* ===== BOTÓN 3 PUNTOS (SIN FONDO NI BORDE) ===== */
+        /* ===== BOTÓN 3 PUNTOS ===== */
         .btn-menu {
             position: fixed;
             top: 18px;
@@ -162,22 +162,22 @@
             background: #e5e7eb;
         }
 
-        /* ===== CONTENEDOR BLANCO (Inicio / Historial / Servicios) ===== */
+        /* ===== CONTENEDOR BLANCO CON SOMBRA ===== */
         .card-white {
             background: white;
             border-radius: 16px;
             padding: 16px 18px;
             margin-bottom: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
 
-        /* ===== INICIO HEADER (Odómetro en fondo blanco) ===== */
+        /* ===== ODÓMETRO CON SOMBRA ===== */
         .inicio-header {
             background: white;
             border-radius: 16px;
             padding: 14px 18px 16px;
             margin-bottom: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             color: #1a1a2e;
         }
 
@@ -239,6 +239,37 @@
         .inicio-header .odo-unit {
             font-size: 14px;
             color: #888;
+        }
+
+        /* ===== RESUMEN HISTORIAL (COMPACTO) ===== */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .summary-item {
+            background: #f8f9fb;
+            border-radius: 10px;
+            padding: 8px 12px;
+            text-align: center;
+        }
+
+        .summary-item .sum-label {
+            display: block;
+            font-size: 10px;
+            text-transform: uppercase;
+            color: #999;
+            letter-spacing: 0.3px;
+            font-weight: 500;
+        }
+
+        .summary-item .sum-value {
+            display: block;
+            font-size: 15px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-top: 0px;
         }
 
         /* ===== RESTO DE ESTILOS ===== */
@@ -411,37 +442,6 @@
             padding: 24px 10px;
             color: #aaa;
             font-size: 13px;
-        }
-
-        .summary-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-        }
-
-        .summary-item {
-            background: white;
-            border-radius: 10px;
-            padding: 10px 6px;
-            text-align: center;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .sum-label {
-            display: block;
-            font-size: 10px;
-            text-transform: uppercase;
-            color: #999;
-            letter-spacing: 0.5px;
-            font-weight: 500;
-        }
-
-        .sum-value {
-            display: block;
-            font-size: 16px;
-            font-weight: 700;
-            color: #1a1a2e;
-            margin-top: 2px;
         }
 
         .month-selector-compact {
@@ -900,26 +900,6 @@
                 font-size: 11px;
                 min-width: 55px;
             }
-            .summary-row {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 6px;
-            }
-            .summary-item {
-                padding: 8px 4px;
-            }
-            .sum-value {
-                font-size: 14px;
-            }
-            .history-row2 {
-                font-size: 12px;
-                gap: 4px 8px;
-            }
-            .history-date {
-                font-size: 12px;
-            }
-            .history-km {
-                font-size: 13px;
-            }
             .fab-mini {
                 right: calc(50% - 160px);
                 width: 48px;
@@ -949,6 +929,12 @@
             .header-title {
                 font-size: 16px;
             }
+            .summary-item .sum-value {
+                font-size: 13px;
+            }
+            .summary-item {
+                padding: 6px 8px;
+            }
         }
     </style>
 </head>
@@ -958,7 +944,7 @@
 
     <div class="app">
 
-        <!-- ===== BOTÓN 3 PUNTOS (SIN FONDO NI BORDE) ===== -->
+        <!-- ===== BOTÓN 3 PUNTOS ===== -->
         <button type="button" class="btn-menu" id="menuBtn" onclick="toggleMenu(event)">⋮</button>
 
         <!-- ===== MENÚ ADMIN ===== -->
@@ -968,7 +954,7 @@
             </button>
         </div>
 
-        <!-- ===== HEADER SUPER COMPACTO ===== -->
+        <!-- ===== HEADER ===== -->
         <header class="header-mini" id="mainHeader">
             <div class="header-content">
                 <span class="app-name">⛽ GasApp</span>
@@ -978,7 +964,6 @@
 
         <!-- ===== PESTAÑA INICIO ===== -->
         <div id="tabInicio" class="tab-content active">
-            <!-- Odómetro en fondo BLANCO -->
             <div class="inicio-header">
                 <div class="car-name-row">
                     <span class="car-name" id="carNameDisplay">Mi Auto</span>
@@ -1006,9 +991,8 @@
 
         <!-- ===== PESTAÑA HISTORIAL ===== -->
         <div id="tabHistorial" class="tab-content">
-            <!-- Resumen en fondo BLANCO -->
             <div class="card-white">
-                <div class="summary-row">
+                <div class="summary-grid">
                     <div class="summary-item">
                         <span class="sum-label">Mes</span>
                         <span class="sum-value" id="summaryMonth">---</span>
@@ -1037,7 +1021,6 @@
 
         <!-- ===== PESTAÑA SERVICIOS ===== -->
         <div id="tabServicios" class="tab-content">
-            <!-- Contenedor BLANCO para servicios -->
             <div class="card-white">
                 <div id="servicesList" class="service-list-compact">
                     <div class="empty-state-mini">No hay servicios registrados</div>
