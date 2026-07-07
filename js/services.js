@@ -1,15 +1,24 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    document.getElementById('addServiceBtn').addEventListener('click', () => {
-        location.href = 'add-service.html';
-    });
+    console.log('Servicios cargado');
+    
+    const addBtn = document.getElementById('addServiceBtn');
+    if (addBtn) {
+        addBtn.addEventListener('click', () => {
+            window.location.href = 'add-service.html';
+        });
+    }
+    
     await loadServices();
 });
 
 async function loadServices() {
     try {
+        console.log('Cargando servicios...');
         const services = await getAllServices();
         const currentOdometer = await getCurrentOdometer();
         const container = document.getElementById('servicesList');
+        
+        if (!container) return;
         
         if (services.length === 0) {
             container.innerHTML = `
@@ -51,9 +60,15 @@ async function loadServices() {
             `;
         });
         container.innerHTML = html;
+        
+        console.log('Servicios cargados correctamente');
+        
     } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('servicesList').innerHTML = `<div class="empty-state-mini">Error al cargar servicios</div>`;
+        console.error('Error al cargar servicios:', error);
+        const container = document.getElementById('servicesList');
+        if (container) {
+            container.innerHTML = `<div class="empty-state-mini">Error al cargar servicios</div>`;
+        }
     }
 }
 
@@ -64,6 +79,6 @@ async function getCurrentOdometer() {
     return initialKm || 0;
 }
 
-function editService(id) {
-    location.href = `edit-service.html?id=${id}`;
-}
+window.editService = function(id) {
+    window.location.href = `edit-service.html?id=${id}`;
+};
