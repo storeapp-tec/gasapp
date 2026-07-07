@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nuevo servicio - Fuelio</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <div class="container">
+        <header class="modal-header">
+            <button class="close-btn" onclick="location.href='index.html'">✕</button>
+            <h2>🔧 Nuevo servicio</h2>
+        </header>
+
+        <form id="serviceForm" class="form-card">
+            <div class="form-group">
+                <label>📅 Fecha</label>
+                <input type="date" id="serviceDate" required>
+            </div>
+
+            <div class="form-group">
+                <label>🔧 Tipo de servicio</label>
+                <select id="serviceType" required>
+                    <option value="Cambio de aceite">Cambio de aceite</option>
+                    <option value="Cambio de frenos">Cambio de frenos</option>
+                    <option value="Cambio de filtros">Cambio de filtros</option>
+                    <option value="Alineación">Alineación</option>
+                    <option value="Neumáticos">Neumáticos</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>📟 Odómetro actual (km)</label>
+                <input type="number" id="serviceOdometer" placeholder="Ej: 123000" required step="1">
+            </div>
+
+            <div class="form-group">
+                <label>📅 Próximo servicio (km)</label>
+                <input type="number" id="serviceNextKm" placeholder="Ej: 125000" required step="1">
+                <small class="hint">Ej: Si el taller recomienda cada 5000 km, suma 5000 al odómetro actual</small>
+            </div>
+
+            <div class="form-group">
+                <label>📝 Notas (opcional)</label>
+                <input type="text" id="serviceNotes" placeholder="Ej: Aceite sintético 5W-30">
+            </div>
+
+            <button type="submit" class="btn-primary">💾 Guardar servicio</button>
+        </form>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/add-service.js"></script>
+</body>
+</html>
