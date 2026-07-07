@@ -6,7 +6,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Precargar odómetro actual
     const lastFuel = await getLastFuel();
     if (lastFuel) {
-        document.getElementById('serviceOdometer').placeholder = `Actual: ${formatNumber(lastFuel.odometer)} km`;
+        document.getElementById('serviceOdometer').value = lastFuel.odometer;
+        // Sugerir próximo servicio (odómetro + 5000 como ejemplo)
+        document.getElementById('serviceNextKm').placeholder = `Ej: ${lastFuel.odometer + 5000}`;
     }
 });
 
