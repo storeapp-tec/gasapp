@@ -15,7 +15,6 @@
     <meta name="mobile-web-app-capable" content="yes">
 
     <style>
-        /* ===== RESET ===== */
         * {
             margin: 0;
             padding: 0;
@@ -104,7 +103,7 @@
             font-weight: 600;
         }
 
-        /* ===== BOTÓN 3 PUNTOS ===== */
+        /* ===== BOTÓN 3 PUNTOS (DIV) ===== */
         .btn-menu {
             background: rgba(255, 255, 255, 0.15);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -122,6 +121,7 @@
             border-radius: 50%;
             transition: background 0.2s, transform 0.15s;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            user-select: none;
         }
 
         .btn-menu:hover {
@@ -699,7 +699,7 @@
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
         }
 
-        .modal-box h1 {
+        .modal-box h2 {
             font-size: 20px;
             margin-bottom: 16px;
             color: #1a1a2e;
@@ -963,7 +963,8 @@
                 </div>
                 <div class="header-right">
                     <span class="page-title" id="headerTitle">Inicio</span>
-                    <button type="button" class="btn-menu" id="menuBtn" onclick="toggleMenu(event)">⋮</button>
+                    <!-- BOTÓN DE 3 PUNTOS CON ONCLICK DIRECTO -->
+                    <div class="btn-menu" id="menuBtn" onclick="toggleMenu(event)">⋮</div>
                 </div>
             </div>
         </header>
@@ -980,7 +981,7 @@
             <div class="inicio-header">
                 <div class="car-name-row">
                     <span class="car-name" id="carNameDisplay">Mi Auto</span>
-                    <button class="btn-edit-car" id="editCarNameBtn">✏️</button>
+                    <button type="button" class="btn-edit-car" id="editCarNameBtn">✏️</button>
                 </div>
                 <div class="odometer-row">
                     <span class="odo-label">Odómetro</span>
@@ -1038,19 +1039,19 @@
         </div>
 
         <!-- ===== FAB ===== -->
-        <button class="fab-mini" id="fabBtn">+</button>
+        <button type="button" class="fab-mini" id="fabBtn">+</button>
 
         <!-- ===== BOTTOM NAV ===== -->
         <nav class="bottom-nav-mini">
-            <button class="nav-item active" data-tab="tabInicio">
+            <button type="button" class="nav-item active" data-tab="tabInicio">
                 <span>📊</span>
                 <span>Inicio</span>
             </button>
-            <button class="nav-item" data-tab="tabHistorial">
+            <button type="button" class="nav-item" data-tab="tabHistorial">
                 <span>📈</span>
                 <span>Historial</span>
             </button>
-            <button class="nav-item" data-tab="tabServicios">
+            <button type="button" class="nav-item" data-tab="tabServicios">
                 <span>🔧</span>
                 <span>Servicios</span>
             </button>
@@ -1063,12 +1064,12 @@
         <!-- MODAL NOMBRE -->
         <div class="modal-overlay" id="nombreModal">
             <div class="modal-box">
-                <button class="modal-close" id="nombreModalClose">✕</button>
-                <h1>✏️ Editar nombre del auto</h1>
+                <button type="button" class="modal-close" id="nombreModalClose">✕</button>
+                <h2>✏️ Editar nombre del auto</h2>
                 <input type="text" id="nombreInput" class="modal-input" placeholder="Ej: Nissan March" value="Mi Auto">
                 <div class="modal-actions">
-                    <button class="btn-modal-cancel" id="nombreCancel">Cancelar</button>
-                    <button class="btn-modal-save" id="nombreSave">Guardar</button>
+                    <button type="button" class="btn-modal-cancel" id="nombreCancel">Cancelar</button>
+                    <button type="button" class="btn-modal-save" id="nombreSave">Guardar</button>
                 </div>
             </div>
         </div>
@@ -1076,12 +1077,12 @@
         <!-- MODAL ODÓMETRO -->
         <div class="modal-overlay" id="odoModal">
             <div class="modal-box">
-                <button class="modal-close" id="odoModalClose">✕</button>
-                <h1>Editar odómetro</h1>
+                <button type="button" class="modal-close" id="odoModalClose">✕</button>
+                <h2>Editar odómetro</h2>
                 <input type="number" id="odoInput" class="modal-input" placeholder="Kilometraje actual">
                 <div class="modal-actions">
-                    <button class="btn-modal-cancel" id="odoCancel">Cancelar</button>
-                    <button class="btn-modal-save" id="odoSave">Guardar</button>
+                    <button type="button" class="btn-modal-cancel" id="odoCancel">Cancelar</button>
+                    <button type="button" class="btn-modal-save" id="odoSave">Guardar</button>
                 </div>
             </div>
         </div>
@@ -1089,8 +1090,8 @@
         <!-- MODAL CARGA -->
         <div class="modal-overlay" id="fuelModal">
             <div class="modal-box">
-                <button class="modal-close" id="fuelModalClose">✕</button>
-                <h1 id="fuelModalTitle">⛽ Nueva carga</h1>
+                <button type="button" class="modal-close" id="fuelModalClose">✕</button>
+                <h2 id="fuelModalTitle">⛽ Nueva carga</h2>
                 <input type="hidden" id="editFuelId">
                 <form id="fuelForm">
                     <div class="field-group">
@@ -1128,8 +1129,8 @@
         <!-- MODAL SERVICIO -->
         <div class="modal-overlay" id="serviceModal">
             <div class="modal-box">
-                <button class="modal-close" id="serviceModalClose">✕</button>
-                <h1 id="serviceModalTitle">🔧 Nuevo servicio</h1>
+                <button type="button" class="modal-close" id="serviceModalClose">✕</button>
+                <h2 id="serviceModalTitle">🔧 Nuevo servicio</h2>
                 <input type="hidden" id="editServiceId">
                 <form id="serviceForm">
                     <div class="field-group">
@@ -1166,12 +1167,15 @@
 
     <script>
         // ================================================================
-        // MENÚ ADMIN - CORREGIDO Y FUNCIONAL
+        // MENÚ ADMIN - FUNCIÓN GLOBAL
         // ================================================================
 
-        // Función global para abrir/cerrar el menú (se llama desde el HTML)
+        // Función global para abrir/cerrar el menú
         window.toggleMenu = function(event) {
-            if (event) event.stopPropagation();
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
             var menu = document.getElementById('adminMenu');
             if (!menu) return;
 
@@ -1180,6 +1184,7 @@
             } else {
                 menu.style.display = 'block';
             }
+            console.log('Menú toggled:', menu.style.display);
         };
 
         // Cerrar menú al hacer clic fuera
@@ -1192,6 +1197,53 @@
                 }
             }
         });
+
+        // ================================================================
+        // IMPORTAR BACKUP
+        // ================================================================
+
+        window.importarBackup = function() {
+            // Cerrar menú
+            var menu = document.getElementById('adminMenu');
+            if (menu) menu.style.display = 'none';
+
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = async (e) => {
+                try {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const text = await file.text();
+                    const datos = JSON.parse(text);
+                    if (!datos.fuels || !datos.services) {
+                        showToast('❌ Archivo inválido', 'error');
+                        return;
+                    }
+                    if (!confirm('¿Restaurar backup? Se perderán los datos actuales.')) return;
+                    const fuels = await getAllFuels();
+                    const services = await getAllServices();
+                    for (const f of fuels) await deleteFuel(f.id);
+                    for (const s of services) await deleteService(s.id);
+                    localStorage.clear();
+                    if (datos.carName) saveCarName(datos.carName);
+                    if (datos.initialKm) saveInitialKm(datos.initialKm);
+                    if (datos.lastPrice) saveLastPrice(datos.lastPrice);
+                    for (const fuel of datos.fuels) {
+                        await addFuel(fuel);
+                    }
+                    for (const service of datos.services) {
+                        await addService(service);
+                    }
+                    showToast('✅ Backup restaurado correctamente', 'success');
+                    location.reload();
+                } catch (error) {
+                    console.error('Error al importar:', error);
+                    showToast('❌ Error al importar: ' + error.message, 'error');
+                }
+            };
+            input.click();
+        };
 
         // ================================================================
         // UTILS
@@ -1285,15 +1337,10 @@
             return km ? parseFloat(km) : null;
         }
 
-        // ================================================================
-        // BACKUP AUTOMÁTICO Y RESTAURACIÓN
-        // ================================================================
-
         function generarBackupAutomatico() {
             try {
                 const promesaFuels = getAllFuels();
                 const promesaServices = getAllServices();
-
                 Promise.all([promesaFuels, promesaServices]).then(([fuels, services]) => {
                     const datos = {
                         version: '1.0',
@@ -1304,11 +1351,9 @@
                         fuels: fuels,
                         services: services
                     };
-
                     const json = JSON.stringify(datos, null, 2);
                     const blob = new Blob([json], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
-
                     const a = document.createElement('a');
                     a.href = url;
                     a.download = 'gasapp-backup.json';
@@ -1316,7 +1361,6 @@
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
-
                     console.log('✅ Backup automático guardado');
                 }).catch(error => {
                     console.error('Error al obtener datos para backup:', error);
@@ -1325,58 +1369,6 @@
                 console.error('Error en backup automático:', error);
             }
         }
-
-        // Función global para importar backup
-        window.importarBackup = function() {
-            // Cerrar menú
-            var menu = document.getElementById('adminMenu');
-            if (menu) menu.style.display = 'none';
-
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = async (e) => {
-                try {
-                    const file = e.target.files[0];
-                    if (!file) return;
-
-                    const text = await file.text();
-                    const datos = JSON.parse(text);
-
-                    if (!datos.fuels || !datos.services) {
-                        showToast('❌ Archivo inválido', 'error');
-                        return;
-                    }
-
-                    if (!confirm('¿Restaurar backup? Se perderán los datos actuales.')) return;
-
-                    const fuels = await getAllFuels();
-                    const services = await getAllServices();
-                    for (const f of fuels) await deleteFuel(f.id);
-                    for (const s of services) await deleteService(s.id);
-                    localStorage.clear();
-
-                    if (datos.carName) saveCarName(datos.carName);
-                    if (datos.initialKm) saveInitialKm(datos.initialKm);
-                    if (datos.lastPrice) saveLastPrice(datos.lastPrice);
-
-                    for (const fuel of datos.fuels) {
-                        await addFuel(fuel);
-                    }
-                    for (const service of datos.services) {
-                        await addService(service);
-                    }
-
-                    showToast('✅ Backup restaurado correctamente', 'success');
-                    location.reload();
-
-                } catch (error) {
-                    console.error('Error al importar:', error);
-                    showToast('❌ Error al importar: ' + error.message, 'error');
-                }
-            };
-            input.click();
-        };
 
         // ================================================================
         // INDEXEDDB
@@ -1409,8 +1401,6 @@
                 };
             });
         }
-
-        // --- COMBUSTIBLE ---
 
         async function addFuel(entry) {
             await openDB();
@@ -1494,8 +1484,6 @@
                 request.onerror = () => reject(request.error);
             });
         }
-
-        // --- SERVICIOS ---
 
         async function addService(entry) {
             await openDB();
@@ -1595,15 +1583,12 @@
 
         function switchTab(tabId) {
             currentTab = tabId;
-
             document.querySelectorAll('.tab-content').forEach(c => {
                 c.classList.toggle('active', c.id === tabId);
             });
-
             document.querySelectorAll('.nav-item').forEach(n => {
                 n.classList.toggle('active', n.dataset.tab === tabId);
             });
-
             const headerTitle = document.getElementById('headerTitle');
             if (tabId === 'tabInicio') {
                 headerTitle.textContent = 'Inicio';
@@ -1612,7 +1597,6 @@
             } else if (tabId === 'tabServicios') {
                 headerTitle.textContent = 'Servicios';
             }
-
             const fab = document.getElementById('fabBtn');
             if (tabId === 'tabInicio' || tabId === 'tabServicios') {
                 fab.classList.remove('hidden');
@@ -1620,7 +1604,6 @@
             } else {
                 fab.classList.add('hidden');
             }
-
             if (tabId === 'tabInicio') updateDashboard();
             if (tabId === 'tabHistorial') {
                 populateMonthSelector();
@@ -1644,15 +1627,12 @@
             }, 100);
         }
 
-        // Botón cerrar modal nombre
         document.getElementById('nombreModalClose').addEventListener('click', function() {
             document.getElementById('nombreModal').classList.remove('active');
         });
-
         document.getElementById('nombreCancel').addEventListener('click', () => {
             document.getElementById('nombreModal').classList.remove('active');
         });
-
         document.getElementById('nombreSave').addEventListener('click', () => {
             const input = document.getElementById('nombreInput');
             const newName = input.value.trim();
@@ -1668,7 +1648,6 @@
             }
             showToast('✅ Nombre actualizado', 'success');
         });
-
         document.getElementById('nombreModal').addEventListener('click', (e) => {
             if (e.target === document.getElementById('nombreModal')) {
                 document.getElementById('nombreModal').classList.remove('active');
@@ -1685,17 +1664,13 @@
             if (carNameSpan) {
                 carNameSpan.textContent = carName;
             }
-
             const editBtn = document.getElementById('editCarNameBtn');
             if (editBtn) {
                 editBtn.addEventListener('click', () => {
                     abrirModalNombre();
                 });
             }
-
             switchTab('tabInicio');
-
-            // Cerrar modales con Escape
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     document.querySelectorAll('.modal-overlay.active').forEach(modal => {
@@ -1703,7 +1678,6 @@
                     });
                 }
             });
-
             document.getElementById('currentOdometer').addEventListener('click', () => {
                 const current = document.getElementById('currentOdometer').textContent.replace(/,/g, '');
                 document.getElementById('odoInput').value = current;
@@ -1713,16 +1687,12 @@
                     document.getElementById('odoInput').select();
                 }, 100);
             });
-
-            // Botón cerrar modal odómetro
             document.getElementById('odoModalClose').addEventListener('click', function() {
                 document.getElementById('odoModal').classList.remove('active');
             });
-
             document.getElementById('odoCancel').addEventListener('click', () => {
                 document.getElementById('odoModal').classList.remove('active');
             });
-
             document.getElementById('odoSave').addEventListener('click', async () => {
                 const input = document.getElementById('odoInput');
                 const value = parseFloat(input.value);
@@ -1736,14 +1706,11 @@
                 showToast('✅ Odómetro actualizado', 'success');
                 await updateDashboard();
             });
-
             document.getElementById('odoModal').addEventListener('click', (e) => {
                 if (e.target === document.getElementById('odoModal')) {
                     document.getElementById('odoModal').classList.remove('active');
                 }
             });
-
-            // Fuel Modal
             document.getElementById('fuelModalClose').addEventListener('click', () => {
                 document.getElementById('fuelModal').classList.remove('active');
             });
@@ -1752,8 +1719,6 @@
                     document.getElementById('fuelModal').classList.remove('active');
                 }
             });
-
-            // Service Modal
             document.getElementById('serviceModalClose').addEventListener('click', () => {
                 document.getElementById('serviceModal').classList.remove('active');
             });
@@ -1762,16 +1727,12 @@
                     document.getElementById('serviceModal').classList.remove('active');
                 }
             });
-
             document.getElementById('fuelForm').addEventListener('submit', handleFuelSubmit);
             document.getElementById('fuelLiters').addEventListener('input', calculateFuelTotal);
             document.getElementById('fuelPrice').addEventListener('input', calculateFuelTotal);
-
             document.getElementById('serviceForm').addEventListener('submit', handleServiceSubmit);
-
             document.getElementById('deleteFuelBtn').addEventListener('click', handleDeleteFuel);
             document.getElementById('deleteServiceBtn').addEventListener('click', handleDeleteService);
-
             await updateDashboard();
             await populateMonthSelector();
             await updateHistory();
@@ -1787,16 +1748,13 @@
                 const allFuels = await getAllFuels();
                 const lastFuel = await getLastFuel();
                 const initialKm = getInitialKm();
-
                 let currentOdometer = 0;
                 if (lastFuel) {
                     currentOdometer = lastFuel.odometer;
                 } else if (initialKm) {
                     currentOdometer = initialKm;
                 }
-
                 document.getElementById('currentOdometer').textContent = formatNumber(currentOdometer);
-
                 const container = document.getElementById('lastFuels');
                 if (allFuels.length === 0) {
                     container.innerHTML = `<div class="empty-state-mini">Sin registros</div>`;
@@ -1814,7 +1772,6 @@
                         }
                         const cClass = getConsumptionColor(consumption);
                         const emoji = getConsumptionEmoji(consumption);
-
                         html += `
                             <div class="fuel-item-compact" onclick="openFuelModal(${fuel.id})">
                                 <div class="fuel-left-compact">
@@ -1834,7 +1791,6 @@
                     }
                     container.innerHTML = html;
                 }
-
                 const nextService = await getNextService(currentOdometer);
                 const alertDiv = document.getElementById('serviceAlert');
                 if (nextService) {
@@ -1852,7 +1808,6 @@
                 } else {
                     alertDiv.style.display = 'none';
                 }
-
             } catch (error) {
                 console.error('Error en dashboard:', error);
                 document.getElementById('lastFuels').innerHTML =
@@ -1873,18 +1828,14 @@
             const submitBtn = document.getElementById('fuelSubmitBtn');
             const deleteBtn = document.getElementById('deleteFuelBtn');
             const form = document.getElementById('fuelForm');
-
             form.reset();
             deleteBtn.style.display = 'none';
-
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('fuelDate').value = today;
-
             const lastFuel = await getLastFuel();
             const initialKm = getInitialKm();
             const odoInput = document.getElementById('fuelOdometer');
             const odoHint = document.getElementById('odoHint');
-
             if (lastFuel) {
                 odoInput.value = lastFuel.odometer;
                 odoHint.textContent = `Último registro: ${formatNumber(lastFuel.odometer)} km`;
@@ -1894,13 +1845,11 @@
             } else {
                 odoHint.textContent = '💡 Este será el kilometraje inicial de tu auto';
             }
-
             const lastPrice = getLastPrice();
             if (lastPrice) {
                 document.getElementById('lastPriceHint').textContent = `Último precio: $${parseFloat(lastPrice).toFixed(2)}`;
                 document.getElementById('fuelPrice').value = lastPrice;
             }
-
             if (id) {
                 title.textContent = '✏️ Editar carga';
                 submitBtn.textContent = '💾 Actualizar';
@@ -1922,7 +1871,6 @@
                 document.getElementById('fuelLiters').value = '';
                 document.getElementById('totalCost').textContent = '$0.00';
             }
-
             modal.classList.add('active');
         }
 
@@ -1940,21 +1888,17 @@
                 const odometer = parseFloat(document.getElementById('fuelOdometer').value);
                 const liters = parseFloat(document.getElementById('fuelLiters').value);
                 const price = parseFloat(document.getElementById('fuelPrice').value);
-
                 if (!date) { showToast('❌ La fecha es obligatoria', 'error'); return; }
                 if (!odometer || isNaN(odometer) || odometer < 0) { showToast('❌ Odómetro inválido', 'error'); return; }
                 if (!liters || isNaN(liters) || liters <= 0) { showToast('❌ Litros inválidos', 'error'); return; }
                 if (!price || isNaN(price) || price <= 0) { showToast('❌ Precio inválido', 'error'); return; }
-
                 const lastFuel = await getLastFuel();
                 if (!id && lastFuel && odometer <= lastFuel.odometer) {
                     showToast(`❌ El odómetro debe ser mayor a ${formatNumber(lastFuel.odometer)} km`, 'error');
                     return;
                 }
-
                 const totalCost = liters * price;
                 const entry = { date, odometer, liters, pricePerLiter: price, totalCost };
-
                 if (id) {
                     await updateFuel(parseInt(id), entry);
                     showToast('✅ Carga actualizada', 'success');
@@ -1967,14 +1911,11 @@
                     saveLastPrice(price);
                     showToast('✅ Carga guardada', 'success');
                 }
-
                 document.getElementById('fuelModal').classList.remove('active');
                 await updateDashboard();
                 await populateMonthSelector();
                 await updateHistory();
-
                 generarBackupAutomatico();
-
             } catch (error) {
                 console.error('Error:', error);
                 showToast('❌ Error: ' + error.message, 'error');
@@ -2011,18 +1952,14 @@
             const submitBtn = document.getElementById('serviceSubmitBtn');
             const deleteBtn = document.getElementById('deleteServiceBtn');
             const form = document.getElementById('serviceForm');
-
             form.reset();
             deleteBtn.style.display = 'none';
-
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('serviceDate').value = today;
-
             const lastFuel = await getLastFuel();
             const initialKm = getInitialKm();
             const odoInput = document.getElementById('serviceOdometer');
             const odoHint = document.getElementById('serviceOdoHint');
-
             let currentOdometer = 0;
             if (lastFuel) {
                 currentOdometer = lastFuel.odometer;
@@ -2035,11 +1972,9 @@
             } else {
                 odoHint.textContent = '💡 Este será el kilometraje inicial';
             }
-
             if (currentOdometer > 0) {
                 document.getElementById('serviceNextKm').placeholder = `Ej: ${currentOdometer + 5000}`;
             }
-
             if (id) {
                 title.textContent = '✏️ Editar servicio';
                 submitBtn.textContent = '💾 Actualizar';
@@ -2059,7 +1994,6 @@
                 document.getElementById('editServiceId').value = '';
                 document.getElementById('serviceNotes').value = '';
             }
-
             modal.classList.add('active');
         }
 
@@ -2072,7 +2006,6 @@
                 const odometer = parseFloat(document.getElementById('serviceOdometer').value);
                 const nextKm = parseFloat(document.getElementById('serviceNextKm').value);
                 const notes = document.getElementById('serviceNotes').value.trim();
-
                 if (!date) { showToast('❌ La fecha es obligatoria', 'error'); return; }
                 if (!type) { showToast('❌ Escribe el tipo de servicio', 'error'); return; }
                 if (!odometer || isNaN(odometer) || odometer < 0) { showToast('❌ Odómetro inválido', 'error'); return; }
@@ -2081,9 +2014,7 @@
                     showToast('❌ El próximo servicio debe ser MAYOR al odómetro actual', 'error');
                     return;
                 }
-
                 const entry = { date, type, odometer, nextKm, notes: notes || '' };
-
                 if (id) {
                     await updateService(parseInt(id), entry);
                     showToast('✅ Servicio actualizado', 'success');
@@ -2095,13 +2026,10 @@
                     await addService(entry);
                     showToast('✅ Servicio guardado', 'success');
                 }
-
                 document.getElementById('serviceModal').classList.remove('active');
                 await loadServices();
                 await updateDashboard();
-
                 generarBackupAutomatico();
-
             } catch (error) {
                 console.error('Error:', error);
                 showToast('❌ Error: ' + error.message, 'error');
@@ -2134,7 +2062,6 @@
                 const lastFuel = await getLastFuel();
                 const initialKm = getInitialKm();
                 let currentOdometer = lastFuel ? lastFuel.odometer : (initialKm || 0);
-
                 const container = document.getElementById('servicesList');
                 if (services.length === 0) {
                     container.innerHTML =
@@ -2145,7 +2072,6 @@
                         </div>`;
                     return;
                 }
-
                 let html = '';
                 services.forEach(service => {
                     const kmLeft = service.nextKm - currentOdometer;
@@ -2154,13 +2080,11 @@
                     if (kmLeft <= 0) { statusClass = 'status-danger';
                         statusText = '⚠️ Vencido'; } else if (kmLeft <= 500) { statusClass = 'status-warning';
                         statusText = `⏳ ${formatNumber(kmLeft)} km`; } else { statusText = `✅ ${formatNumber(kmLeft)} km`; }
-
                     const dateObj = new Date(service.date + 'T00:00:00');
                     const day = String(dateObj.getDate()).padStart(2, '0');
                     const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
                     const month = months[dateObj.getMonth()];
                     const year = String(dateObj.getFullYear()).slice(-2);
-
                     html += `
                         <div class="service-item-compact" onclick="openServiceModal(${service.id})">
                             <div class="service-left-compact">
@@ -2175,7 +2099,6 @@
                     `;
                 });
                 container.innerHTML = html;
-
             } catch (error) {
                 console.error('Error en servicios:', error);
                 document.getElementById('servicesList').innerHTML =
@@ -2193,7 +2116,6 @@
         async function populateMonthSelector() {
             const allFuels = await getAllFuels();
             const select = document.getElementById('monthSelect');
-
             if (allFuels.length === 0) {
                 const currentMonth = new Date().getMonth();
                 const currentYear = new Date().getFullYear();
@@ -2203,15 +2125,12 @@
                 histYear = currentYear;
                 return;
             }
-
             const monthsSet = new Set();
             allFuels.forEach(f => {
                 const d = new Date(f.date + 'T00:00:00');
                 monthsSet.add(`${d.getFullYear()}-${d.getMonth()}`);
             });
-
             const months = Array.from(monthsSet).sort((a, b) => b.localeCompare(a));
-
             select.innerHTML = '';
             let selectedValue = null;
             months.forEach(m => {
@@ -2220,7 +2139,6 @@
                 option.value = m;
                 option.textContent = `${getMonthName(month)} ${year}`;
                 select.appendChild(option);
-
                 if (!selectedValue) {
                     selectedValue = m;
                     option.selected = true;
@@ -2228,7 +2146,6 @@
                     histMonth = month;
                 }
             });
-
             select.onchange = async () => {
                 const [year, month] = select.value.split('-').map(Number);
                 histYear = year;
@@ -2242,8 +2159,6 @@
                 const fuels = await getFuelsByMonth(histYear, histMonth);
                 const allFuels = await getAllFuels();
                 const initialKm = getInitialKm();
-
-                // ===== RESUMEN =====
                 if (allFuels.length === 0) {
                     document.getElementById('summaryMonth').textContent = '---';
                     document.getElementById('summaryTotal').textContent = '$0';
@@ -2259,7 +2174,6 @@
                     const liters = fuels.reduce((s, f) => s + f.liters, 0);
                     let totalC = 0,
                         valid = 0;
-
                     for (let i = 0; i < fuels.length; i++) {
                         const curr = fuels[i];
                         let prev = null;
@@ -2283,15 +2197,12 @@
                                 valid++; }
                         }
                     }
-
                     document.getElementById('summaryMonth').textContent = getMonthName(histMonth).substring(0, 3);
                     document.getElementById('summaryTotal').textContent = `$${total.toFixed(2)}`;
                     document.getElementById('summaryLiters').textContent = `${liters.toFixed(1)} L`;
                     document.getElementById('summaryAvg').textContent =
                         `${(valid > 0 ? totalC / valid : 0).toFixed(1)} km/L`;
                 }
-
-                // ===== LISTA =====
                 const container = document.getElementById('historyList');
                 if (allFuels.length === 0) {
                     container.innerHTML = `<div class="empty-state-mini">Sin registros</div>`;
@@ -2301,7 +2212,6 @@
                     container.innerHTML = `<div class="empty-state-mini">Sin registros en este mes</div>`;
                     return;
                 }
-
                 fuels.sort((a, b) => b.date.localeCompare(a.date));
                 let html = '';
                 for (let i = 0; i < fuels.length; i++) {
@@ -2309,7 +2219,6 @@
                     let prev = null,
                         consumption = 0,
                         kmDiff = 0;
-
                     if (i < fuels.length - 1) {
                         prev = fuels[i + 1];
                     } else {
@@ -2322,21 +2231,17 @@
                             kmDiff = fuel.odometer - initialKm;
                         }
                     }
-
                     if (prev) {
                         consumption = calculateConsumption(prev.odometer, fuel.odometer, fuel.liters);
                         kmDiff = fuel.odometer - prev.odometer;
                     }
-
                     const cClass = getConsumptionColor(consumption);
                     const emoji = getConsumptionEmoji(consumption);
-
                     const dateObj = new Date(fuel.date + 'T00:00:00');
                     const day = String(dateObj.getDate()).padStart(2, '0');
                     const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
                     const month = months[dateObj.getMonth()];
                     const year = String(dateObj.getFullYear()).slice(-2);
-
                     html += `
                         <div class="history-item-compact" onclick="openFuelModal(${fuel.id})">
                             <div class="history-row1">
@@ -2356,7 +2261,6 @@
                     `;
                 }
                 container.innerHTML = html;
-
             } catch (error) {
                 console.error('Error en historial:', error);
                 document.getElementById('historyList').innerHTML =
