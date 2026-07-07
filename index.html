@@ -23,6 +23,20 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
+        /* ===== ELIMINAR CUALQUIER PUNTO NEGRO ===== */
+        .app,
+        .header-mini,
+        .header-top,
+        .header-left,
+        .header-right,
+        .odometer-row,
+        .tab-content,
+        .nav-item,
+        .fab-mini,
+        .modal-box {
+            /* No agregar ningún contenido extra */
+        }
+
         body {
             background: #f5f7fa;
             color: #1a1a2e;
@@ -145,6 +159,25 @@
         .odo-unit {
             font-size: 14px;
             opacity: 0.7;
+        }
+
+        /* ===== INPUT SIN CURSOR NEGRO ===== */
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 16px;
+            background: white;
+            color: #1a1a2e;
+            caret-color: #667eea;
+        }
+
+        .modal-input:focus {
+            border-color: #667eea;
+            outline: none;
         }
 
         /* ===== CONTENIDO ===== */
@@ -297,36 +330,37 @@
         .summary-row {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
-            margin-bottom: 10px;
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
         .summary-item {
             background: white;
-            border-radius: 8px;
-            padding: 8px 4px;
+            border-radius: 10px;
+            padding: 10px 6px;
             text-align: center;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .sum-label {
             display: block;
-            font-size: 9px;
+            font-size: 10px;
             text-transform: uppercase;
             color: #999;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.5px;
+            font-weight: 500;
         }
 
         .sum-value {
             display: block;
-            font-size: 13px;
+            font-size: 16px;
             font-weight: 700;
             color: #1a1a2e;
             margin-top: 2px;
         }
 
         .month-selector-compact {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .month-dropdown {
@@ -337,18 +371,19 @@
             font-size: 14px;
             background: white;
             appearance: auto;
+            font-weight: 500;
         }
 
         .history-list-compact {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
         }
 
         .history-item-compact {
             background: white;
-            border-radius: 8px;
-            padding: 8px 12px;
+            border-radius: 10px;
+            padding: 10px 14px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
             cursor: pointer;
             transition: background 0.1s;
@@ -362,15 +397,17 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 2px;
         }
 
         .history-date {
-            font-size: 12px;
-            color: #555;
+            font-size: 13px;
+            font-weight: 500;
+            color: #444;
         }
 
         .history-km {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             color: #1a1a2e;
         }
@@ -385,8 +422,8 @@
         .history-row2 {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px 10px;
-            font-size: 12px;
+            gap: 8px 14px;
+            font-size: 13px;
             color: #666;
             margin-top: 2px;
         }
@@ -395,20 +432,20 @@
             font-weight: 600;
             padding: 0 6px;
             border-radius: 3px;
-            font-size: 12px;
+            font-size: 13px;
         }
 
         /* ===== SERVICIOS ===== */
         .service-list-compact {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
         }
 
         .service-item-compact {
             background: white;
-            border-radius: 8px;
-            padding: 10px 12px;
+            border-radius: 10px;
+            padding: 10px 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -424,7 +461,7 @@
         .service-left-compact {
             display: flex;
             flex-direction: column;
-            gap: 1px;
+            gap: 2px;
         }
 
         .service-name-compact {
@@ -433,7 +470,7 @@
         }
 
         .service-date-compact {
-            font-size: 11px;
+            font-size: 12px;
             color: #999;
         }
 
@@ -442,16 +479,17 @@
         }
 
         .service-km-compact {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             color: #1a1a2e;
         }
 
         .service-status-compact {
-            font-size: 11px;
-            padding: 1px 8px;
+            font-size: 12px;
+            padding: 2px 10px;
             border-radius: 4px;
             display: inline-block;
+            font-weight: 500;
         }
 
         .status-ok {
@@ -610,6 +648,7 @@
             font-size: 14px;
             background: #fafafa;
             transition: border-color 0.2s;
+            caret-color: #667eea;
         }
 
         .field-group input:focus,
@@ -756,10 +795,23 @@
             }
             .summary-row {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+            .summary-item {
+                padding: 8px 4px;
+            }
+            .sum-value {
+                font-size: 14px;
             }
             .history-row2 {
-                font-size: 11px;
+                font-size: 12px;
                 gap: 4px 8px;
+            }
+            .history-date {
+                font-size: 12px;
+            }
+            .history-km {
+                font-size: 13px;
             }
             .fab-mini {
                 right: calc(50% - 160px);
@@ -873,7 +925,7 @@
         <div class="modal-overlay" id="odoModal">
             <div class="modal-box">
                 <h2>Editar odómetro</h2>
-                <input type="number" id="odoInput" class="modal-input" placeholder="Kilometraje actual" style="width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:10px;font-size:16px;text-align:center;margin-bottom:16px;">
+                <input type="number" id="odoInput" class="modal-input" placeholder="Kilometraje actual">
                 <div style="display:flex;gap:10px;">
                     <button class="btn-modal-cancel" id="odoCancel" style="flex:1;padding:10px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;background:#f3f4f6;color:#666;">Cancelar</button>
                     <button class="btn-modal-save" id="odoSave" style="flex:1;padding:10px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;">Guardar</button>
@@ -1262,7 +1314,6 @@
 
         let currentTab = 'tabInicio';
 
-        // Navegación inferior
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
                 switchTab(item.dataset.tab);
@@ -1272,28 +1323,23 @@
         function switchTab(tabId) {
             currentTab = tabId;
 
-            // Contenido
             document.querySelectorAll('.tab-content').forEach(c => {
                 c.classList.toggle('active', c.id === tabId);
             });
 
-            // Navegación inferior
             document.querySelectorAll('.nav-item').forEach(n => {
                 n.classList.toggle('active', n.dataset.tab === tabId);
             });
 
-            // ===== HEADER =====
             const headerLeft = document.getElementById('headerLeft');
             const odoRow = document.getElementById('odometerRow');
 
             if (tabId === 'tabInicio') {
-                // Inicio: muestra el nombre del auto con lápiz
                 const carName = getCarName();
                 headerLeft.innerHTML = `
                     <span class="car-name">${carName}</span>
                     <button class="btn-edit-car" id="editCarName">✏️</button>
                 `;
-                // Asignar evento al lápiz
                 document.getElementById('editCarName').addEventListener('click', (e) => {
                     e.stopPropagation();
                     const newName = prompt('✏️ Editar nombre del auto:', getCarName());
@@ -1305,16 +1351,13 @@
                 });
                 odoRow.classList.remove('hidden');
             } else if (tabId === 'tabHistorial') {
-                // Historial: solo el título "Historial"
                 headerLeft.innerHTML = `<span class="page-title">Historial</span>`;
                 odoRow.classList.add('hidden');
             } else if (tabId === 'tabServicios') {
-                // Servicios: solo el título "Servicios"
                 headerLeft.innerHTML = `<span class="page-title">Servicios</span>`;
                 odoRow.classList.add('hidden');
             }
 
-            // FAB
             const fab = document.getElementById('fabBtn');
             if (tabId === 'tabInicio' || tabId === 'tabServicios') {
                 fab.classList.remove('hidden');
@@ -1323,7 +1366,6 @@
                 fab.classList.add('hidden');
             }
 
-            // Actualizar datos
             if (tabId === 'tabInicio') updateDashboard();
             if (tabId === 'tabHistorial') { populateMonthSelector();
                 updateHistory(); }
@@ -1331,14 +1373,12 @@
         }
 
         // ================================================================
-        // DASHBOARD (Inicio)
+        // DASHBOARD
         // ================================================================
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // Inicializar header
             switchTab('tabInicio');
 
-            // Odómetro - clic para editar
             document.getElementById('currentOdometer').addEventListener('click', () => {
                 const current = document.getElementById('currentOdometer').textContent.replace(/,/g, '');
                 document.getElementById('odoInput').value = current;
@@ -1349,7 +1389,6 @@
                 }, 100);
             });
 
-            // Modal odómetro
             document.getElementById('odoCancel').addEventListener('click', () => {
                 document.getElementById('odoModal').classList.remove('active');
             });
@@ -1382,7 +1421,6 @@
                 }
             });
 
-            // MODALES - Fuel
             document.getElementById('fuelModalClose').addEventListener('click', () => {
                 document.getElementById('fuelModal').classList.remove('active');
             });
@@ -1392,7 +1430,6 @@
                 }
             });
 
-            // MODALES - Service
             document.getElementById('serviceModalClose').addEventListener('click', () => {
                 document.getElementById('serviceModal').classList.remove('active');
             });
@@ -1402,21 +1439,15 @@
                 }
             });
 
-            // Formulario Fuel
             document.getElementById('fuelForm').addEventListener('submit', handleFuelSubmit);
             document.getElementById('fuelLiters').addEventListener('input', calculateFuelTotal);
             document.getElementById('fuelPrice').addEventListener('input', calculateFuelTotal);
 
-            // Formulario Service
             document.getElementById('serviceForm').addEventListener('submit', handleServiceSubmit);
 
-            // Eliminar Fuel
             document.getElementById('deleteFuelBtn').addEventListener('click', handleDeleteFuel);
-
-            // Eliminar Service
             document.getElementById('deleteServiceBtn').addEventListener('click', handleDeleteService);
 
-            // Inicializar
             await updateDashboard();
             await populateMonthSelector();
             await updateHistory();
@@ -1480,7 +1511,6 @@
                     container.innerHTML = html;
                 }
 
-                // Alerta servicio
                 const nextService = await getNextService(currentOdometer);
                 const alertDiv = document.getElementById('serviceAlert');
                 if (nextService) {
