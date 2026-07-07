@@ -23,13 +23,12 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
-        /* ===== ELIMINAR EL CURSOR DE TODOS LOS INPUTS ===== */
+        /* ===== OCULTAR CURSOR DE INPUTS ===== */
         input,
         textarea,
         select {
             caret-color: transparent !important;
         }
-
         input:focus,
         textarea:focus,
         select:focus {
@@ -604,6 +603,7 @@
             font-size: 20px;
         }
 
+        /* ===== MODALES ===== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -635,6 +635,7 @@
             font-size: 18px;
             margin-bottom: 16px;
             color: #1a1a2e;
+            text-align: center;
         }
 
         .modal-close {
@@ -758,6 +759,33 @@
             gap: 8px;
         }
 
+        /* Botones del modal de nombre */
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-modal-cancel {
+            background: #f3f4f6;
+            color: #666;
+        }
+
+        .btn-modal-save {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
         .toast {
             position: fixed;
             top: 80px;
@@ -848,9 +876,13 @@
 
     <div class="app">
 
+        <!-- ===== HEADER ===== -->
         <header class="header-mini" id="mainHeader">
             <div class="header-top">
-                <div class="header-left" id="headerLeft"></div>
+                <div class="header-left" id="headerLeft">
+                    <span class="car-name" id="carNameDisplay">Mi Auto</span>
+                    <button class="btn-edit-car" id="editCarNameBtn">✏️</button>
+                </div>
                 <div class="header-right">⛽ GasApp</div>
             </div>
             <div class="odometer-row" id="odometerRow">
@@ -860,6 +892,19 @@
             </div>
         </header>
 
+        <!-- ===== MODAL PARA EDITAR NOMBRE ===== -->
+        <div class="modal-overlay" id="nombreModal">
+            <div class="modal-box">
+                <h2>✏️ Editar nombre del auto</h2>
+                <input type="text" id="nombreInput" class="modal-input" placeholder="Ej: Nissan March" value="Mi Auto">
+                <div class="modal-actions">
+                    <button class="btn-modal-cancel" id="nombreCancel">Cancelar</button>
+                    <button class="btn-modal-save" id="nombreSave">Guardar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== PESTAÑAS ===== -->
         <div id="tabInicio" class="tab-content active">
             <div class="service-alert-mini" id="serviceAlert" style="display:none;">
                 <span class="alert-icon">🔧</span>
@@ -907,8 +952,10 @@
             </div>
         </div>
 
+        <!-- ===== BOTÓN FLOTANTE ===== -->
         <button class="fab-mini" id="fabBtn">+</button>
 
+        <!-- ===== NAVEGACIÓN INFERIOR ===== -->
         <nav class="bottom-nav-mini">
             <button class="nav-item active" data-tab="tabInicio">
                 <span>📊</span>
@@ -924,18 +971,23 @@
             </button>
         </nav>
 
-        <!-- MODALES -->
+        <!-- ============================================================ -->
+        <!-- MODALES PRINCIPALES -->
+        <!-- ============================================================ -->
+
+        <!-- MODAL: Editar odómetro -->
         <div class="modal-overlay" id="odoModal">
             <div class="modal-box">
                 <h2>Editar odómetro</h2>
                 <input type="number" id="odoInput" class="modal-input" placeholder="Kilometraje actual">
-                <div style="display:flex;gap:10px;">
-                    <button class="btn-modal-cancel" id="odoCancel" style="flex:1;padding:10px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;background:#f3f4f6;color:#666;">Cancelar</button>
-                    <button class="btn-modal-save" id="odoSave" style="flex:1;padding:10px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;">Guardar</button>
+                <div class="modal-actions">
+                    <button class="btn-modal-cancel" id="odoCancel">Cancelar</button>
+                    <button class="btn-modal-save" id="odoSave">Guardar</button>
                 </div>
             </div>
         </div>
 
+        <!-- MODAL: Agregar/Editar carga -->
         <div class="modal-overlay" id="fuelModal">
             <div class="modal-box">
                 <button class="modal-close" id="fuelModalClose">✕</button>
@@ -974,6 +1026,7 @@
             </div>
         </div>
 
+        <!-- MODAL: Agregar/Editar servicio -->
         <div class="modal-overlay" id="serviceModal">
             <div class="modal-box">
                 <button class="modal-close" id="serviceModalClose">✕</button>
@@ -1327,35 +1380,26 @@
                 n.classList.toggle('active', n.dataset.tab === tabId);
             });
 
-            const headerLeft = document.getElementById('headerLeft');
             const odoRow = document.getElementById('odometerRow');
+            const headerLeft = document.getElementById('headerLeft');
 
             if (tabId === 'tabInicio') {
                 const carName = getCarName();
                 headerLeft.innerHTML = `
                     <span class="car-name">${carName}</span>
-                    <button class="btn-edit-car" id="editCarName">✏️</button>
+                    <button class="btn-edit-car" id="editCarNameBtn">✏️</button>
                 `;
-                document.getElementById('editCarName').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const newName = prompt('✏️ Editar nombre del auto:', getCarName());
-                    if (newName && newName.trim()) {
-                        saveCarName(newName.trim());
-                        document.querySelector('.car-name').textContent = newName.trim();
-                        showToast('✅ Nombre actualizado', 'success');
-                    }
+                // Re-asignar evento al botón de editar nombre
+                document.getElementById('editCarNameBtn').addEventListener('click', () => {
+                    abrirModalNombre();
                 });
                 odoRow.classList.remove('hidden');
             } else if (tabId === 'tabHistorial') {
                 headerLeft.innerHTML = `<span class="page-title">Historial</span>`;
                 odoRow.classList.add('hidden');
-                // Recargar historial al cambiar a esta pestaña
-                populateMonthSelector();
-                updateHistory();
             } else if (tabId === 'tabServicios') {
                 headerLeft.innerHTML = `<span class="page-title">Servicios</span>`;
                 odoRow.classList.add('hidden');
-                loadServices();
             }
 
             const fab = document.getElementById('fabBtn');
@@ -1367,15 +1411,74 @@
             }
 
             if (tabId === 'tabInicio') updateDashboard();
+            if (tabId === 'tabHistorial') {
+                populateMonthSelector();
+                updateHistory();
+            }
+            if (tabId === 'tabServicios') loadServices();
         }
+
+        // ================================================================
+        // MODAL PARA EDITAR NOMBRE DEL AUTO (NUEVO)
+        // ================================================================
+
+        function abrirModalNombre() {
+            const modal = document.getElementById('nombreModal');
+            const input = document.getElementById('nombreInput');
+            input.value = getCarName();
+            modal.classList.add('active');
+            setTimeout(() => {
+                input.focus();
+                input.select();
+            }, 100);
+        }
+
+        document.getElementById('nombreCancel').addEventListener('click', () => {
+            document.getElementById('nombreModal').classList.remove('active');
+        });
+
+        document.getElementById('nombreSave').addEventListener('click', () => {
+            const input = document.getElementById('nombreInput');
+            const newName = input.value.trim();
+            if (!newName) {
+                showToast('❌ Ingresa un nombre válido', 'error');
+                return;
+            }
+            saveCarName(newName);
+            document.getElementById('nombreModal').classList.remove('active');
+            // Actualizar el nombre en el header
+            const carNameSpan = document.querySelector('#headerLeft .car-name');
+            if (carNameSpan) {
+                carNameSpan.textContent = newName;
+            }
+            showToast('✅ Nombre actualizado', 'success');
+        });
+
+        document.getElementById('nombreModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('nombreModal')) {
+                document.getElementById('nombreModal').classList.remove('active');
+            }
+        });
 
         // ================================================================
         // DASHBOARD
         // ================================================================
 
         document.addEventListener('DOMContentLoaded', async () => {
+            // Mostrar el nombre inicial
+            const carName = getCarName();
+            const headerLeft = document.getElementById('headerLeft');
+            headerLeft.innerHTML = `
+                <span class="car-name">${carName}</span>
+                <button class="btn-edit-car" id="editCarNameBtn">✏️</button>
+            `;
+            document.getElementById('editCarNameBtn').addEventListener('click', () => {
+                abrirModalNombre();
+            });
+
             switchTab('tabInicio');
 
+            // Odómetro - clic
             document.getElementById('currentOdometer').addEventListener('click', () => {
                 const current = document.getElementById('currentOdometer').textContent.replace(/,/g, '');
                 document.getElementById('odoInput').value = current;
@@ -1406,6 +1509,7 @@
 
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
+                    document.getElementById('nombreModal').classList.remove('active');
                     document.getElementById('odoModal').classList.remove('active');
                     document.getElementById('fuelModal').classList.remove('active');
                     document.getElementById('serviceModal').classList.remove('active');
@@ -1852,7 +1956,7 @@
         }
 
         // ================================================================
-        // HISTORIAL - CORREGIDO
+        // HISTORIAL - CORREGIDO (VERSIÓN ORIGINAL QUE FUNCIONABA)
         // ================================================================
 
         let histMonth = new Date().getMonth();
@@ -1862,7 +1966,6 @@
             const allFuels = await getAllFuels();
             const select = document.getElementById('monthSelect');
 
-            // Si no hay registros, mostrar el mes actual
             if (allFuels.length === 0) {
                 const currentMonth = new Date().getMonth();
                 const currentYear = new Date().getFullYear();
@@ -1873,7 +1976,6 @@
                 return;
             }
 
-            // Obtener meses únicos con datos
             const monthsSet = new Set();
             allFuels.forEach(f => {
                 const d = new Date(f.date + 'T00:00:00');
@@ -1891,7 +1993,6 @@
                 option.textContent = `${getMonthName(month)} ${year}`;
                 select.appendChild(option);
 
-                // Seleccionar el mes más reciente por defecto
                 if (!selectedValue) {
                     selectedValue = m;
                     option.selected = true;
@@ -1900,26 +2001,6 @@
                 }
             });
 
-            // Si el mes actual no está en la lista, seleccionamos el más reciente
-            const currentMonth = new Date().getMonth();
-            const currentYear = new Date().getFullYear();
-            const currentKey = `${currentYear}-${currentMonth}`;
-            if (!monthsSet.has(currentKey)) {
-                // El mes más reciente ya está seleccionado
-            } else {
-                // Seleccionar el mes actual si existe
-                for (let option of select.options) {
-                    if (option.value === currentKey) {
-                        option.selected = true;
-                        histYear = currentYear;
-                        histMonth = currentMonth;
-                        break;
-                    }
-                }
-            }
-
-            // Quitar event listener anterior para evitar duplicados
-            select.onchange = null;
             select.onchange = async () => {
                 const [year, month] = select.value.split('-').map(Number);
                 histYear = year;
@@ -1951,14 +2032,12 @@
                     let totalC = 0,
                         valid = 0;
 
-                    // Calcular consumo promedio del mes
                     for (let i = 0; i < fuels.length; i++) {
                         const curr = fuels[i];
                         let prev = null;
                         if (i < fuels.length - 1) {
                             prev = fuels[i + 1];
                         } else {
-                            // Buscar registro anterior fuera del mes
                             const allSorted = await getAllFuels();
                             const idx = allSorted.findIndex(f => f.id === curr.id);
                             if (idx < allSorted.length - 1) {
@@ -2003,7 +2082,6 @@
                         consumption = 0,
                         kmDiff = 0;
 
-                    // Buscar el registro anterior (puede estar fuera del mes)
                     if (i < fuels.length - 1) {
                         prev = fuels[i + 1];
                     } else {
