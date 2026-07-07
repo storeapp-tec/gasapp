@@ -3,61 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasApp - Mi Auto</title>
+    <title>GasApp</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="manifest" href="manifest.json">
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header>
-            <div class="app-header">
-                <div class="app-title">⛽ GasApp</div>
-                <div class="car-header">
-                    <h1 id="carName">Mi Auto</h1>
-                    <button class="edit-btn" id="editCarName">✏️</button>
-                </div>
+    <div class="app">
+        <!-- Header minimalista -->
+        <header class="header-mini">
+            <div class="header-top">
+                <span class="app-name">⛽ GasApp</span>
+                <button class="btn-edit-car" id="editCarName">✏️</button>
             </div>
-            <div class="odometer-display">
-                <span class="odometer-value" id="currentOdometer">0</span>
-                <span class="odometer-unit">km</span>
+            <div class="car-name" id="carName">Mi Auto</div>
+            <div class="odometer-row">
+                <span class="odo-label">Odómetro</span>
+                <span class="odo-value" id="currentOdometer">0</span>
+                <span class="odo-unit">km</span>
+                <button class="btn-odo-edit" id="editOdometerBtn">✏️</button>
             </div>
         </header>
 
-        <!-- Alerta de próximo servicio -->
-        <div class="service-alert" id="serviceAlert" style="display:none;">
-            <div class="alert-icon">🔧</div>
-            <div class="alert-content">
-                <div class="alert-title">Próximo servicio</div>
-                <div class="alert-detail" id="serviceDetail">Cambio de aceite</div>
-                <div class="alert-km" id="serviceKm">Faltan 500 km</div>
+        <!-- Alerta servicio (compacta) -->
+        <div class="service-alert-mini" id="serviceAlert" style="display:none;">
+            <span class="alert-icon">🔧</span>
+            <div class="alert-text">
+                <strong id="serviceDetail">Cambio de aceite</strong>
+                <span id="serviceKm">Faltan 500 km</span>
             </div>
         </div>
 
-        <!-- Últimas cargas -->
-        <div class="section-title">📊 Últimas cargas</div>
-        <div id="lastFuels" class="fuel-list">
-            <div class="empty-state">🚗 No hay registros aún</div>
+        <!-- Últimas cargas (lista compacta) -->
+        <div class="section-label">Últimas cargas</div>
+        <div id="lastFuels" class="fuel-list-compact">
+            <div class="empty-state-mini">Sin registros</div>
         </div>
 
         <!-- Botón flotante -->
-        <button class="fab" id="addFuelBtn">➕</button>
+        <button class="fab-mini" id="addFuelBtn">+</button>
 
-        <!-- Navegación -->
-        <nav class="bottom-nav">
-            <button class="nav-btn active" onclick="location.href='index.html'">
-                <span class="nav-icon">📊</span>
+        <!-- Navegación inferior -->
+        <nav class="bottom-nav-mini">
+            <button class="nav-item active" onclick="location.href='index.html'">
+                <span>📊</span>
                 <span>Inicio</span>
             </button>
-            <button class="nav-btn" onclick="location.href='history.html'">
-                <span class="nav-icon">📈</span>
+            <button class="nav-item" onclick="location.href='history.html'">
+                <span>📈</span>
                 <span>Historial</span>
             </button>
-            <button class="nav-btn" id="serviceBtn">
-                <span class="nav-icon">🔧</span>
+            <button class="nav-item" id="serviceBtn">
+                <span>🔧</span>
                 <span>Servicios</span>
             </button>
         </nav>
+    </div>
+
+    <!-- Modal para editar odómetro -->
+    <div class="modal-overlay" id="odoModal">
+        <div class="modal-box">
+            <h3>Editar odómetro</h3>
+            <input type="number" id="odoInput" class="modal-input" placeholder="Kilometraje actual">
+            <div class="modal-actions">
+                <button class="btn-modal-cancel" id="odoCancel">Cancelar</button>
+                <button class="btn-modal-save" id="odoSave">Guardar</button>
+            </div>
+        </div>
     </div>
 
     <script src="js/utils.js"></script>
