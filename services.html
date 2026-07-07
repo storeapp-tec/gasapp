@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Servicios</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <div class="app">
+        <header class="header-modal">
+            <button class="btn-back" onclick="location.href='index.html'">‹</button>
+            <span class="modal-title">Servicios</span>
+            <button class="btn-add-small" id="addServiceBtn">+</button>
+        </header>
+
+        <div id="servicesList" class="service-list-compact">
+            <div class="empty-state-mini">No hay servicios registrados</div>
+        </div>
+
+        <nav class="bottom-nav-mini">
+            <button class="nav-item" onclick="location.href='index.html'">
+                <span>📊</span>
+                <span>Inicio</span>
+            </button>
+            <button class="nav-item" onclick="location.href='history.html'">
+                <span>📈</span>
+                <span>Historial</span>
+            </button>
+            <button class="nav-item active" onclick="location.href='services.html'">
+                <span>🔧</span>
+                <span>Servicios</span>
+            </button>
+        </nav>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/services.js"></script>
+</body>
+</html>
