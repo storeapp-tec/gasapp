@@ -1,17 +1,19 @@
 // Formatear número con comas
 function formatNumber(num) {
-    if (!num) return '0';
+    if (!num && num !== 0) return '0';
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-// Formatear fecha corta (dd/mm)
+// Formatear fecha corta
 function formatShortDate(dateStr) {
+    if (!dateStr) return '--/--';
     const d = new Date(dateStr + 'T00:00:00');
     return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
 }
 
 // Formatear fecha completa
 function formatDate(dateStr) {
+    if (!dateStr) return 'Fecha no disponible';
     const d = new Date(dateStr + 'T00:00:00');
     return d.toLocaleDateString('es-ES', { 
         day: '2-digit', 
@@ -22,8 +24,9 @@ function formatDate(dateStr) {
 
 // Calcular consumo km/l
 function calculateConsumption(prevOdometer, currOdometer, liters) {
+    if (!prevOdometer || !currOdometer || !liters || liters <= 0) return 0;
     const km = currOdometer - prevOdometer;
-    if (km <= 0 || liters <= 0) return 0;
+    if (km <= 0) return 0;
     return km / liters;
 }
 
@@ -57,12 +60,6 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
-// Obtener mes actual
-function getCurrentMonth() {
-    const now = new Date();
-    return now.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
-}
-
 // Obtener nombre del mes
 function getMonthName(month) {
     const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
@@ -70,20 +67,33 @@ function getMonthName(month) {
     return months[month];
 }
 
-// Guardar y obtener configuración del auto
+// ===== FUNCIONES PARA CONFIGURACIÓN =====
+
 function saveCarName(name) {
     localStorage.setItem('carName', name);
 }
 
 function getCarName() {
-    return localStorage.getItem('carName') || 'Nissan March';
+    return localStorage.getItem('carName') || 'Mi Auto';
 }
 
-// Guardar y obtener último precio
 function saveLastPrice(price) {
     localStorage.setItem('lastPrice', price);
 }
 
 function getLastPrice() {
     return localStorage.getItem('lastPrice') || null;
+}
+
+function saveInitialKm(km) {
+    localStorage.setItem('initialKm', km);
+}
+
+function getInitialKm() {
+    const km = localStorage.getItem('initialKm');
+    return km ? parseFloat(km) : null;
+}
+
+function isFirstTime() {
+    return !getInitialKm();
 }
