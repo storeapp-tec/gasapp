@@ -15,13 +15,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function populateMonthSelector() {
     const allFuels = await getAllFuels();
+    const select = document.getElementById('monthSelect');
+    
     if (allFuels.length === 0) {
-        const select = document.getElementById('monthSelect');
         select.innerHTML = `<option value="${currentYear}-${currentMonth}">${getMonthName(currentMonth)} ${currentYear}</option>`;
         return;
     }
     
-    // Obtener meses únicos con datos
     const monthsSet = new Set();
     allFuels.forEach(f => {
         const d = new Date(f.date + 'T00:00:00');
@@ -30,7 +30,6 @@ async function populateMonthSelector() {
     
     const months = Array.from(monthsSet).sort((a, b) => b.localeCompare(a));
     
-    const select = document.getElementById('monthSelect');
     select.innerHTML = '';
     months.forEach(m => {
         const [year, month] = m.split('-').map(Number);
@@ -95,7 +94,7 @@ async function updateHistory() {
             document.getElementById('summaryAvg').textContent = `${(validCount > 0 ? totalConsumption / validCount : 0).toFixed(1)} km/L`;
         }
         
-        // Lista
+        // Lista - 2 LÍNEAS
         const container = document.getElementById('historyList');
         if (allFuels.length === 0) {
             container.innerHTML = `<div class="empty-state-mini">Sin registros</div>`;
@@ -134,15 +133,15 @@ async function updateHistory() {
             
             html += `
                 <div class="history-item-compact" onclick="editFuel(${fuel.id})">
-                    <div class="history-date-compact">${formatDateFull(fuel.date)}</div>
-                    <div class="history-main-compact">
-                        <span class="history-km-compact">📟 ${formatNumber(fuel.odometer)} km</span>
-                        <span class="history-total-compact">$${fuel.totalCost.toFixed(2)}</span>
+                    <div class="history-row1">
+                        <span class="history-date">${formatDateFull(fuel.date)}</span>
+                        <span class="history-km">${formatNumber(fuel.odometer)} km</span>
                     </div>
-                    <div class="history-details-compact">
+                    <div class="history-row2">
                         <span>⛽ ${fuel.liters.toFixed(1)} L</span>
                         <span>💰 $${fuel.pricePerLiter.toFixed(2)}/L</span>
-                        <span class="history-consumption-compact ${cClass}">${emoji} ${consumption > 0 ? consumption.toFixed(1) : '0.0'} km/L</span>
+                        <span class="history-consumption-badge ${cClass}">${emoji} ${consumption > 0 ? consumption.toFixed(1) : '0.0'} km/L</span>
+                        <span>$${fuel.totalCost.toFixed(2)}</span>
                     </div>
                 </div>
             `;
