@@ -5,7 +5,6 @@ let currentMonth = currentDate.getMonth();
 document.addEventListener('DOMContentLoaded', () => {
     updateHistory();
     
-    // Navegación de meses
     document.getElementById('prevMonth').addEventListener('click', () => {
         currentMonth--;
         if (currentMonth < 0) {
@@ -27,32 +26,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function updateHistory() {
     try {
-        // Actualizar título del mes
         document.getElementById('currentMonthDisplay').textContent = 
             `${getMonthName(currentMonth)} ${currentYear}`;
         
-        // Obtener registros del mes
         const fuels = await getFuelsByMonth(currentYear, currentMonth);
+        const allFuels = await getAllFuels();
         
-        // Actualizar resumen
         updateSummary(fuels);
         
-        // Mostrar lista
         const container = document.getElementById('historyList');
         
-        if (fuels.length === 0) {
-            container.innerHTML = '<div class="empty-state">📭 No hay registros en este mes</div>';
+        if (allFuels.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    📭 No hay registros aún<br>
+                    <small>Agrega tu primera carga de combustible</small>
+                </div>
+            `;
             return;
         }
         
-        // Ordenar por fecha (más reciente primero)
+        if (fuels.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    📭 No hay registros en ${getMonthName(currentMonth)} ${currentYear}<br>
+                    <small>Selecciona otro mes o agrega una carga</small>
+                </div>
+            `;
+            return;
+        }
+        
         fuels.sort((a, b) => b.date.localeCompare(a.date));
         
         let html = '';
+        const initialKm = getInitialKm();
+        
         for (let i = 0; i < fuels.length; i++) {
             const fuel = fuels[i];
-            const prev = i < fuels.length - 1 ? fuels[i + 1] : null;
-            const consumption = prev ? calculateConsumption(prev.odometer, fuel.odometer, fuel.liters) : 0;
+            let prev = null;
+            let consumption = 0;
+            
+            if (i < fuels.length - 1) {
+                prev = fuels[i + 1];
+            } else {
+                const allFuelsSorted = await getAllFuels();
+                const currentIndex = allFuelsSorted.findIndex(f => f.id === fuel.id);
+                if (currentIndex < allFuelsSorted.length - 1) {
+                    prev = allFuelsSorted[currentIndex + 1];
+                } else if (initialKm) {
+                    consumption = calculateConsumption(initialKm, fuel.odometer, fuel.liters);
+                }
+            }
+            
+            if (prev) {
+                consumption = calculateConsumption(prev.odometer, fuel.odometer, fuel.liters);
+            }
+            
             const consumptionClass = getConsumptionColor(consumption);
             const emoji = getConsumptionEmoji(consumption);
             
@@ -77,12 +106,19 @@ async function updateHistory() {
         
     } catch (error) {
         console.error('Error:', error);
-        showToast('❌ Error al cargar el historial', 'error');
+        document.getElementById('historyList').innerHTML = `
+            <div class="empty-state">
+                📭 Sin datos para mostrar<br>
+                <small>Agrega tu primera carga de combustible</small>
+            </div>
+        `;
     }
 }
 
 function updateSummary(fuels) {
-    if (fuels.length === 0) {
+    const allFuels = getAllFuels();
+    
+    if (!allFuels || allFuels.length === 0) {
         document.getElementById('summaryMonth').textContent = '---';
         document.getElementById('summaryTotal').textContent = '$0';
         document.getElementById('summaryLiters').textContent = '0 L';
@@ -90,29 +126,55 @@ function updateSummary(fuels) {
         return;
     }
     
-    // Total gastado
+    if (fuels.length === 0) {
+        document.getElementById('summaryMonth').textContent = getMonthName(currentMonth).substring(0, 3);
+        document.getElementById('summaryTotal').textContent = '$0';
+        document.getElementById('summaryLiters').textContent = '0 L';
+        document.getElementById('summaryAvg').textContent = '0 km/L';
+        return;
+    }
+    
     const total = fuels.reduce((sum, f) => sum + f.totalCost, 0);
     document.getElementById('summaryTotal').textContent = `$${total.toFixed(2)}`;
     
-    // Total litros
     const liters = fuels.reduce((sum, f) => sum + f.liters, 0);
     document.getElementById('summaryLiters').textContent = `${liters.toFixed(1)} L`;
     
-    // Consumo promedio (usando todos los registros del mes)
     let totalConsumption = 0;
     let validCount = 0;
-    for (let i = 0; i < fuels.length - 1; i++) {
+    const initialKm = getInitialKm();
+    
+    for (let i = 0; i < fuels.length; i++) {
         const curr = fuels[i];
-        const prev = fuels[i + 1];
-        const consumption = calculateConsumption(prev.odometer, curr.odometer, curr.liters);
-        if (consumption > 0) {
-            totalConsumption += consumption;
-            validCount++;
+        let prev = null;
+        
+        if (i < fuels.length - 1) {
+            prev = fuels[i + 1];
+        } else {
+            const allFuelsSorted = getAllFuels();
+            const currentIndex = allFuelsSorted.findIndex(f => f.id === curr.id);
+            if (currentIndex < allFuelsSorted.length - 1) {
+                prev = allFuelsSorted[currentIndex + 1];
+            } else if (initialKm) {
+                const consumption = calculateConsumption(initialKm, curr.odometer, curr.liters);
+                if (consumption > 0) {
+                    totalConsumption += consumption;
+                    validCount++;
+                }
+                continue;
+            }
+        }
+        
+        if (prev) {
+            const consumption = calculateConsumption(prev.odometer, curr.odometer, curr.liters);
+            if (consumption > 0) {
+                totalConsumption += consumption;
+                validCount++;
+            }
         }
     }
+    
     const avg = validCount > 0 ? totalConsumption / validCount : 0;
     document.getElementById('summaryAvg').textContent = `${avg.toFixed(1)} km/L`;
-    
-    // Mostrar mes en el resumen
     document.getElementById('summaryMonth').textContent = getMonthName(currentMonth).substring(0, 3);
 }
