@@ -16,7 +16,6 @@ body {
     padding: 16px;
 }
 
-/* ===== HEADER ===== */
 header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 20px;
@@ -26,11 +25,22 @@ header {
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
+.app-header {
+    margin-bottom: 12px;
+}
+
+.app-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+}
+
 .car-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
 }
 
 .car-header h1 {
@@ -49,8 +59,8 @@ header {
     transition: background 0.2s;
 }
 
-.edit-btn:hover {
-    background: rgba(255,255,255,0.3);
+.edit-btn:active {
+    transform: scale(0.95);
 }
 
 .odometer-display {
@@ -69,7 +79,6 @@ header {
     margin-left: 4px;
 }
 
-/* ===== SERVICE ALERT ===== */
 .service-alert {
     background: white;
     border-radius: 16px;
@@ -102,13 +111,11 @@ header {
 }
 
 .alert-km {
-    color: #f59e0b;
     font-weight: 600;
     font-size: 14px;
     margin-top: 2px;
 }
 
-/* ===== SECTION TITLE ===== */
 .section-title {
     font-size: 16px;
     font-weight: 600;
@@ -116,7 +123,6 @@ header {
     margin-bottom: 12px;
 }
 
-/* ===== FUEL LIST ===== */
 .fuel-list {
     display: flex;
     flex-direction: column;
@@ -132,11 +138,6 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: transform 0.1s;
-}
-
-.fuel-item:active {
-    transform: scale(0.98);
 }
 
 .fuel-left {
@@ -176,7 +177,6 @@ header {
     border-radius: 8px;
 }
 
-/* Colores según rendimiento */
 .consumption-excellent {
     color: #10b981;
     background: #d1fae5;
@@ -192,7 +192,6 @@ header {
     background: #fecaca;
 }
 
-/* ===== EMPTY STATE ===== */
 .empty-state {
     text-align: center;
     padding: 40px 20px;
@@ -200,7 +199,11 @@ header {
     font-size: 16px;
 }
 
-/* ===== FAB ===== */
+.empty-state small {
+    color: #bbb;
+    font-size: 13px;
+}
+
 .fab {
     position: fixed;
     bottom: 100px;
@@ -222,7 +225,6 @@ header {
     transform: scale(0.9);
 }
 
-/* ===== BOTTOM NAV ===== */
 .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -264,7 +266,6 @@ header {
     color: #333;
 }
 
-/* ===== FORM ===== */
 .form-card {
     background: white;
     border-radius: 20px;
@@ -393,7 +394,6 @@ header {
     flex: 1;
 }
 
-/* ===== HISTORIAL ===== */
 .monthly-summary {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -484,9 +484,9 @@ header {
     gap: 16px;
     font-size: 13px;
     color: #666;
+    flex-wrap: wrap;
 }
 
-/* ===== TOAST ===== */
 .toast {
     position: fixed;
     top: 20px;
@@ -521,7 +521,6 @@ header {
     }
 }
 
-/* ===== RESPONSIVE ===== */
 @media (max-width: 400px) {
     .odometer-value {
         font-size: 36px;
