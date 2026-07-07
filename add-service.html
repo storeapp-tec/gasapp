@@ -3,53 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nuevo servicio</title>
+    <title>Nuevo servicio - GasApp</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="manifest" href="manifest.json">
 </head>
 <body>
     <div class="app">
         <header class="header-modal">
-            <button class="btn-back" onclick="location.href='index.html'">‹</button>
-            <span class="modal-title">Nuevo servicio</span>
+            <button class="btn-back" onclick="window.location.href='services.html'">‹</button>
+            <span class="modal-title">🔧 Nuevo servicio</span>
             <span></span>
         </header>
 
         <form id="serviceForm" class="form-compact">
             <div class="field-group">
-                <label>Fecha</label>
+                <label>📅 Fecha</label>
                 <input type="date" id="serviceDate" required>
             </div>
 
             <div class="field-group">
-                <label>Tipo</label>
-                <select id="serviceType" required>
-                    <option value="Cambio de aceite">Cambio de aceite</option>
-                    <option value="Cambio de frenos">Cambio de frenos</option>
-                    <option value="Cambio de filtros">Cambio de filtros</option>
-                    <option value="Alineación">Alineación</option>
-                    <option value="Neumáticos">Neumáticos</option>
-                    <option value="Otro">Otro</option>
-                </select>
+                <label>🔧 Tipo de servicio</label>
+                <input type="text" id="serviceType" placeholder="Ej: Cambio de aceite, Frenos, etc." required>
             </div>
 
             <div class="field-group">
-                <label>Odómetro actual (km)</label>
+                <label>📟 Odómetro actual (km)</label>
                 <input type="number" id="serviceOdometer" placeholder="123000" required step="1">
             </div>
 
             <div class="field-group">
-                <label>Próximo servicio (km)</label>
+                <label>📅 Próximo servicio (km)</label>
                 <input type="number" id="serviceNextKm" placeholder="125000" required step="1">
                 <small class="hint">Ej: odómetro + 5000 km</small>
             </div>
 
             <div class="field-group">
-                <label>Notas</label>
+                <label>📝 Notas (opcional)</label>
                 <input type="text" id="serviceNotes" placeholder="Aceite sintético 5W-30">
             </div>
 
-            <button type="submit" class="btn-primary-full">Guardar servicio</button>
+            <button type="submit" class="btn-primary-full">💾 Guardar servicio</button>
         </form>
     </div>
 
