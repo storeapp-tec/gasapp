@@ -1,141 +1,79 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    // Nombre del auto
-    document.getElementById('carName').textContent = getCarName();
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GasApp</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <div class="app">
+        <!-- Header minimalista -->
+        <header class="header-mini">
+            <div class="header-top">
+                <div class="car-name-row">
+                    <span class="car-name" id="carName">Mi Auto</span>
+                    <button class="btn-edit-car" id="editCarName">✏️</button>
+                </div>
+                <span class="app-name">⛽ GasApp</span>
+            </div>
+            <div class="odometer-row">
+                <span class="odo-label">Odómetro</span>
+                <span class="odo-value clickable" id="currentOdometer">0</span>
+                <span class="odo-unit">km</span>
+            </div>
+        </header>
 
-    // Editar nombre del auto
-    document.getElementById('editCarName').addEventListener('click', () => {
-        const newName = prompt('Nombre del auto:', getCarName());
-        if (newName && newName.trim()) {
-            saveCarName(newName.trim());
-            document.getElementById('carName').textContent = newName.trim();
-            showToast('✅ Nombre actualizado', 'success');
-        }
-    });
+        <!-- Alerta servicio (compacta) -->
+        <div class="service-alert-mini" id="serviceAlert" style="display:none;">
+            <span class="alert-icon">🔧</span>
+            <div class="alert-text">
+                <strong id="serviceDetail">Cambio de aceite</strong>
+                <span id="serviceKm">Faltan 500 km</span>
+            </div>
+        </div>
 
-    // Editar odómetro - ABRIR MODAL
-    document.getElementById('editOdometerBtn').addEventListener('click', () => {
-        const current = document.getElementById('currentOdometer').textContent.replace(/,/g, '');
-        document.getElementById('odoInput').value = current;
-        document.getElementById('odoModal').classList.add('active');
-        document.getElementById('odoInput').focus();
-        document.getElementById('odoInput').select();
-    });
+        <!-- Últimas cargas (una línea) -->
+        <div class="section-label">Últimas cargas</div>
+        <div id="lastFuels" class="fuel-list-compact">
+            <div class="empty-state-mini">Sin registros</div>
+        </div>
 
-    // Cancelar modal
-    document.getElementById('odoCancel').addEventListener('click', () => {
-        document.getElementById('odoModal').classList.remove('active');
-    });
+        <!-- Botón flotante -->
+        <button class="fab-mini" id="addFuelBtn">+</button>
 
-    // Guardar odómetro
-    document.getElementById('odoSave').addEventListener('click', async () => {
-        const value = parseFloat(document.getElementById('odoInput').value);
-        if (!value || value < 0) {
-            showToast('❌ Ingresa un valor válido', 'error');
-            return;
-        }
-        saveInitialKm(value);
-        document.getElementById('currentOdometer').textContent = formatNumber(value);
-        document.getElementById('odoModal').classList.remove('active');
-        showToast('✅ Odómetro actualizado', 'success');
-        await updateDashboard();
-    });
+        <!-- Navegación inferior -->
+        <nav class="bottom-nav-mini">
+            <button class="nav-item active" onclick="location.href='index.html'">
+                <span>📊</span>
+                <span>Inicio</span>
+            </button>
+            <button class="nav-item" onclick="location.href='history.html'">
+                <span>📈</span>
+                <span>Historial</span>
+            </button>
+            <button class="nav-item" id="serviceBtn">
+                <span>🔧</span>
+                <span>Servicios</span>
+            </button>
+        </nav>
+    </div>
 
-    // Cerrar modal con ESC
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            document.getElementById('odoModal').classList.remove('active');
-        }
-    });
+    <!-- Modal para editar odómetro -->
+    <div class="modal-overlay" id="odoModal">
+        <div class="modal-box">
+            <h3>Editar odómetro</h3>
+            <input type="number" id="odoInput" class="modal-input" placeholder="Kilometraje actual">
+            <div class="modal-actions">
+                <button class="btn-modal-cancel" id="odoCancel">Cancelar</button>
+                <button class="btn-modal-save" id="odoSave">Guardar</button>
+            </div>
+        </div>
+    </div>
 
-    // Botón nueva carga
-    document.getElementById('addFuelBtn').addEventListener('click', () => {
-        location.href = 'add-fuel.html';
-    });
-
-    // Botón servicios - AHORA VA A services.html
-    document.getElementById('serviceBtn').addEventListener('click', () => {
-        location.href = 'services.html';
-    });
-
-    await updateDashboard();
-});
-
-async function updateDashboard() {
-    try {
-        const allFuels = await getAllFuels();
-        const lastFuel = await getLastFuel();
-        const initialKm = getInitialKm();
-
-        // Odómetro
-        let currentOdometer = 0;
-        if (lastFuel) {
-            currentOdometer = lastFuel.odometer;
-        } else if (initialKm) {
-            currentOdometer = initialKm;
-        }
-        document.getElementById('currentOdometer').textContent = formatNumber(currentOdometer);
-
-        // Últimas cargas
-        const container = document.getElementById('lastFuels');
-        if (allFuels.length === 0) {
-            container.innerHTML = `<div class="empty-state-mini">Sin registros</div>`;
-        } else {
-            const latest = allFuels.slice(0, 5);
-            let html = '';
-            for (let i = 0; i < latest.length; i++) {
-                const fuel = latest[i];
-                const prev = i < allFuels.length - 1 ? allFuels[i + 1] : null;
-                let consumption = 0;
-                if (prev) {
-                    consumption = calculateConsumption(prev.odometer, fuel.odometer, fuel.liters);
-                } else if (initialKm) {
-                    consumption = calculateConsumption(initialKm, fuel.odometer, fuel.liters);
-                }
-                const consumptionClass = getConsumptionColor(consumption);
-                const emoji = getConsumptionEmoji(consumption);
-
-                html += `
-                    <div class="fuel-item-compact" onclick="editFuel(${fuel.id})">
-                        <div class="fuel-left-compact">
-                            <div class="fuel-date-compact">${formatDateShort(fuel.date)}</div>
-                            <div class="fuel-details-compact">
-                                <span class="fuel-liters-compact">⛽ ${fuel.liters.toFixed(1)} L</span>
-                                <span class="fuel-cost-compact">$${fuel.totalCost.toFixed(2)}</span>
-                            </div>
-                        </div>
-                        <div class="fuel-right-compact">
-                            <div class="fuel-consumption-compact ${consumptionClass}">
-                                ${emoji} ${consumption > 0 ? consumption.toFixed(1) : '0.0'} km/L
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-            container.innerHTML = html;
-        }
-
-        // Alerta servicio
-        const nextService = await getNextService(currentOdometer);
-        const alertDiv = document.getElementById('serviceAlert');
-        if (nextService) {
-            const kmLeft = nextService.nextKm - currentOdometer;
-            if (kmLeft <= 500 && kmLeft > 0) {
-                alertDiv.style.display = 'flex';
-                document.getElementById('serviceDetail').textContent = nextService.type;
-                document.getElementById('serviceKm').textContent = `Faltan ${formatNumber(kmLeft)} km (${formatNumber(nextService.nextKm)} km)`;
-                document.getElementById('serviceKm').style.color = kmLeft <= 100 ? '#ef4444' : kmLeft <= 300 ? '#f59e0b' : '#10b981';
-            } else {
-                alertDiv.style.display = 'none';
-            }
-        } else {
-            alertDiv.style.display = 'none';
-        }
-    } catch (error) {
-        console.error('Error:', error);
-    }
-}
-
-// Función para editar carga (desde el dashboard)
-function editFuel(id) {
-    location.href = `edit-fuel.html?id=${id}`;
-}
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
