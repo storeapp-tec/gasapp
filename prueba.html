@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Prueba - GasApp</title>
+    <title>Prueba - GasApp (Completa)</title>
     <style>
         * {
             margin: 0;
@@ -38,7 +38,7 @@
             padding-bottom: 8px;
         }
 
-        /* ===== ESTILOS DEL HEADER (LOS MISMOS DE LA APP) ===== */
+        /* ===== ESTILOS DEL HEADER ===== */
         .header-mini {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 14px 18px 16px;
@@ -67,12 +67,12 @@
         }
 
         .btn-edit-car {
-            background: rgba(255, 255, 255, 0.15);
+            background: transparent;
             border: none;
             color: white;
             padding: 0 8px;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 14px;
             cursor: pointer;
             height: 22px;
             display: flex;
@@ -114,43 +114,187 @@
             opacity: 0.7;
         }
 
-        /* ===== VARIANTES DEL BOTÓN LÁPIZ ===== */
-        .btn-edit-car-transparent {
-            background: transparent;
-            border: none;
-            color: white;
-            padding: 0 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            height: 22px;
+        /* ===== SERVICE ALERT (copiada del index) ===== */
+        .service-alert-mini {
+            background: white;
+            border-radius: 10px;
+            padding: 10px 14px;
             display: flex;
             align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            border-left: 3px solid #f59e0b;
         }
 
-        .btn-edit-car-transparent:hover {
-            background: rgba(255, 255, 255, 0.1);
+        .alert-icon {
+            font-size: 18px;
         }
 
-        .btn-edit-car-transparent:active {
-            background: rgba(255, 255, 255, 0.2);
+        .alert-text {
+            display: flex;
+            flex-direction: column;
+            font-size: 13px;
         }
 
-        /* ===== ELIMINAR CUALQUIER PUNTO ===== */
+        .alert-text strong {
+            font-size: 13px;
+        }
+
+        .alert-text span {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* ===== SECTION LABEL ===== */
+        .section-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        /* ===== FUEL LIST ===== */
+        .fuel-list-compact {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .fuel-item-compact {
+            background: white;
+            border-radius: 8px;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+
+        .fuel-left-compact {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .fuel-date-compact {
+            font-size: 12px;
+            color: #888;
+            min-width: 65px;
+        }
+
+        .fuel-details-compact {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .fuel-liters-compact {
+            color: #666;
+        }
+
+        .fuel-cost-compact {
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .fuel-right-compact {
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .fuel-consumption-compact {
+            font-size: 13px;
+            font-weight: 700;
+            padding: 1px 8px;
+            border-radius: 4px;
+        }
+
+        .consumption-excellent {
+            color: #10b981;
+            background: #d1fae5;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state-mini {
+            text-align: center;
+            padding: 24px 10px;
+            color: #aaa;
+            font-size: 13px;
+        }
+
+        /* ===== FAB ===== */
+        .fab-mini {
+            position: fixed;
+            bottom: 85px;
+            right: calc(50% - 180px);
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-size: 28px;
+            font-weight: 300;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+            cursor: pointer;
+            z-index: 100;
+            transition: transform 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            padding: 0;
+        }
+
+        /* ===== BOTTOM NAV ===== */
+        .bottom-nav-mini {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 10px;
+            border-top: 1px solid #eee;
+            max-width: 480px;
+            margin: 0 auto;
+            z-index: 99;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            background: none;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            cursor: pointer;
+            opacity: 0.4;
+            font-size: 11px;
+            color: #666;
+            padding: 4px 12px;
+            transition: opacity 0.2s;
+        }
+
+        /* ===== ELIMINAR PUNTOS ===== */
         *::before,
         *::after {
             display: none !important;
             content: none !important;
         }
 
-        .punto,
-        .punto-negro,
-        .dot,
-        .circle {
+        .punto, .punto-negro, .dot, .circle {
             display: none !important;
         }
 
-        /* ===== RESULTADO ===== */
         .resultado {
             padding: 10px;
             border-radius: 8px;
@@ -174,155 +318,95 @@
 
     <div class="container">
 
-        <h2 style="margin-bottom:16px;font-size:18px;">🔍 Prueba - Identificar punto negro</h2>
+        <h2 style="margin-bottom:16px;font-size:18px;">🔍 Prueba completa - Identificar punto negro</h2>
 
         <!-- ============================================================ -->
-        <!-- PRUEBA 1: SOLO FONDO MORADO -->
+        <!-- PRUEBA 11: ALERTA DE SERVICIO -->
         <!-- ============================================================ -->
         <div class="test-section">
-            <h3>Prueba 1: Solo fondo morado</h3>
-            <div class="header-mini">
-                <!-- Sin contenido -->
+            <h3>Prueba 11: Alerta de servicio</h3>
+            <div class="service-alert-mini">
+                <span class="alert-icon">🔧</span>
+                <div class="alert-text">
+                    <strong>Cambio de aceite</strong>
+                    <span>Faltan 500 km</span>
+                </div>
             </div>
-            <div class="resultado ok">✅ Sin contenido - revisar si hay punto</div>
+            <div class="resultado ok">✅ Revisar si el punto aparece aquí</div>
         </div>
 
         <!-- ============================================================ -->
-        <!-- PRUEBA 2: NOMBRE + LÁPIZ CON FONDO (ACTUAL) -->
+        <!-- PRUEBA 12: ÚLTIMAS CARGAS (contenedor vacío) -->
         <!-- ============================================================ -->
         <div class="test-section">
-            <h3>Prueba 2: Nombre + lápiz CON fondo</h3>
-            <div class="header-mini">
-                <div class="header-top">
-                    <div class="header-left">
-                        <span class="car-name">Nissan March</span>
-                        <button class="btn-edit-car">✏️</button>
+            <h3>Prueba 12: Últimas cargas (contenedor vacío)</h3>
+            <div class="section-label">Últimas cargas</div>
+            <div id="lastFuels" class="fuel-list-compact">
+                <div class="empty-state-mini">Sin registros</div>
+            </div>
+            <div class="resultado ok">✅ Revisar si el punto aparece aquí</div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- PRUEBA 13: ÚLTIMAS CARGAS (con un ítem de ejemplo) -->
+        <!-- ============================================================ -->
+        <div class="test-section">
+            <h3>Prueba 13: Últimas cargas (con ítem)</h3>
+            <div class="section-label">Últimas cargas</div>
+            <div class="fuel-list-compact">
+                <div class="fuel-item-compact">
+                    <div class="fuel-left-compact">
+                        <span class="fuel-date-compact">07-Jul-26</span>
+                        <span class="fuel-details-compact">
+                            <span class="fuel-liters-compact">⛽ 38.0 L</span>
+                            <span class="fuel-cost-compact">$910.10</span>
+                        </span>
                     </div>
-                    <div class="header-right">⛽ GasApp</div>
-                </div>
-            </div>
-            <div class="resultado ok">✅ Revisar si el punto aparece aquí</div>
-        </div>
-
-        <!-- ============================================================ -->
-        <!-- PRUEBA 3: NOMBRE + LÁPIZ TRANSPARENTE -->
-        <!-- ============================================================ -->
-        <div class="test-section">
-            <h3>Prueba 3: Nombre + lápiz SIN fondo (transparente)</h3>
-            <div class="header-mini">
-                <div class="header-top">
-                    <div class="header-left">
-                        <span class="car-name">Nissan March</span>
-                        <button class="btn-edit-car-transparent">✏️</button>
+                    <div class="fuel-right-compact">
+                        <span class="fuel-consumption-compact consumption-excellent">🟢 10.8 km/L</span>
                     </div>
-                    <div class="header-right">⛽ GasApp</div>
                 </div>
             </div>
             <div class="resultado ok">✅ Revisar si el punto aparece aquí</div>
         </div>
 
         <!-- ============================================================ -->
-        <!-- PRUEBA 4: NOMBRE + LÁPIZ (SIN EL BOTÓN) -->
+        <!-- PRUEBA 14: BOTÓN FAB -->
         <!-- ============================================================ -->
         <div class="test-section">
-            <h3>Prueba 4: Nombre SIN lápiz</h3>
+            <h3>Prueba 14: Botón FAB (flotante)</h3>
+            <button class="fab-mini">+</button>
+            <div class="resultado ok" style="margin-top:80px;">✅ Revisar si el punto aparece aquí (el botón + está abajo a la derecha)</div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- PRUEBA 15: NAVEGACIÓN INFERIOR -->
+        <!-- ============================================================ -->
+        <div class="test-section">
+            <h3>Prueba 15: Navegación inferior</h3>
+            <nav class="bottom-nav-mini" style="position:relative;bottom:auto;left:auto;right:auto;margin:0 auto;">
+                <button class="nav-item active">
+                    <span>📊</span>
+                    <span>Inicio</span>
+                </button>
+                <button class="nav-item">
+                    <span>📈</span>
+                    <span>Historial</span>
+                </button>
+                <button class="nav-item">
+                    <span>🔧</span>
+                    <span>Servicios</span>
+                </button>
+            </nav>
+            <div class="resultado ok">✅ Revisar si el punto aparece aquí</div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- PRUEBA 16: HEADER + ALERTA + CARGAS -->
+        <!-- ============================================================ -->
+        <div class="test-section">
+            <h3>Prueba 16: Header + Alerta + Cargas (combinado)</h3>
             <div class="header-mini">
-                <div class="header-top">
-                    <div class="header-left">
-                        <span class="car-name">Nissan March</span>
-                    </div>
-                    <div class="header-right">⛽ GasApp</div>
-                </div>
-            </div>
-            <div class="resultado ok">✅ Revisar si el punto aparece aquí</div>
-        </div>
-
-        <!-- ============================================================ -->
-        <!-- PRUEBA 5: ODÓMETRO SOLO -->
-        <!-- ============================================================ -->
-        <div class="test-section">
-            <h3>Prueba 5: Solo odómetro</h3>
-            <div class="header-mini">
-                <div class="odometer-row">
-                    <span class="odo-label">Odómetro</span>
-                    <span class="odo-value">176,098</span>
-                    <span class="odo-unit">km</span>
-                </div>
-            </div>
-            <div class="resultado ok">✅ Revisar si el punto aparece aquí</div>
-        </div>
-
-        <!-- ============================================================ -->
-        <!-- PRUEBA 6: HEADER COMPLETO -->
-        <!-- ============================================================ -->
-        <div class="test-section">
-            <h3>Prueba 6: Header completo (actual)</h3>
-            <div class="header-mini">
-                <div class="header-top">
-                    <div class="header-left">
-                        <span class="car-name">Nissan March</span>
-                        <button class="btn-edit-car">✏️</button>
-                    </div>
-                    <div class="header-right">⛽ GasApp</div>
-                </div>
-                <div class="odometer-row">
-                    <span class="odo-label">Odómetro</span>
-                    <span class="odo-value">176,098</span>
-                    <span class="odo-unit">km</span>
-                </div>
-            </div>
-            <div class="resultado ok">✅ Revisar si el punto aparece aquí</div>
-        </div>
-
-        <!-- ============================================================ -->
-        <!-- PRUEBA 7: HEADER COMPLETO CON LÁPIZ TRANSPARENTE -->
-        <!-- ============================================================ -->
-        <div class="test-section">
-            <h3>Prueba 7: Header completo con lápiz transparente</h3>
-            <div class="header-mini">
-                <div class="header-top">
-                    <div class="header-left">
-                        <span class="car-name">Nissan March</span>
-                        <button class="btn-edit-car-transparent">✏️</button>
-                    </div>
-                    <div class="header-right">⛽ GasApp</div>
-                </div>
-                <div class="odometer-row">
-                    <span class="odo-label">Odómetro</span>
-                    <span class="odo-value">176,098</span>
-                    <span class="odo-unit">km</span>
-                </div>
-            </div>
-            <div class="resultado ok">✅ Revisar si el punto aparece aquí</div>
-        </div>
-
-        <!-- ============================================================ -->
-        <!-- PRUEBA 8: HEADER COMPLETO SIN LÁPIZ -->
-        <!-- ============================================================ -->
-        <div class="test-section">
-            <h3>Prueba 8: Header completo sin lápiz</h3>
-            <div class="header-mini">
-                <div class="header-top">
-                    <div class="header-left">
-                        <span class="car-name">Nissan March</span>
-                    </div>
-                    <div class="header-right">⛽ GasApp</div>
-                </div>
-                <div class="odometer-row">
-                    <span class="odo-label">Odómetro</span>
-                    <span class="odo-value">176,098</span>
-                    <span class="odo-unit">km</span>
-                </div>
-            </div>
-            <div class="resultado ok">✅ Revisar si el punto aparece aquí</div>
-        </div>
-
-        <!-- ============================================================ -->
-        <!-- PRUEBA 9: HEADER COMPLETO CON BORDE (para ver desbordes) -->
-        <!-- ============================================================ -->
-        <div class="test-section">
-            <h3>Prueba 9: Header con borde rojo (para ver desbordes)</h3>
-            <div class="header-mini" style="border: 2px solid red; overflow: visible;">
                 <div class="header-top">
                     <div class="header-left">
                         <span class="car-name">Nissan March</span>
@@ -336,29 +420,29 @@
                     <span class="odo-unit">km</span>
                 </div>
             </div>
-            <div class="resultado ok">✅ Revisar si el punto aparece fuera del borde rojo</div>
-        </div>
-
-        <!-- ============================================================ -->
-        <!-- PRUEBA 10: HEADER COMPLETO CON BORDE Y OVERFLOW HIDDEN -->
-        <!-- ============================================================ -->
-        <div class="test-section">
-            <h3>Prueba 10: Header con borde rojo y overflow hidden</h3>
-            <div class="header-mini" style="border: 2px solid red; overflow: hidden;">
-                <div class="header-top">
-                    <div class="header-left">
-                        <span class="car-name">Nissan March</span>
-                        <button class="btn-edit-car">✏️</button>
-                    </div>
-                    <div class="header-right">⛽ GasApp</div>
-                </div>
-                <div class="odometer-row">
-                    <span class="odo-label">Odómetro</span>
-                    <span class="odo-value">176,098</span>
-                    <span class="odo-unit">km</span>
+            <div class="service-alert-mini" style="margin-top:12px;">
+                <span class="alert-icon">🔧</span>
+                <div class="alert-text">
+                    <strong>Cambio de aceite</strong>
+                    <span>Faltan 500 km</span>
                 </div>
             </div>
-            <div class="resultado ok">✅ Revisar si el punto aparece dentro del borde rojo</div>
+            <div class="section-label" style="margin-top:12px;">Últimas cargas</div>
+            <div class="fuel-list-compact">
+                <div class="fuel-item-compact">
+                    <div class="fuel-left-compact">
+                        <span class="fuel-date-compact">07-Jul-26</span>
+                        <span class="fuel-details-compact">
+                            <span class="fuel-liters-compact">⛽ 38.0 L</span>
+                            <span class="fuel-cost-compact">$910.10</span>
+                        </span>
+                    </div>
+                    <div class="fuel-right-compact">
+                        <span class="fuel-consumption-compact consumption-excellent">🟢 10.8 km/L</span>
+                    </div>
+                </div>
+            </div>
+            <div class="resultado ok">✅ Revisar si el punto aparece aquí (combinación completa)</div>
         </div>
 
         <div style="text-align:center;padding:20px 0;color:#999;font-size:13px;">
