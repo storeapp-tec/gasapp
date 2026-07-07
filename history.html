@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Historial - Fuelio</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📈 Historial</h1>
+            <button class="back-btn" onclick="location.href='index.html'">←</button>
+        </header>
+
+        <!-- Resumen mensual -->
+        <div class="monthly-summary" id="monthlySummary">
+            <div class="summary-card">
+                <div class="summary-label">Mes</div>
+                <div class="summary-value" id="summaryMonth">---</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Gastos</div>
+                <div class="summary-value" id="summaryTotal">$0</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Litros</div>
+                <div class="summary-value" id="summaryLiters">0 L</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Promedio</div>
+                <div class="summary-value" id="summaryAvg">0 km/L</div>
+            </div>
+        </div>
+
+        <!-- Selector de mes -->
+        <div class="month-selector">
+            <button id="prevMonth">◀</button>
+            <span id="currentMonthDisplay">Junio 2026</span>
+            <button id="nextMonth">▶</button>
+        </div>
+
+        <!-- Lista de registros del mes -->
+        <div id="historyList" class="history-list">
+            <div class="empty-state">No hay registros en este mes</div>
+        </div>
+
+        <nav class="bottom-nav">
+            <button class="nav-btn" onclick="location.href='index.html'">
+                <span class="nav-icon">📊</span>
+                <span>Inicio</span>
+            </button>
+            <button class="nav-btn active" onclick="location.href='history.html'">
+                <span class="nav-icon">📈</span>
+                <span>Historial</span>
+            </button>
+            <button class="nav-btn" onclick="location.href='index.html'">
+                <span class="nav-icon">🔧</span>
+                <span>Servicios</span>
+            </button>
+        </nav>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/history.js"></script>
+</body>
+</html>
