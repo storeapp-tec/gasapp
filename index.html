@@ -1336,7 +1336,7 @@
             return km ? parseFloat(km) : null;
         }
 
-        // ===== BACKUP AUTOMÁTICO (SIEMPRE SOBRESCRIBE) =====
+        // ===== BACKUP AUTOMÁTICO (USA window.location.href para sobrescribir) =====
         function generarBackupAutomatico() {
             try {
                 const promesaFuels = getAllFuels();
@@ -1355,15 +1355,17 @@
                     const blob = new Blob([json], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
                     
-                    // Forzar descarga con el mismo nombre
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'gasapp-backup.json';
-                    a.style.display = 'none';
-                    document.body.appendChild(a);
-                    a.click();
+                    // === NUEVO: Forzar sobrescritura usando location.href ===
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'gasapp-backup.json';
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    
+                    // Limpiar después de la descarga
                     setTimeout(() => {
-                        document.body.removeChild(a);
+                        document.body.removeChild(link);
                         URL.revokeObjectURL(url);
                     }, 500);
                     
@@ -2126,7 +2128,7 @@
         }
 
         // ================================================================
-        // HISTORIAL CON CÁLCULO CORREGIDO (BUSCA EL ANTERIOR CORRECTO)
+        // HISTORIAL CON CÁLCULO CORREGIDO
         // ================================================================
 
         let histMonth = new Date().getMonth();
@@ -2178,6 +2180,8 @@
                 const fuels = await getFuelsByMonth(histYear, histMonth);
                 const allFuels = await getAllFuels();
                 const initialKm = getInitialKm();
+                
+                // ===== RESUMEN =====
                 if (allFuels.length === 0) {
                     document.getElementById('summaryMonth').textContent = '---';
                     document.getElementById('summaryTotal').textContent = '$0';
@@ -2196,6 +2200,7 @@
                     for (let i = 0; i < fuels.length; i++) {
                         const curr = fuels[i];
                         let prev = null;
+                        // Buscar el registro anterior en el tiempo
                         if (i < fuels.length - 1) {
                             prev = fuels[i + 1];
                         } else {
@@ -2222,6 +2227,8 @@
                     document.getElementById('summaryAvg').textContent =
                         `${(valid > 0 ? totalC / valid : 0).toFixed(1)} km/L`;
                 }
+                
+                // ===== LISTA =====
                 const container = document.getElementById('historyList');
                 if (allFuels.length === 0) {
                     container.innerHTML = `<div class="empty-state-mini">Sin registros</div>`;
@@ -2239,9 +2246,9 @@
                         consumption = 0,
                         kmDiff = 0;
                     
-                    // --- LÓGICA CORREGIDA PARA BUSCAR EL REGISTRO ANTERIOR ---
+                    // === LÓGICA CORREGIDA: BUSCAR EL REGISTRO ANTERIOR ===
                     if (i < fuels.length - 1) {
-                        // El siguiente en la lista es el anterior en el tiempo
+                        // El siguiente en la lista (índice i+1) es el registro anterior en el tiempo
                         prev = fuels[i + 1];
                     } else {
                         // Si es el primer registro del mes (el más reciente), buscar fuera del mes
