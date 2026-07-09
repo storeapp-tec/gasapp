@@ -1272,7 +1272,6 @@
             return `${day} de ${month} ${d.getFullYear()}`;
         }
 
-        // ===== FUNCIÓN CORREGIDA DE CONSUMO =====
         function calculateConsumption(prevOdometer, currOdometer, liters) {
             if (!prevOdometer || !currOdometer || !liters || liters <= 0) return 0;
             const km = currOdometer - prevOdometer;
@@ -1335,6 +1334,7 @@
             return km ? parseFloat(km) : null;
         }
 
+        // ===== BACKUP AUTOMÁTICO (sobrescribe el mismo archivo) =====
         function generarBackupAutomatico() {
             try {
                 const promesaFuels = getAllFuels();
@@ -1352,18 +1352,19 @@
                     const json = JSON.stringify(datos, null, 2);
                     const blob = new Blob([json], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
+                    
+                    // Forzar la descarga y sobrescritura
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'gasapp-backup.json';
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
                     setTimeout(() => {
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = 'gasapp-backup.json';
-                        a.style.display = 'none';
-                        document.body.appendChild(a);
-                        a.click();
-                        setTimeout(() => {
-                            document.body.removeChild(a);
-                            URL.revokeObjectURL(url);
-                        }, 100);
-                    }, 300);
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }, 500);
+                    
                     console.log('✅ Backup automático guardado (sobrescrito)');
                 }).catch(error => {
                     console.error('Error al obtener datos para backup:', error);
@@ -1854,11 +1855,8 @@
                 document.getElementById('fuelPrice').value = lastPrice;
             }
             
-            // === NUEVO: PRECARGAR LITROS CON 38 ===
-            const litersInput = document.getElementById('fuelLiters');
-            if (litersInput) {
-                litersInput.value = '38.0';
-            }
+            // ===== PRECARGAR LITROS CON 38.0 =====
+            document.getElementById('fuelLiters').value = '38.0';
             
             if (id) {
                 title.textContent = '✏️ Editar carga';
@@ -2187,9 +2185,9 @@
                     for (let i = 0; i < fuels.length; i++) {
                         const curr = fuels[i];
                         let prev = null;
+                        // Buscar el registro anterior correctamente (el siguiente en la lista es el anterior en el tiempo)
                         if (i < fuels.length - 1) {
-                            const nextFuel = fuels[i + 1];
-                            prev = nextFuel;
+                            prev = fuels[i + 1];
                         } else {
                             const allSorted = await getAllFuels();
                             const idx = allSorted.findIndex(f => f.id === curr.id);
@@ -2230,24 +2228,29 @@
                     let prev = null,
                         consumption = 0,
                         kmDiff = 0;
-                    // Buscar el registro anterior correcto
+                    
+                    // Buscar el registro anterior correctamente
                     if (i < fuels.length - 1) {
-                        const nextFuel = fuels[i + 1];
-                        prev = nextFuel;
+                        // El siguiente en la lista es el anterior en el tiempo
+                        prev = fuels[i + 1];
                     } else {
+                        // Si es el primer registro del mes (el más reciente del mes), buscar fuera del mes
                         const allSorted = await getAllFuels();
                         const idx = allSorted.findIndex(f => f.id === fuel.id);
                         if (idx < allSorted.length - 1) {
                             prev = allSorted[idx + 1];
                         } else if (initialKm) {
+                            // Si no hay registro anterior, usar km inicial
                             consumption = calculateConsumption(initialKm, fuel.odometer, fuel.liters);
                             kmDiff = fuel.odometer - initialKm;
                         }
                     }
+                    
                     if (prev) {
                         consumption = calculateConsumption(prev.odometer, fuel.odometer, fuel.liters);
                         kmDiff = fuel.odometer - prev.odometer;
                     }
+                    
                     const cClass = getConsumptionColor(consumption);
                     const emoji = getConsumptionEmoji(consumption);
                     const dateObj = new Date(fuel.date + 'T00:00:00');
