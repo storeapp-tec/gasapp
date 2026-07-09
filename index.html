@@ -272,7 +272,7 @@
             margin-top: 0px;
         }
 
-        /* ===== HISTORIAL LISTA (CORREGIDO) ===== */
+        /* ===== HISTORIAL LISTA ===== */
         .history-list-compact {
             display: flex;
             flex-direction: column;
@@ -1272,11 +1272,12 @@
             return `${day} de ${month} ${d.getFullYear()}`;
         }
 
+        // ===== FUNCIÓN CORREGIDA DE CONSUMO =====
         function calculateConsumption(prevOdometer, currOdometer, liters) {
             if (!prevOdometer || !currOdometer || !liters || liters <= 0) return 0;
             const km = currOdometer - prevOdometer;
             if (km <= 0) return 0;
-            return km / liters;
+            return Math.round((km / liters) * 10) / 10;
         }
 
         function getConsumptionColor(kmL) {
@@ -1351,14 +1352,19 @@
                     const json = JSON.stringify(datos, null, 2);
                     const blob = new Blob([json], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'gasapp-backup.json';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    console.log('✅ Backup automático guardado');
+                    setTimeout(() => {
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'gasapp-backup.json';
+                        a.style.display = 'none';
+                        document.body.appendChild(a);
+                        a.click();
+                        setTimeout(() => {
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                        }, 100);
+                    }, 300);
+                    console.log('✅ Backup automático guardado (sobrescrito)');
                 }).catch(error => {
                     console.error('Error al obtener datos para backup:', error);
                 });
@@ -1847,6 +1853,13 @@
                 document.getElementById('lastPriceHint').textContent = `Último precio: $${parseFloat(lastPrice).toFixed(2)}`;
                 document.getElementById('fuelPrice').value = lastPrice;
             }
+            
+            // === NUEVO: PRECARGAR LITROS CON 38 ===
+            const litersInput = document.getElementById('fuelLiters');
+            if (litersInput) {
+                litersInput.value = '38.0';
+            }
+            
             if (id) {
                 title.textContent = '✏️ Editar carga';
                 submitBtn.textContent = '💾 Actualizar';
@@ -2104,7 +2117,7 @@
         }
 
         // ================================================================
-        // HISTORIAL
+        // HISTORIAL CON CÁLCULO CORREGIDO
         // ================================================================
 
         let histMonth = new Date().getMonth();
@@ -2175,7 +2188,8 @@
                         const curr = fuels[i];
                         let prev = null;
                         if (i < fuels.length - 1) {
-                            prev = fuels[i + 1];
+                            const nextFuel = fuels[i + 1];
+                            prev = nextFuel;
                         } else {
                             const allSorted = await getAllFuels();
                             const idx = allSorted.findIndex(f => f.id === curr.id);
@@ -2216,8 +2230,10 @@
                     let prev = null,
                         consumption = 0,
                         kmDiff = 0;
+                    // Buscar el registro anterior correcto
                     if (i < fuels.length - 1) {
-                        prev = fuels[i + 1];
+                        const nextFuel = fuels[i + 1];
+                        prev = nextFuel;
                     } else {
                         const allSorted = await getAllFuels();
                         const idx = allSorted.findIndex(f => f.id === fuel.id);
