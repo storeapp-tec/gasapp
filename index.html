@@ -1103,7 +1103,6 @@
                     <div class="field-group">
                         <label>📟 Odómetro (km)</label>
                         <input type="number" id="fuelOdometer" placeholder="Ej: 179652" required step="1">
-                        <small class="hint" id="odoHint">Último: --</small>
                     </div>
                     <div class="field-row">
                         <div class="field-group half">
@@ -1113,8 +1112,12 @@
                         <div class="field-group half">
                             <label>💰 Precio $/L</label>
                             <input type="number" id="fuelPrice" placeholder="23.66" required step="0.01">
-                            <small class="hint" id="lastPriceHint">Último: $---</small>
                         </div>
+                    </div>
+                    <!-- ===== NUEVO: RENDIMIENTO EN VIVO ===== -->
+                    <div class="rendimiento-box" id="rendimientoBox">
+                        <span class="rendimiento-label">📊 Rendimiento</span>
+                        <span class="rendimiento-value" id="rendimientoValue">-- km/L</span>
                     </div>
                     <div class="total-box">
                         <span>Total</span>
@@ -1166,6 +1169,42 @@
         </div>
 
     </div>
+
+    <style>
+        /* ===== ESTILOS PARA EL RENDIMIENTO ===== */
+        .rendimiento-box {
+            background: #f8f9fb;
+            border-radius: 10px;
+            padding: 10px 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #667eea;
+        }
+        .rendimiento-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #444;
+        }
+        .rendimiento-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        .rendimiento-value.excellent {
+            color: #10b981;
+        }
+        .rendimiento-value.good {
+            color: #f59e0b;
+        }
+        .rendimiento-value.poor {
+            color: #ef4444;
+        }
+        .rendimiento-value.empty {
+            color: #999;
+        }
+    </style>
 
     <script>
         // ================================================================
@@ -1763,8 +1802,15 @@
                 }
             });
             document.getElementById('fuelForm').addEventListener('submit', handleFuelSubmit);
-            document.getElementById('fuelLiters').addEventListener('input', calculateFuelTotal);
+            
+            // === NUEVOS EVENTOS PARA RENDIMIENTO ===
+            document.getElementById('fuelOdometer').addEventListener('input', calcularRendimientoEnVivo);
+            document.getElementById('fuelLiters').addEventListener('input', function() {
+                calcularRendimientoEnVivo();
+                calculateFuelTotal();
+            });
             document.getElementById('fuelPrice').addEventListener('input', calculateFuelTotal);
+            
             document.getElementById('serviceForm').addEventListener('submit', handleServiceSubmit);
             document.getElementById('deleteFuelBtn').addEventListener('click', handleDeleteFuel);
             document.getElementById('deleteServiceBtn').addEventListener('click', handleDeleteService);
@@ -1773,6 +1819,60 @@
             await updateHistory();
             await loadServices();
         });
+
+        // ================================================================
+        // RENDIMIENTO EN VIVO (NUEVA FUNCIÓN)
+        // ================================================================
+
+        async function calcularRendimientoEnVivo() {
+            const odometerInput = document.getElementById('fuelOdometer');
+            const litersInput = document.getElementById('fuelLiters');
+            const rendimientoElement = document.getElementById('rendimientoValue');
+            
+            const nuevoOdometer = parseFloat(odometerInput.value);
+            const litros = parseFloat(litersInput.value);
+            
+            if (!nuevoOdometer || !litros || litros <= 0) {
+                rendimientoElement.textContent = '-- km/L';
+                rendimientoElement.className = 'rendimiento-value empty';
+                return;
+            }
+            
+            // Obtener el último odómetro guardado
+            const lastFuel = await getLastFuel();
+            const initialKm = getInitialKm();
+            
+            let odometroAnterior = 0;
+            if (lastFuel) {
+                odometroAnterior = lastFuel.odometer;
+            } else if (initialKm) {
+                odometroAnterior = initialKm;
+            } else {
+                rendimientoElement.textContent = '-- km/L';
+                rendimientoElement.className = 'rendimiento-value empty';
+                return;
+            }
+            
+            // Calcular rendimiento
+            const kmRecorridos = nuevoOdometer - odometroAnterior;
+            if (kmRecorridos <= 0) {
+                rendimientoElement.textContent = '-- km/L';
+                rendimientoElement.className = 'rendimiento-value empty';
+                return;
+            }
+            
+            const rendimiento = Math.round((kmRecorridos / litros) * 10) / 10;
+            
+            // Mostrar con color
+            rendimientoElement.textContent = rendimiento.toFixed(1) + ' km/L';
+            if (rendimiento >= 15) {
+                rendimientoElement.className = 'rendimiento-value excellent';
+            } else if (rendimiento >= 10) {
+                rendimientoElement.className = 'rendimiento-value good';
+            } else {
+                rendimientoElement.className = 'rendimiento-value poor';
+            }
+        }
 
         // ================================================================
         // DASHBOARD - UPDATE
@@ -1876,21 +1976,24 @@
             const lastFuel = await getLastFuel();
             const initialKm = getInitialKm();
             const odoInput = document.getElementById('fuelOdometer');
-            const odoHint = document.getElementById('odoHint');
             if (lastFuel) {
                 odoInput.value = lastFuel.odometer;
-                odoHint.textContent = `Último registro: ${formatNumber(lastFuel.odometer)} km`;
+                odoInput.placeholder = `Último: ${formatNumber(lastFuel.odometer)} km`;
             } else if (initialKm) {
                 odoInput.value = initialKm;
-                odoHint.textContent = `Km inicial configurado: ${formatNumber(initialKm)} km`;
+                odoInput.placeholder = `Inicial: ${formatNumber(initialKm)} km`;
             } else {
-                odoHint.textContent = '💡 Este será el kilometraje inicial de tu auto';
+                odoInput.placeholder = 'Ej: 179652';
             }
+            
             const lastPrice = getLastPrice();
             if (lastPrice) {
-                document.getElementById('lastPriceHint').textContent = `Último precio: $${parseFloat(lastPrice).toFixed(2)}`;
                 document.getElementById('fuelPrice').value = lastPrice;
             }
+            
+            // Resetear rendimiento
+            document.getElementById('rendimientoValue').textContent = '-- km/L';
+            document.getElementById('rendimientoValue').className = 'rendimiento-value empty';
             
             if (id) {
                 title.textContent = '✏️ Editar carga';
@@ -1905,6 +2008,8 @@
                     document.getElementById('fuelLiters').value = fuel.liters;
                     document.getElementById('fuelPrice').value = fuel.pricePerLiter;
                     calculateFuelTotal();
+                    // Calcular rendimiento al cargar edición
+                    await calcularRendimientoEnVivo();
                 }
             } else {
                 title.textContent = '⛽ Nueva carga';
@@ -1913,6 +2018,7 @@
                 document.getElementById('fuelLiters').value = '38.0';
                 document.getElementById('totalCost').textContent = '$0.00';
                 calculateFuelTotal();
+                await calcularRendimientoEnVivo();
             }
             modal.classList.add('active');
         }
@@ -2263,7 +2369,6 @@
                         consumption = 0,
                         kmDiff = 0;
                     
-                    // === BUSCAR EL REGISTRO ANTERIOR CORRECTO ===
                     if (i < fuels.length - 1) {
                         prev = fuels[i + 1];
                     } else {
