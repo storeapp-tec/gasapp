@@ -955,8 +955,14 @@
 
         <!-- ===== MENÚ ADMIN ===== -->
         <div class="menu-dropdown" id="adminMenu">
+            <button type="button" class="menu-item" onclick="forzarActualizacion()">
+                🔄 Actualizar
+            </button>
+            <button type="button" class="menu-item" onclick="descargarBackupManual()">
+                💾 Backup
+            </button>
             <button type="button" class="menu-item" onclick="importarBackup()">
-                Restaurar
+                📥 Restaurar
             </button>
         </div>
 
@@ -1191,6 +1197,65 @@
             }
         });
 
+        // ===== NUEVA FUNCIÓN: FORZAR ACTUALIZACIÓN =====
+        function forzarActualizacion() {
+            var menu = document.getElementById('adminMenu');
+            if (menu) menu.style.display = 'none';
+            
+            // Recargar todos los datos
+            updateDashboard();
+            populateMonthSelector();
+            updateHistory();
+            loadServices();
+            
+            showToast('✅ Datos actualizados', 'success');
+            console.log('🔄 Actualización forzada ejecutada');
+        }
+
+        // ===== NUEVA FUNCIÓN: DESCARGAR BACKUP MANUAL =====
+        function descargarBackupManual() {
+            var menu = document.getElementById('adminMenu');
+            if (menu) menu.style.display = 'none';
+            
+            try {
+                const promesaFuels = getAllFuels();
+                const promesaServices = getAllServices();
+                Promise.all([promesaFuels, promesaServices]).then(([fuels, services]) => {
+                    const datos = {
+                        version: '1.0',
+                        fecha: new Date().toISOString(),
+                        carName: getCarName(),
+                        initialKm: getInitialKm(),
+                        lastPrice: getLastPrice(),
+                        fuels: fuels,
+                        services: services
+                    };
+                    const json = JSON.stringify(datos, null, 2);
+                    const blob = new Blob([json], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'gasapp-backup.json';
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }, 500);
+                    
+                    showToast('✅ Backup descargado', 'success');
+                }).catch(error => {
+                    console.error('Error al obtener datos para backup:', error);
+                    showToast('❌ Error al generar backup', 'error');
+                });
+            } catch (error) {
+                console.error('Error en backup manual:', error);
+                showToast('❌ Error al generar backup', 'error');
+            }
+        }
+
         function importarBackup() {
             var menu = document.getElementById('adminMenu');
             if (menu) menu.style.display = 'none';
@@ -1224,7 +1289,10 @@
                         await addService(service);
                     }
                     showToast('✅ Backup restaurado correctamente', 'success');
-                    location.reload();
+                    // Forzar actualización después de restaurar
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
                 } catch (error) {
                     console.error('Error al importar:', error);
                     showToast('❌ Error al importar: ' + error.message, 'error');
@@ -1241,6 +1309,8 @@
         window.openServiceModal = openServiceModal;
         window.toggleMenu = toggleMenu;
         window.importarBackup = importarBackup;
+        window.forzarActualizacion = forzarActualizacion;
+        window.descargarBackupManual = descargarBackupManual;
 
         // ================================================================
         // UTILS
@@ -1272,12 +1342,11 @@
             return `${day} de ${month} ${d.getFullYear()}`;
         }
 
-        // ===== FUNCIÓN DE CONSUMO CORREGIDA =====
+        // ===== FUNCIÓN DE CONSUMO =====
         function calculateConsumption(prevOdometer, currOdometer, liters) {
             if (!prevOdometer || !currOdometer || !liters || liters <= 0) return 0;
             const km = currOdometer - prevOdometer;
             if (km <= 0) return 0;
-            // Redondeo a 1 decimal
             return Math.round((km / liters) * 10) / 10;
         }
 
@@ -1334,48 +1403,6 @@
         function getInitialKm() {
             const km = localStorage.getItem('initialKm');
             return km ? parseFloat(km) : null;
-        }
-
-        // ===== BACKUP AUTOMÁTICO (USA window.location.href para sobrescribir) =====
-        function generarBackupAutomatico() {
-            try {
-                const promesaFuels = getAllFuels();
-                const promesaServices = getAllServices();
-                Promise.all([promesaFuels, promesaServices]).then(([fuels, services]) => {
-                    const datos = {
-                        version: '1.0',
-                        fecha: new Date().toISOString(),
-                        carName: getCarName(),
-                        initialKm: getInitialKm(),
-                        lastPrice: getLastPrice(),
-                        fuels: fuels,
-                        services: services
-                    };
-                    const json = JSON.stringify(datos, null, 2);
-                    const blob = new Blob([json], { type: 'application/json' });
-                    const url = URL.createObjectURL(blob);
-                    
-                    // === NUEVO: Forzar sobrescritura usando location.href ===
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = 'gasapp-backup.json';
-                    link.style.display = 'none';
-                    document.body.appendChild(link);
-                    link.click();
-                    
-                    // Limpiar después de la descarga
-                    setTimeout(() => {
-                        document.body.removeChild(link);
-                        URL.revokeObjectURL(url);
-                    }, 500);
-                    
-                    console.log('✅ Backup automático guardado (sobrescrito)');
-                }).catch(error => {
-                    console.error('Error al obtener datos para backup:', error);
-                });
-            } catch (error) {
-                console.error('Error en backup automático:', error);
-            }
         }
 
         // ================================================================
@@ -1824,7 +1851,7 @@
         }
 
         // ================================================================
-        // FUEL MODAL (CORREGIDO CON PRECARGA DE 38 LITROS)
+        // FUEL MODAL
         // ================================================================
 
         let editingFuelId = null;
@@ -1837,12 +1864,10 @@
             const deleteBtn = document.getElementById('deleteFuelBtn');
             const form = document.getElementById('fuelForm');
             
-            // Resetear el formulario primero
             form.reset();
             deleteBtn.style.display = 'none';
             
-            // === PRECARGAR LITROS CON 38.0 SIEMPRE ===
-            // Esto debe hacerse DESPUÉS del reset y ANTES de cargar datos de edición
+            // === PRECARGAR LITROS CON 38.0 ===
             document.getElementById('fuelLiters').value = '38.0';
             
             const today = new Date().toISOString().split('T')[0];
@@ -1868,7 +1893,6 @@
             }
             
             if (id) {
-                // MODO EDICIÓN
                 title.textContent = '✏️ Editar carga';
                 submitBtn.textContent = '💾 Actualizar';
                 deleteBtn.style.display = 'block';
@@ -1878,19 +1902,17 @@
                     document.getElementById('editFuelId').value = fuel.id;
                     document.getElementById('fuelDate').value = fuel.date;
                     document.getElementById('fuelOdometer').value = fuel.odometer;
-                    // Al editar, mantener el valor real del registro, NO forzar 38
                     document.getElementById('fuelLiters').value = fuel.liters;
                     document.getElementById('fuelPrice').value = fuel.pricePerLiter;
                     calculateFuelTotal();
                 }
             } else {
-                // MODO NUEVA CARGA: asegurar que el litro sea 38 (aunque el reset lo puso, lo reforzamos)
-                document.getElementById('fuelLiters').value = '38.0';
                 title.textContent = '⛽ Nueva carga';
                 submitBtn.textContent = '💾 Guardar carga';
                 document.getElementById('editFuelId').value = '';
+                document.getElementById('fuelLiters').value = '38.0';
                 document.getElementById('totalCost').textContent = '$0.00';
-                calculateFuelTotal(); // Para actualizar el total
+                calculateFuelTotal();
             }
             modal.classList.add('active');
         }
@@ -1936,7 +1958,6 @@
                 await updateDashboard();
                 await populateMonthSelector();
                 await updateHistory();
-                generarBackupAutomatico();
             } catch (error) {
                 console.error('Error:', error);
                 showToast('❌ Error: ' + error.message, 'error');
@@ -1954,7 +1975,6 @@
                 await updateDashboard();
                 await populateMonthSelector();
                 await updateHistory();
-                generarBackupAutomatico();
             } catch (error) {
                 showToast('❌ Error al eliminar', 'error');
             }
@@ -2050,7 +2070,6 @@
                 document.getElementById('serviceModal').classList.remove('active');
                 await loadServices();
                 await updateDashboard();
-                generarBackupAutomatico();
             } catch (error) {
                 console.error('Error:', error);
                 showToast('❌ Error: ' + error.message, 'error');
@@ -2067,7 +2086,6 @@
                 document.getElementById('serviceModal').classList.remove('active');
                 await loadServices();
                 await updateDashboard();
-                generarBackupAutomatico();
             } catch (error) {
                 showToast('❌ Error al eliminar', 'error');
             }
@@ -2128,7 +2146,7 @@
         }
 
         // ================================================================
-        // HISTORIAL CON CÁLCULO CORREGIDO
+        // HISTORIAL
         // ================================================================
 
         let histMonth = new Date().getMonth();
@@ -2181,7 +2199,7 @@
                 const allFuels = await getAllFuels();
                 const initialKm = getInitialKm();
                 
-                // ===== RESUMEN =====
+                // === RESUMEN ===
                 if (allFuels.length === 0) {
                     document.getElementById('summaryMonth').textContent = '---';
                     document.getElementById('summaryTotal').textContent = '$0';
@@ -2200,7 +2218,6 @@
                     for (let i = 0; i < fuels.length; i++) {
                         const curr = fuels[i];
                         let prev = null;
-                        // Buscar el registro anterior en el tiempo
                         if (i < fuels.length - 1) {
                             prev = fuels[i + 1];
                         } else {
@@ -2228,7 +2245,7 @@
                         `${(valid > 0 ? totalC / valid : 0).toFixed(1)} km/L`;
                 }
                 
-                // ===== LISTA =====
+                // === LISTA ===
                 const container = document.getElementById('historyList');
                 if (allFuels.length === 0) {
                     container.innerHTML = `<div class="empty-state-mini">Sin registros</div>`;
@@ -2246,18 +2263,15 @@
                         consumption = 0,
                         kmDiff = 0;
                     
-                    // === LÓGICA CORREGIDA: BUSCAR EL REGISTRO ANTERIOR ===
+                    // === BUSCAR EL REGISTRO ANTERIOR CORRECTO ===
                     if (i < fuels.length - 1) {
-                        // El siguiente en la lista (índice i+1) es el registro anterior en el tiempo
                         prev = fuels[i + 1];
                     } else {
-                        // Si es el primer registro del mes (el más reciente), buscar fuera del mes
                         const allSorted = await getAllFuels();
                         const idx = allSorted.findIndex(f => f.id === fuel.id);
                         if (idx < allSorted.length - 1) {
                             prev = allSorted[idx + 1];
                         } else if (initialKm) {
-                            // Si no hay registro anterior, usar km inicial
                             consumption = calculateConsumption(initialKm, fuel.odometer, fuel.liters);
                             kmDiff = fuel.odometer - initialKm;
                         }
