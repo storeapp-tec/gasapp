@@ -1784,19 +1784,16 @@
             });
             document.getElementById('fuelForm').addEventListener('submit', handleFuelSubmit);
 
-            // === EVENTOS CORREGIDOS PARA RENDIMIENTO ===
-            const odoInput = document.getElementById('fuelOdometer');
-            const litersInput = document.getElementById('fuelLiters');
-            const priceInput = document.getElementById('fuelPrice');
-
-            function actualizarTodo() {
+            // === EVENTOS SIMPLIFICADOS PARA RENDIMIENTO ===
+            document.getElementById('fuelOdometer').addEventListener('input', function() {
                 calcularRendimientoEnVivo();
                 calculateFuelTotal();
-            }
-
-            odoInput.addEventListener('input', actualizarTodo);
-            litersInput.addEventListener('input', actualizarTodo);
-            priceInput.addEventListener('input', calculateFuelTotal);
+            });
+            document.getElementById('fuelLiters').addEventListener('input', function() {
+                calcularRendimientoEnVivo();
+                calculateFuelTotal();
+            });
+            document.getElementById('fuelPrice').addEventListener('input', calculateFuelTotal);
 
             document.getElementById('serviceForm').addEventListener('submit', handleServiceSubmit);
             document.getElementById('deleteFuelBtn').addEventListener('click', handleDeleteFuel);
@@ -1808,10 +1805,10 @@
         });
 
         // ================================================================
-        // RENDIMIENTO EN VIVO
+        // RENDIMIENTO EN VIVO (CORREGIDO - SIN ASYNC)
         // ================================================================
 
-        async function calcularRendimientoEnVivo() {
+        function calcularRendimientoEnVivo() {
             const odometerInput = document.getElementById('fuelOdometer');
             const litersInput = document.getElementById('fuelLiters');
             const rendimientoElement = document.getElementById('rendimientoValue');
@@ -1825,37 +1822,42 @@
                 return;
             }
             
-            const lastFuel = await getLastFuel();
-            const initialKm = getInitialKm();
-            
-            let odometroAnterior = 0;
-            if (lastFuel) {
-                odometroAnterior = lastFuel.odometer;
-            } else if (initialKm) {
-                odometroAnterior = initialKm;
-            } else {
+            // Obtener el último odómetro guardado
+            getLastFuel().then(lastFuel => {
+                const initialKm = getInitialKm();
+                let odometroAnterior = 0;
+                
+                if (lastFuel) {
+                    odometroAnterior = lastFuel.odometer;
+                } else if (initialKm) {
+                    odometroAnterior = initialKm;
+                } else {
+                    rendimientoElement.textContent = '-- km/L';
+                    rendimientoElement.className = 'rendimiento-value empty';
+                    return;
+                }
+                
+                const kmRecorridos = nuevoOdometer - odometroAnterior;
+                if (kmRecorridos <= 0) {
+                    rendimientoElement.textContent = '-- km/L';
+                    rendimientoElement.className = 'rendimiento-value empty';
+                    return;
+                }
+                
+                const rendimiento = Math.round((kmRecorridos / litros) * 10) / 10;
+                
+                rendimientoElement.textContent = rendimiento.toFixed(1) + ' km/L';
+                if (rendimiento >= 15) {
+                    rendimientoElement.className = 'rendimiento-value excellent';
+                } else if (rendimiento >= 10) {
+                    rendimientoElement.className = 'rendimiento-value good';
+                } else {
+                    rendimientoElement.className = 'rendimiento-value poor';
+                }
+            }).catch(() => {
                 rendimientoElement.textContent = '-- km/L';
                 rendimientoElement.className = 'rendimiento-value empty';
-                return;
-            }
-            
-            const kmRecorridos = nuevoOdometer - odometroAnterior;
-            if (kmRecorridos <= 0) {
-                rendimientoElement.textContent = '-- km/L';
-                rendimientoElement.className = 'rendimiento-value empty';
-                return;
-            }
-            
-            const rendimiento = Math.round((kmRecorridos / litros) * 10) / 10;
-            
-            rendimientoElement.textContent = rendimiento.toFixed(1) + ' km/L';
-            if (rendimiento >= 15) {
-                rendimientoElement.className = 'rendimiento-value excellent';
-            } else if (rendimiento >= 10) {
-                rendimientoElement.className = 'rendimiento-value good';
-            } else {
-                rendimientoElement.className = 'rendimiento-value poor';
-            }
+            });
         }
 
         // ================================================================
@@ -1990,7 +1992,7 @@
                     document.getElementById('fuelLiters').value = fuel.liters;
                     document.getElementById('fuelPrice').value = fuel.pricePerLiter;
                     calculateFuelTotal();
-                    await calcularRendimientoEnVivo();
+                    calcularRendimientoEnVivo();
                 }
             } else {
                 title.textContent = '⛽ Nueva carga';
@@ -1999,7 +2001,7 @@
                 document.getElementById('fuelLiters').value = '38.0';
                 document.getElementById('totalCost').textContent = '$0.00';
                 calculateFuelTotal();
-                await calcularRendimientoEnVivo();
+                calcularRendimientoEnVivo();
             }
             modal.classList.add('active');
         }
