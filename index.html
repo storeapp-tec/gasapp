@@ -518,7 +518,7 @@
             z-index: 10;
         }
 
-        .nav-item {
+        .nav-bar .nav-item {
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -529,7 +529,7 @@
             gap: 2px;
         }
 
-        .nav-item.active {
+        .nav-bar .nav-item.active {
             color: #667eea;
             font-weight: 600;
         }
@@ -550,7 +550,7 @@
     <div class="app">
         <header class="header-mini">
             <div class="header-content">
-                <span class="app-name" id="appSubtitle">MI COCHE</span>
+                <span class="app-name" id="appSubtitle">NISSAN MARCH</span>
                 <span class="header-title" id="appTitle">Resumen</span>
             </div>
             <button class="btn-menu" id="menuBtn">⋮</button>
@@ -563,7 +563,7 @@
         <div id="tab-inicio" class="tab-content active">
             <div class="inicio-header">
                 <div class="car-name-row">
-                    <span class="car-name" id="carNameDisplay">Mi Vehículo</span>
+                    <span class="car-name" id="carNameDisplay">Nissan March</span>
                 </div>
                 <div class="odometer-row">
                     <span class="odo-value" id="mainOdometer">0</span>
@@ -634,6 +634,7 @@
         </nav>
     </div>
 
+    <!-- MODAL: AGREGAR CARGA -->
     <div class="modal" id="fuelModal">
         <div class="modal-content">
             <div class="modal-title" id="fuelModalTitle">Nueva Carga de Combustible</div>
@@ -658,7 +659,7 @@
                 </div>
 
                 <div class="rendimiento-box">
-                    <span class="rendimiento-label">Rendimiento:</span>
+                    <span class="rendimiento-label">Rendimiento Estimado:</span>
                     <span class="rendimiento-value empty" id="liveRendimiento">Calculando...</span>
                 </div>
 
@@ -676,6 +677,7 @@
         </div>
     </div>
 
+    <!-- MODAL: CONFIGURACIÓN VEHÍCULO -->
     <div class="modal" id="carModal">
         <div class="modal-content">
             <div class="modal-title">Configuración del Vehículo</div>
@@ -690,6 +692,7 @@
         </div>
     </div>
 
+    <!-- MODAL: ACTUALIZAR ODÓMETRO MANUAL -->
     <div class="modal" id="odoModal">
         <div class="modal-content">
             <div class="modal-title">Actualizar Odómetro Manual</div>
@@ -704,6 +707,7 @@
         </div>
     </div>
 
+    <!-- MODAL: AGREGAR SERVICIO -->
     <div class="modal" id="serviceModal">
         <div class="modal-content">
             <div class="modal-title" id="serviceModalTitle">Nuevo Registro de Servicio</div>
@@ -736,13 +740,12 @@
 
     <script>
         let appData = {
-            carName: 'Mi Vehículo',
+            carName: 'Nissan March',
             manualOdometer: null,
             fuels: [],
             services: []
         };
 
-        const TANQUE_MAX = 38.0; // Tope físico del tanque fijado por el usuario
         const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
         function loadData() {
@@ -752,7 +755,7 @@
                     appData = JSON.parse(saved);
                     if (!appData.fuels) appData.fuels = [];
                     if (!appData.services) appData.services = [];
-                    if (!appData.carName) appData.carName = 'Mi Vehículo';
+                    if (!appData.carName) appData.carName = 'Nissan March';
                 } catch(e) {
                     console.error("Error cargando datos", e);
                 }
@@ -777,34 +780,24 @@
             return dateStr;
         }
 
-        // --- NUEVA LÓGICA DE RENDIMIENTO DE TANQUE REAL POR DIFERENCIAS ---
+        // --- CORRECCIÓN CRUCIAL DE LÓGICA TEMPORAL ---
         function calculateTankDifferencesConsumption(chronoFuels) {
             if (chronoFuels.length === 0) return [];
             
+            // Creamos una copia limpia para calcular cronológicamente (Pasado -> Presente)
             let advancedFuels = chronoFuels.map(f => ({...f, calculatedConsumption: null, kmDiff: 0}));
 
             for (let i = 0; i < advancedFuels.length; i++) {
                 if (i > 0) {
+                    // Los kilómetros recorridos en este tramo actual
                     advancedFuels[i].kmDiff = advancedFuels[i].odometer - advancedFuels[i-1].odometer;
                     
-                    let km = advancedFuels[i].kmDiff;
-                    let currentLiters = advancedFuels[i].liters;
+                    let kmRecorridos = advancedFuels[i].kmDiff;
+                    // ¡AQUÍ ESTÁ EL CAMBIO!: El rendimiento de estos km se calcula con los litros de la CARGA ANTERIOR (i-1)
+                    let litrosConsumidos = advancedFuels[i-1].liters; 
                     
-                    if (km > 0) {
-                        // Si la recarga actual es igual o mayor al tope del tanque (llenado a tope)
-                        if (currentLiters >= TANQUE_MAX) {
-                            advancedFuels[i].calculatedConsumption = km / TANQUE_MAX;
-                        } else {
-                            // Si es una carga parcial, evaluamos el impacto real ajustando la diferencia contra el tope físico
-                            let spaceInTank = TANQUE_MAX - currentLiters;
-                            let adjustedLiters = currentLiters + (spaceInTank * (km / (km + 100))); // Factor proporcional de consumo real
-                            
-                            // Validamos que los litros calculados se mantengan lógicos dentro del margen físico del coche
-                            if(adjustedLiters > TANQUE_MAX) adjustedLiters = TANQUE_MAX;
-                            if(adjustedLiters < currentLiters) adjustedLiters = currentLiters;
-
-                            advancedFuels[i].calculatedConsumption = km / adjustedLiters;
-                        }
+                    if (kmRecorridos > 0 && litrosConsumidos > 0) {
+                        advancedFuels[i].calculatedConsumption = kmRecorridos / litrosConsumidos;
                     }
                 }
             }
@@ -812,8 +805,10 @@
         }
 
         function updateUI() {
+            // Ordenar cronológicamente para calcular de forma correcta el antes y el después
             appData.fuels.sort((a, b) => new Date(a.date) - new Date(b.date) || a.odometer - b.odometer);
             const computedFuelsChrono = calculateTankDifferencesConsumption(appData.fuels);
+            // Invertir para la visualización del usuario (Últimas cargas primero)
             const computedFuelsView = [...computedFuelsChrono].sort((a, b) => new Date(b.date) - new Date(a.date) || b.odometer - a.odometer);
 
             document.getElementById('carNameDisplay').innerText = appData.carName;
@@ -897,7 +892,21 @@
             document.getElementById('summaryLiters').innerText = `${totalLiters.toFixed(1)} L`;
 
             let validFuels = filteredFuels.filter(f => f.calculatedConsumption !== null);
-            document.getElementById('summaryAvg').innerText = validFuels.length > 0 ? validFuels[0].calculatedConsumption.toFixed(1) + " km/L" : "0.0 km/L";
+            
+            // Rendimiento promedio del mes seleccionado basado en trayectos válidos
+            if(validFuels.length > 0) {
+                let sumKm = validFuels.reduce((sum, f) => sum + f.kmDiff, 0);
+                // Buscamos los litros del origen de esos km
+                let sumLiters = 0;
+                validFuels.forEach(vf => {
+                    let idx = appData.fuels.findIndex(orig => orig.id === vf.id);
+                    if(idx > 0) sumLiters += appData.fuels[idx-1].liters;
+                });
+                let finalAvg = sumLiters > 0 ? (sumKm / sumLiters) : 0;
+                document.getElementById('summaryAvg').innerText = finalAvg > 0 ? finalAvg.toFixed(1) + " km/L" : "0.0 km/L";
+            } else {
+                document.getElementById('summaryAvg').innerText = "0.0 km/L";
+            }
 
             if (filteredFuels.length === 0) {
                 historyContainer.innerHTML = `<div class="empty-state-mini">No hay cargas en este periodo</div>`;
@@ -940,7 +949,7 @@
         const liveTotalLabel = document.getElementById('liveTotal');
         const liveRendimientoLabel = document.getElementById('liveRendimiento');
 
-        // CÁLCULO EN TIEMPO REAL DESDE EL MODAL CON LA NUEVA FÓRMULA
+        // CÁLCULO EN TIEMPO REAL DESDE EL MODAL MIRANDO AL PASADO
         function calculateLiveFuelValues() {
             const odo = parseInt(fOdoInput.value) || 0;
             const liters = parseFloat(fLitersInput.value) || 0;
@@ -949,30 +958,24 @@
             liveTotalLabel.innerText = `$${formatNumber((liters * price).toFixed(2))}`;
 
             const currentId = document.getElementById('editFuelIndex').value;
-            let tempFuels = [...appData.fuels.filter(f => String(f.id) !== String(currentId)), { odometer: odo, liters: liters }];
+            // Clonamos el set existente omitiendo la versión vieja de este registro
+            let tempFuels = [...appData.fuels.filter(f => String(f.id) !== String(currentId)), { id: 'temp', odometer: odo, liters: liters }];
             tempFuels.sort((a,b) => a.odometer - b.odometer);
 
-            let targetIdx = tempFuels.findIndex(f => f.odometer === odo && f.liters === liters);
-            if (targetIdx === -1) targetIdx = tempFuels.length - 1;
-
-            if (targetIdx === 0) {
+            let targetIdx = tempFuels.findIndex(f => f.id === 'temp');
+            if (targetIdx <= 0) {
                 liveRendimientoLabel.innerText = "Iniciando";
                 liveRendimientoLabel.className = "rendimiento-value empty";
             } else {
                 let km = tempFuels[targetIdx].odometer - tempFuels[targetIdx - 1].odometer;
-                if (km <= 0 || liters <= 0) {
+                // Usamos los litros guardados en el registro anterior para evaluar este tramo actual
+                let litrosAnteriores = tempFuels[targetIdx - 1].liters;
+                
+                if (km <= 0 || litrosAnteriores <= 0) {
                     liveRendimientoLabel.innerText = "Iniciando";
                     liveRendimientoLabel.className = "rendimiento-value empty";
                 } else {
-                    let currentAvg = 0;
-                    if (liters >= TANQUE_MAX) {
-                        currentAvg = km / TANQUE_MAX;
-                    } else {
-                        let space = TANQUE_MAX - liters;
-                        let adjustedL = liters + (space * (km / (km + 100)));
-                        if (adjustedL > TANQUE_MAX) adjustedL = TANQUE_MAX;
-                        currentAvg = km / adjustedL;
-                    }
+                    let currentAvg = km / litrosAnteriores;
                     liveRendimientoLabel.innerText = `${currentAvg.toFixed(1)} km/L`;
                     liveRendimientoLabel.className = `rendimiento-value ${currentAvg >= 13 ? 'excellent' : (currentAvg >= 10 ? 'good' : 'poor')}`;
                 }
@@ -1002,7 +1005,7 @@
         });
         document.getElementById('btnCancelCar').addEventListener('click', () => toggleModal('carModal', 'close'));
         document.getElementById('btnSaveCar').addEventListener('click', () => {
-            appData.carName = document.getElementById('carNameInput').value.trim() || 'Mi Vehículo';
+            appData.carName = document.getElementById('carNameInput').value.trim() || 'Nissan March';
             toggleModal('carModal', 'close');
             saveData();
         });
