@@ -5,24 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>⛽ GasApp</title>
 
-    <!-- PWA -->
     <link rel="manifest" href="/gasapp-web/manifest.json">
     <link rel="apple-touch-icon" sizes="512x512" href="/gasapp/icon-512.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/gasapp/icon-512.png">
     <meta name="theme-color" content="#667eea">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="GasApp">
 
     <style>
-        /* RESET Y ESTRUCTURA BASE */
+        /* ESTRUCTURA ORIGINAL RESTAURADA */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; appearance: none; }
         
-        body { background: #f5f7fa; color: #1a1a2e; height: 100vh; overflow: hidden; }
+        body { background: #f5f7fa; color: #1a1a2e; height: 100vh; overflow: hidden; width: 100vw; }
         
-        /* Contenedor principal para que el menú no desaparezca */
         .app { 
             max-width: 480px; 
             margin: 0 auto; 
@@ -30,91 +27,81 @@
             display: flex; 
             flex-direction: column; 
             position: relative; 
+            overflow: hidden;
         }
 
-        /* HEADER */
         .header-mini { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; flex-shrink: 0; z-index: 10; border-radius: 0 0 20px 20px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); display: flex; justify-content: space-between; align-items: center; min-height: 70px; padding: 0 20px; }
         .header-left { display: flex; align-items: center; gap: 8px; }
         .header-left .app-name { font-size: 16px; font-weight: 700; }
         .header-right .header-title { font-size: 16px; font-weight: 600; opacity: 0.9; }
 
-        /* CONTENIDO SCROLLABLE */
-        .tab-content { display: none; flex: 1; overflow-y: auto; padding: 12px 16px 80px; }
+        .tab-content { display: none; flex: 1; overflow-y: auto; padding: 12px 16px 100px; }
         .tab-content.active { display: block; }
 
-        /* ESTILOS DE TU DISEÑO ORIGINAL */
+        /* DISEÑO DE TARJETAS */
         .inicio-header { background: white; border-radius: 16px; padding: 14px 18px 16px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); text-align: center; }
-        .car-name { font-size: 16px; font-weight: 600; cursor: pointer; padding: 4px; }
+        .car-name { font-size: 16px; font-weight: 600; cursor: pointer; display: block; margin-bottom: 4px; }
         .odo-value { font-size: 32px; font-weight: 700; cursor: pointer; }
-        .odo-unit { font-size: 14px; color: #888; margin-left: 4px; }
+        .odo-unit { font-size: 14px; color: #888; }
 
         .history-grid-4 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
-        .history-summary-card { background: white; border-radius: 10px; padding: 8px 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .history-summary-card { background: white; border-radius: 10px; padding: 8px 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); text-align: center; }
         .h-card-title { font-size: 10px; text-transform: uppercase; color: #999; font-weight: 600; }
         .h-card-value { font-size: 14px; font-weight: 700; }
 
-        .month-select { width: 100%; padding: 8px; border-radius: 20px; border: 1px solid #ddd; margin-bottom: 10px; text-align: center; }
+        .month-select { width: 100%; padding: 8px; border-radius: 20px; border: 1px solid #ddd; margin-bottom: 10px; background: white; }
 
         .history-item-compact { background: white; border-radius: 10px; padding: 10px 14px; margin-bottom: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); cursor: pointer; }
-        .history-row1 { display: flex; justify-content: space-between; margin-bottom: 2px; }
+        .history-row1 { display: flex; justify-content: space-between; align-items: center; }
         .history-km-diff { font-size: 12px; color: #10b981; font-weight: 500; }
-        
         .history-consumption-badge { font-weight: 600; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+        
+        /* COLORES DE RENDIMIENTO */
         .badge-good { background: #e6f4ea; color: #137333; }
         .badge-warn { background: #fef7e0; color: #b06000; }
         .badge-bad { background: #fce8e6; color: #c5221f; }
         .badge-none { background: #f1f3f4; color: #5f6368; }
 
-        .section-label { font-size: 13px; font-weight: 600; color: #666; text-transform: uppercase; margin: 10px 0 8px; }
+        .section-label { font-size: 13px; font-weight: 600; color: #666; text-transform: uppercase; margin: 12px 0 8px; }
         .single-line-fuel { background: white; border-radius: 10px; padding: 10px 14px; margin-bottom: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display: flex; justify-content: space-between; cursor: pointer; font-size: 13px; }
 
         /* MODALES */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
         .modal.active { opacity: 1; pointer-events: auto; }
-        .modal-content { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 400px; }
         .field-group { margin-bottom: 12px; }
         .field-group label { display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 4px; }
-        .field-group input { width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 10px; }
+        .field-group input { width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 10px; outline: none; }
         
         .modal-buttons { display: flex; gap: 10px; margin-top: 15px; }
         .btn-modal { flex: 1; padding: 12px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
         .btn-modal-primary { background: #667eea; color: white; }
         .btn-modal-secondary { background: #f0f2f5; color: #4b5563; }
 
-        /* FAB */
-        .btn-fab { position: fixed; bottom: 80px; right: 20px; width: 56px; height: 56px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 50%; font-size: 28px; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); z-index: 99; }
-
-        /* NAV BAR FIJA ABAJO */
+        /* NAV BAR FIJA */
         .nav-bar { background: white; height: 65px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-around; border-top: 1px solid #eee; z-index: 100; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #888; cursor: pointer; background: none; border: none; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #888; cursor: pointer; background: none; border: none; width: 33%; }
         .nav-item.active { color: #667eea; font-weight: 600; }
         .nav-icon { font-size: 20px; }
         .nav-label { font-size: 11px; }
 
-        .service-notification-banner { background: #fef7e0; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 10px; margin-bottom: 10px; display: none; }
-        .service-notification-banner.show { display: block; }
+        .btn-fab { position: fixed; bottom: 80px; right: 20px; width: 56px; height: 56px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 50%; font-size: 28px; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); z-index: 99; }
     </style>
 </head>
 <body>
 
     <div class="app">
         <header class="header-mini">
-            <div class="header-left">
-                <span class="icon">⛽</span>
-                <span class="app-name">GasApp</span>
-            </div>
-            <div class="header-right">
-                <span class="header-title" id="appTitle">Resumen</span>
-            </div>
+            <div class="header-left"><span class="icon">⛽</span><span class="app-name">GasApp</span></div>
+            <div class="header-right"><span class="header-title" id="appTitle">Resumen</span></div>
         </header>
 
         <!-- PESTAÑA INICIO -->
         <div id="tab-inicio" class="tab-content active">
             <div class="inicio-header">
-                <div class="car-name" id="carNameDisplay">Mi Auto</div>
-                <div class="odometer-row">
-                    <span class="odo-value" id="mainOdometer">0</span>
-                    <span class="odo-unit">km</span>
+                <span class="car-name" id="carNameDisplay" onclick="toggleModal('nameModal','open')">Mi Auto</span>
+                <div class="odometer-row" onclick="toggleModal('odoModal','open')">
+                    <span class="odo-value" id="mainOdometer">0</span><span class="odo-unit">km</span>
                 </div>
             </div>
             <div class="section-label">Últimas Cargas Recientes</div>
@@ -123,7 +110,7 @@
 
         <!-- PESTAÑA HISTORIAL -->
         <div id="tab-historial" class="tab-content">
-            <select id="monthSelect" class="month-select"><option value="todos">Todos los meses</option></select>
+            <select id="monthSelect" class="month-select" onchange="updateUI()"><option value="todos">Todos los meses</option></select>
             <div class="history-grid-4">
                 <div class="history-summary-card"><span class="h-card-title">Km</span><span class="h-card-value" id="summaryKm">0</span></div>
                 <div class="history-summary-card"><span class="h-card-title">Gastos</span><span class="h-card-value" id="summaryTotal">$0</span></div>
@@ -135,14 +122,12 @@
 
         <!-- PESTAÑA SERVICIOS -->
         <div id="tab-servicios" class="tab-content">
-            <div id="serviceBanner" class="service-notification-banner">🔔 Servicios próximos.</div>
             <button class="btn-modal btn-modal-primary" style="width:100%; margin-bottom:15px" onclick="toggleModal('serviceModal','open')">+ Agregar Servicio</button>
             <div id="servicesList"></div>
         </div>
 
-        <button class="btn-fab" id="fabBtn">+</button>
+        <button class="btn-fab" id="fabBtn" onclick="openNewFuel()">+</button>
 
-        <!-- NAVEGACIÓN -->
         <nav class="nav-bar">
             <button class="nav-item active" data-tab="inicio"><span class="nav-icon">📊</span><span class="nav-label">Resumen</span></button>
             <button class="nav-item" data-tab="historial"><span class="nav-icon">📅</span><span class="nav-label">Historial</span></button>
@@ -150,11 +135,11 @@
         </nav>
     </div>
 
-    <!-- MODAL FUEL -->
+    <!-- MODALES -->
     <div class="modal" id="fuelModal">
         <div class="modal-content">
-            <h3 id="fuelModalTitle" style="margin-bottom:15px; text-align:center">Nueva Carga</h3>
-            <form id="fuelForm" onsubmit="return false;">
+            <h3 id="fuelModalTitle" style="text-align:center; margin-bottom:15px">Carga</h3>
+            <form id="fuelForm">
                 <input type="hidden" id="editFuelIndex">
                 <div class="field-group"><label>KM Actual</label><input type="number" id="fuelOdometer" required></div>
                 <div class="field-group"><label>Litros</label><input type="number" id="fuelLiters" step="0.01" required></div>
@@ -165,28 +150,27 @@
                     <button type="button" class="btn-modal btn-modal-secondary" onclick="toggleModal('fuelModal','close')">Cancelar</button>
                     <button type="submit" class="btn-modal btn-modal-primary">Guardar</button>
                 </div>
-                <button type="button" id="deleteFuelBtn" style="width:100%; margin-top:10px; color:red; background:#fce8e6; border:none; padding:12px; border-radius:10px; display:none">Eliminar Registro</button>
+                <button type="button" id="deleteFuelBtn" style="width:100%; margin-top:10px; color:red; background:#fce8e6; border:none; padding:12px; border-radius:10px; display:none">Eliminar</button>
             </form>
         </div>
     </div>
 
-    <!-- OTROS MODALES -->
     <div class="modal" id="nameModal"><div class="modal-content"><h3>Editar Nombre</h3><input type="text" id="carNameInput" style="width:100%; padding:10px; margin:15px 0"><div class="modal-buttons"><button class="btn-modal" onclick="toggleModal('nameModal','close')">Cerrar</button><button class="btn-modal btn-modal-primary" onclick="saveCarName()">Guardar</button></div></div></div>
     <div class="modal" id="odoModal"><div class="modal-content"><h3>Editar Odómetro</h3><input type="number" id="manualOdoInput" style="width:100%; padding:10px; margin:15px 0"><div class="modal-buttons"><button class="btn-modal" onclick="toggleModal('odoModal','close')">Cerrar</button><button class="btn-modal btn-modal-primary" onclick="saveManualOdo()">Guardar</button></div></div></div>
-    <div class="modal" id="serviceModal"><div class="modal-content"><h3>Nuevo Servicio</h3><form id="serviceForm" onsubmit="return false;"><div class="field-group"><label>Tipo</label><input type="text" id="serviceType" required></div><div class="field-group"><label>KM Objetivo</label><input type="number" id="serviceOdometer" required></div><div class="field-group"><label>Fecha</label><input type="date" id="serviceDate" required></div><div class="modal-buttons"><button type="button" class="btn-modal" onclick="toggleModal('serviceModal','close')">Cerrar</button><button type="submit" class="btn-modal btn-modal-primary">Guardar</button></div></form></div></div>
+    <div class="modal" id="serviceModal"><div class="modal-content"><h3>Nuevo Servicio</h3><form id="serviceForm"><div class="field-group"><label>Tipo</label><input type="text" id="serviceType" required></div><div class="field-group"><label>KM Objetivo</label><input type="number" id="serviceOdometer" required></div><div class="field-group"><label>Fecha</label><input type="date" id="serviceDate" required></div><div class="modal-buttons"><button type="button" class="btn-modal" onclick="toggleModal('serviceModal','close')">Cerrar</button><button type="submit" class="btn-modal btn-modal-primary">Guardar</button></div></form></div></div>
 
     <script>
         const CLOUD_URL = 'https://script.google.com/macros/s/AKfycbxq9p7ACA1TWykKEpsu08Xt4ZK-usyFY_dtUPnjGHEn-8q3y_FwIkqITDo3qtFW46KP/exec';
         let appData = { carName: 'Mi Auto', manualOdometer: null, fuels: [], services: [] };
         const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
-        // --- NUBE (SILENCIOSO) ---
+        // --- NUBE (Background) ---
         async function saveData() {
             localStorage.setItem('gas_app_data', JSON.stringify(appData));
-            updateUI();
+            updateUI(); 
             try {
-                await fetch(CLOUD_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(appData) });
-            } catch (e) { console.log("Nube no disponible"); }
+                fetch(CLOUD_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(appData) });
+            } catch (e) { console.log("Offline"); }
         }
 
         async function loadData() {
@@ -196,10 +180,10 @@
                 const res = await fetch(CLOUD_URL);
                 const cloud = await res.json();
                 if (cloud && cloud.fuels) { appData = cloud; updateUI(); }
-            } catch (e) { console.log("Offline mode"); }
+            } catch (e) { console.log("Usando local"); }
         }
 
-        // --- LÓGICA DE NEGOCIO ---
+        // --- LÓGICA ---
         function formatNumber(n) { return new Intl.NumberFormat('es-MX').format(n); }
         function formatDateShort(d) { if(!d) return ''; let p = d.split('-'); return p.length===3 ? `${p[2]}-${mesesNombres[parseInt(p[1])-1]}` : d; }
         function getCurrentOdometer() { return appData.manualOdometer || (appData.fuels.length ? Math.max(...appData.fuels.map(f => f.odometer)) : 0); }
@@ -241,7 +225,6 @@
             const historyList = document.getElementById('historyList');
             let fView = sel === 'todos' ? view : view.filter(f => f.date.startsWith(sel));
             
-            // Totales Historial
             let tKm = fView.reduce((s, f) => s + f.kmDiff, 0);
             let tCost = fView.reduce((s, f) => s + f.totalCost, 0);
             let tLit = fView.reduce((s, f) => s + f.liters, 0);
@@ -260,15 +243,14 @@
                 </div>`;
             }).join('');
 
-            // Selector Meses
+            // Selector
             let mSet = new Set(); appData.fuels.forEach(f => mSet.add(f.date.substring(0,7)));
             let mHtml = '<option value="todos">Todos los meses</option>';
             Array.from(mSet).sort().reverse().forEach(m => {
                 let p = m.split('-'); mHtml += `<option value="${m}">${mesesNombres[parseInt(p[1])-1]} ${p[0]}</option>`;
             });
-            document.getElementById('monthSelect').innerHTML = mHtml;
-            document.getElementById('monthSelect').value = sel;
-
+            document.getElementById('monthSelect').innerHTML = mHtml; document.getElementById('monthSelect').value = sel;
+            
             renderServices();
         }
 
@@ -277,26 +259,26 @@
             item.onclick = function() {
                 document.querySelectorAll('.nav-item, .tab-content').forEach(el => el.classList.remove('active'));
                 this.classList.add('active');
-                const tab = this.dataset.tab;
-                document.getElementById('tab-'+tab).classList.add('active');
+                document.getElementById('tab-'+this.dataset.tab).classList.add('active');
                 document.getElementById('appTitle').innerText = this.innerText;
-                document.getElementById('fabBtn').style.display = (tab==='inicio') ? 'flex' : 'none';
+                document.getElementById('fabBtn').style.display = (this.dataset.tab==='inicio') ? 'flex' : 'none';
             };
         });
 
-        // --- ACCIONES ---
+        // --- MODALES ---
         function toggleModal(id, act) { document.getElementById(id).classList[act==='open'?'add':'remove']('active'); }
         
-        document.getElementById('fabBtn').onclick = () => {
+        function openNewFuel() {
             document.getElementById('fuelForm').reset();
             document.getElementById('editFuelIndex').value = '';
             document.getElementById('fuelDate').value = new Date().toISOString().split('T')[0];
             document.getElementById('deleteFuelBtn').style.display = 'none';
-            document.getElementById('fuelModalTitle').innerText = "Nueva Carga";
+            document.getElementById('liveTotal').innerText = '$0.00';
             toggleModal('fuelModal','open');
-        };
+        }
 
-        document.getElementById('fuelForm').onsubmit = () => {
+        document.getElementById('fuelForm').addEventListener('submit', (e) => {
+            e.preventDefault(); // EVITA RECARGA DE PÁGINA
             let id = document.getElementById('editFuelIndex').value;
             let l = parseFloat(document.getElementById('fuelLiters').value);
             let p = parseFloat(document.getElementById('fuelPrice').value);
@@ -309,7 +291,7 @@
             if(id) { let idx = appData.fuels.findIndex(f => f.id === id); appData.fuels[idx] = item; }
             else appData.fuels.push(item);
             toggleModal('fuelModal','close'); saveData();
-        };
+        });
 
         function openEditFuel(id) {
             const f = appData.fuels.find(x => x.id === id); if(!f) return;
@@ -318,46 +300,49 @@
             document.getElementById('fuelLiters').value = f.liters;
             document.getElementById('fuelPrice').value = f.pricePerLiter;
             document.getElementById('fuelDate').value = f.date;
-            document.getElementById('fuelModalTitle').innerText = "Editar Carga";
             document.getElementById('deleteFuelBtn').style.display = 'block';
-            toggleModal('fuelModal','open');
             document.getElementById('liveTotal').innerText = '$' + (f.liters * f.pricePerLiter).toFixed(2);
+            toggleModal('fuelModal','open');
         }
 
         document.getElementById('deleteFuelBtn').onclick = () => {
-            if(confirm('¿Eliminar registro?')) {
+            if(confirm('¿Eliminar?')) {
                 appData.fuels = appData.fuels.filter(f => f.id !== document.getElementById('editFuelIndex').value);
                 toggleModal('fuelModal','close'); saveData();
             }
         };
 
-        // Inputs
+        // Live Calc
         document.getElementById('fuelLiters').oninput = document.getElementById('fuelPrice').oninput = function() {
             let l = parseFloat(document.getElementById('fuelLiters').value) || 0;
             let p = parseFloat(document.getElementById('fuelPrice').value) || 0;
             document.getElementById('liveTotal').innerText = '$' + (l*p).toFixed(2);
         };
-        document.getElementById('monthSelect').onchange = updateUI;
-        document.getElementById('carNameDisplay').onclick = () => toggleModal('nameModal','open');
-        document.getElementById('mainOdometer').onclick = () => toggleModal('odoModal','open');
 
         function saveCarName() { appData.carName = document.getElementById('carNameInput').value; toggleModal('nameModal','close'); saveData(); }
         function saveManualOdo() { appData.manualOdometer = parseInt(document.getElementById('manualOdoInput').value); toggleModal('odoModal','close'); saveData(); }
 
         // Servicios
+        document.getElementById('serviceForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            appData.services.push({ id:'s_'+Date.now(), type: document.getElementById('serviceType').value, serviceOdometer: parseInt(document.getElementById('serviceOdometer').value), date: document.getElementById('serviceDate').value });
+            toggleModal('serviceModal','close'); saveData();
+        });
+
         function renderServices() {
             const list = document.getElementById('servicesList');
             const odo = getCurrentOdometer();
             list.innerHTML = appData.services.map(s => {
                 let diff = s.serviceOdometer - odo;
                 let badge = diff < 500 ? 'status-red' : (diff < 1000 ? 'status-yellow' : 'status-green');
-                return `<div class="service-item"><div style="display:flex; justify-content:space-between"><b>${s.type}</b><span class="service-status-badge ${badge}">${diff} km restantes</span></div><small>${formatDateShort(s.date)} • ${formatNumber(s.serviceOdometer)} km</small></div>`;
+                return `<div class="service-item" style="background:white; border-radius:10px; padding:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                    <div><b>${s.type}</b><br><small>${formatNumber(s.serviceOdometer)} km</small></div>
+                    <span class="service-status-badge ${badge}" style="padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600">${diff} km restantes</span>
+                    <button onclick="deleteService('${s.id}')" style="background:none; border:none; color:#ccc; font-size:18px; margin-left:10px">✕</button>
+                </div>`;
             }).join('') || '<p style="text-align:center; padding:20px; color:#999">No hay servicios</p>';
         }
-        document.getElementById('serviceForm').onsubmit = () => {
-            appData.services.push({ id:'s_'+Date.now(), type: document.getElementById('serviceType').value, serviceOdometer: parseInt(document.getElementById('serviceOdometer').value), date: document.getElementById('serviceDate').value });
-            toggleModal('serviceModal','close'); saveData();
-        };
+        function deleteService(id) { if(confirm('¿Eliminar?')) { appData.services = appData.services.filter(s => s.id !== id); saveData(); } }
 
         window.onload = loadData;
     </script>
