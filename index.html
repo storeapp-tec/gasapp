@@ -225,9 +225,6 @@
             background: #f0f2f5;
             color: #4b5563;
         }
-        .confirm-btn-cancel:hover {
-            background: #e5e7eb;
-        }
         .confirm-btn-delete {
             background: #dc2626;
             color: white;
@@ -408,9 +405,25 @@
             const modal = document.getElementById('confirmModal');
             const msg = document.getElementById('confirmMessage');
             
+            // Cerrar cualquier modal previo
+            closeConfirmModal();
+            
             msg.textContent = message || 'Esta acción no se puede deshacer.';
             modal.classList.add('show');
             confirmCallback = onConfirm;
+            
+            // Remover event listeners anteriores y agregar nuevos
+            const deleteBtn = document.getElementById('confirmDeleteBtn');
+            const newDeleteBtn = deleteBtn.cloneNode(true);
+            deleteBtn.parentNode.replaceChild(newDeleteBtn, deleteBtn);
+            
+            newDeleteBtn.addEventListener('click', function() {
+                if (confirmCallback) {
+                    const callback = confirmCallback;
+                    closeConfirmModal();
+                    setTimeout(callback, 200);
+                }
+            });
         }
 
         function closeConfirmModal() {
@@ -418,22 +431,12 @@
             confirmCallback = null;
         }
 
-        // Eliminar el event listener anterior y agregar uno nuevo
-        document.getElementById('confirmDeleteBtn').onclick = function() {
-            if (confirmCallback) {
-                const callback = confirmCallback;
-                closeConfirmModal();
-                // Ejecutar el callback después de cerrar el modal
-                setTimeout(callback, 200);
-            }
-        };
-
         // Cerrar con tecla ESC
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') closeConfirmModal();
         });
 
-        // Cerrar haciendo clic fuera del modal
+        // Cerrar haciendo clic fuera
         document.getElementById('confirmModal').addEventListener('click', function(e) {
             if (e.target === this) closeConfirmModal();
         });
@@ -816,9 +819,7 @@
             const id = document.getElementById('editFuelIndex').value;
             const fuel = appData.fuels.find(f => f.id === id);
             if (fuel) {
-                // Cerrar el modal de carga primero
                 toggleModal('fuelModal','close');
-                
                 showConfirmModal(
                     `¿Eliminar la carga del ${formatDateShort(fuel.date)} con ${fuel.liters}L?`,
                     async function() {
@@ -891,7 +892,7 @@
         }
 
         // ============================================================
-        // SERVICIOS
+        // SERVICIOS - FUNCIONALES
         // ============================================================
         function openServiceModal() {
             document.getElementById('serviceForm').reset();
@@ -936,6 +937,7 @@
         }
 
         function editService(id) {
+            // TODO: Implementar edición de servicios
             showToast('✏️ Editar servicio (próximamente)', 'warning');
         }
 
