@@ -186,10 +186,8 @@
         .confirm-buttons button { flex: 1; padding: 12px; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
         .confirm-buttons button:active { transform: scale(0.95); }
         .confirm-btn-cancel { background: #f0f2f5; color: #4b5563; }
-        .confirm-btn-cancel:hover { background: #e5e7eb; }
         .confirm-btn-delete { background: #dc2626; color: white; }
         .confirm-btn-delete:hover { background: #b91c1c; }
-        .confirm-btn-delete:active { background: #991b1b; }
     </style>
 </head>
 <body>
@@ -293,6 +291,7 @@
         </div>
     </div>
 
+    <!-- MODAL DE SERVICIOS CON CAMPO OCULTO PARA EDICIÓN -->
     <div class="modal" id="serviceModal">
         <div class="modal-content">
             <div class="modal-title" id="serviceModalTitle">Agregar Servicio</div>
@@ -469,7 +468,7 @@
         }
 
         // ============================================================
-        // EXCEL SYNC
+        // EXCEL SYNC - CON NO-CORS
         // ============================================================
         async function callAction(action, data) {
             if (isSaving) {
@@ -533,7 +532,7 @@
         }
 
         // ============================================================
-        // UPDATE UI
+        // UPDATE UI - ORIGINAL (SIN MODIFICACIONES)
         // ============================================================
         function updateUI() {
             try {
@@ -562,7 +561,7 @@
                     }).join('');
                 }
 
-                // HISTORIAL
+                // HISTORIAL - ORIGINAL
                 const sel = document.getElementById('monthSelect').value || 'todos';
                 let mSet = new Set(); 
                 fuels.forEach(f => { if(f.date) mSet.add(f.date.substring(0,7)); });
@@ -610,7 +609,7 @@
                     }).join('');
                 }
 
-                // SERVICIOS
+                // SERVICIOS - ORIGINAL
                 const services = appData.services || [];
                 const slist = document.getElementById('servicesList');
                 if (services.length === 0) {
@@ -708,7 +707,7 @@
         }
 
         // ============================================================
-        // FUEL CRUD
+        // FUEL CRUD - ORIGINAL (YA FUNCIONA)
         // ============================================================
         function openNewFuel() { 
             document.getElementById('fuelForm').reset(); 
@@ -738,7 +737,7 @@
             };
             
             if (id) {
-                // EDITAR
+                // EDITAR - ORIGINAL (YA FUNCIONA)
                 const oldFuel = appData.fuels.find(f => f.id === id);
                 if (oldFuel) {
                     const updateData = {
