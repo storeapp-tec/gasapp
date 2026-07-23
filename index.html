@@ -232,13 +232,23 @@
         </div>
     </div>
 
+    <!-- MODAL SERVICIOS - CON ODÓMETRO PRECARGADO -->
     <div class="modal" id="serviceModal">
         <div class="modal-content">
             <div class="modal-title">Agregar Servicio</div>
             <form id="serviceForm" onsubmit="event.preventDefault(); saveService();">
-                <div class="field-group"><label>Tipo de Servicio</label><input type="text" id="serviceType" placeholder="Ej: Cambio de aceite" required></div>
-                <div class="field-group"><label>Odómetro de Servicio (km)</label><input type="number" id="serviceOdometer" step="1" placeholder="Odómetro actual: 0 km" required></div>
-                <div class="field-group"><label>Fecha de Ingreso</label><input type="date" id="serviceDate" required></div>
+                <div class="field-group">
+                    <label>Tipo de Servicio</label>
+                    <input type="text" id="serviceType" placeholder="Ej: Cambio de aceite" required>
+                </div>
+                <div class="field-group">
+                    <label>Odómetro de Servicio (km)</label>
+                    <input type="number" id="serviceOdometer" step="1" required>
+                </div>
+                <div class="field-group">
+                    <label>Fecha de Ingreso</label>
+                    <input type="date" id="serviceDate" required>
+                </div>
                 <div class="modal-buttons">
                     <button type="button" class="btn-modal btn-modal-secondary" onclick="toggleModal('serviceModal','close')">Cancelar</button>
                     <button type="submit" class="btn-modal btn-modal-primary">Guardar Servicio</button>
@@ -251,7 +261,7 @@
         // ============================================
         // CONFIGURACIÓN
         // ============================================
-        const CLOUD_URL = 'https://script.google.com/macros/s/AKfycbw75kOEgUFL6sLMyICAroeHAefN0KsOtQaErct-ElR2phjlPWs36W3HdtbPM2s5HPoq/exec';
+        const CLOUD_URL = 'https://script.google.com/macros/s/AKfycbxq9p7ACA1TWykKEpsu08Xt4ZK-usyFY_dtUPnjGHEn-8q3y_FwIkqITDo3qtFW46KP/exec';
         let appData = { carName: 'Mi Auto', manualOdometer: null, fuels: [], services: [] };
         const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         let toastTimeout = null;
@@ -268,12 +278,10 @@
         }
 
         // ============================================
-        // FORMATO DE FECHAS - CORREGIDO
+        // FORMATO DE FECHAS
         // ============================================
         function formatDateShort(d) {
             if (!d) return '';
-            
-            // Si es string con GMT - convertir a fecha
             if (typeof d === 'string' && d.includes('GMT')) {
                 try {
                     const date = new Date(d);
@@ -284,8 +292,6 @@
                     return `${day}-${month}-${year}`;
                 } catch(e) { return d; }
             }
-            
-            // Si es objeto Date
             if (d instanceof Date) {
                 try {
                     const day = String(d.getDate()).padStart(2, '0');
@@ -294,15 +300,12 @@
                     return `${day}-${month}-${year}`;
                 } catch(e) { return d.toString(); }
             }
-            
-            // Si es YYYY-MM-DD
             if (typeof d === 'string' && d.match(/^\d{4}-\d{2}-\d{2}/)) {
                 try {
                     const parts = d.split('-');
                     return `${parts[2]}-${mesesNombres[parseInt(parts[1])-1]}-${parts[0].substring(2)}`;
                 } catch(e) { return d; }
             }
-            
             return d;
         }
 
@@ -367,7 +370,6 @@
             } catch (e) {
                 console.error('Error al cargar:', e);
                 showToast('❌ Error al cargar datos', 'error');
-                // Intentar usar datos locales si existen
                 try {
                     const saved = localStorage.getItem('gas_app_data');
                     if (saved) {
@@ -677,13 +679,14 @@
         }
 
         // ============================================
-        // SERVICIOS
+        // SERVICIOS - CON ODÓMETRO PRECARGADO
         // ============================================
         function openServiceModal() {
             document.getElementById('serviceForm').reset();
             document.getElementById('serviceDate').value = new Date().toISOString().split('T')[0];
             const currentOdo = getCurrentOdometer();
-            document.getElementById('serviceOdometer').placeholder = `Odómetro actual: ${formatNumber(currentOdo)} km`;
+            // PRECARGAR el odómetro actual como valor
+            document.getElementById('serviceOdometer').value = currentOdo;
             toggleModal('serviceModal','open');
         }
 
@@ -693,6 +696,7 @@
             let dateValue = document.getElementById('serviceDate').value;
             const currentOdo = getCurrentOdometer();
             
+            // Validar que el odómetro sea MAYOR al actual
             if (odo <= currentOdo) {
                 showToast('❌ El odómetro debe ser mayor al actual', 'error');
                 return;
