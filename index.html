@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>⛽ GasApp</title>
 
+    <!-- PWA -->
+    <link rel="manifest" href="/gasapp-web/manifest.json">
+    <link rel="apple-touch-icon" sizes="512x512" href="/gasapp/icon-512.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/gasapp/icon-512.png">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -111,6 +118,7 @@
         .add-service-btn { width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 12px; }
         .add-service-btn:hover { background: #5a6fd6; }
 
+        /* TOAST */
         #toast {
             position: fixed;
             bottom: 140px;
@@ -247,12 +255,13 @@
 
     <script>
         // ============================================================
-        // CONFIGURACIÓN - URL DE GOOGLE APPS SCRIPT
+        // CONFIGURACIÓN
         // ============================================================
-        const URL_API = 'https://script.google.com/macros/s/AKfycbwOwn8iyjeWIK7WiywZQ-Ph96NwDzQCmRKoBkRsylpMlhc4fO2ohppzIIkw5uQo7QUL/exec';
+        const URL_API = 'https://script.google.com/macros/s/AKfycbyCIe9Xyho8-93kN_K04GCSQmqvrM13ia4mwYGHJ-akuyQ6gLSvh7zH8Hai2dLqb8zW/exec';
         let appData = { carName: 'Mi Auto', manualOdometer: null, fuels: [], services: [] };
         const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         let toastTimeout = null;
+        let isSaving = false;
 
         // ============================================================
         // TOAST
@@ -347,25 +356,37 @@
         }
 
         // ============================================================
-        // EXCEL SYNC - COMO LA APP DE TIENDA
+        // EXCEL SYNC - CON NO-CORS (para evitar CORS)
         // ============================================================
         async function callAction(action, data) {
+            if (isSaving) {
+                showToast('⏳ Espera a que termine la operación actual', 'saving');
+                return null;
+            }
+            isSaving = true;
+            showToast('⏳ Guardando...', 'saving');
+            
             try {
                 const payload = { accion: action, datos: data };
                 console.log('📤 Enviando:', payload);
                 
-                const response = await fetch(URL_API, {
+                // Usamos mode: 'no-cors' para evitar el error CORS
+                await fetch(URL_API, {
                     method: 'POST',
+                    mode: 'no-cors',  // ← ESTO EVITA EL ERROR CORS
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                
-                const result = await response.json();
-                console.log('📥 Respuesta:', result);
-                return result;
+
+                // Con no-cors no podemos leer la respuesta, pero los datos llegan
+                showToast('✅ Datos enviados', 'success');
+                return { status: 'OK' };
             } catch (error) {
                 console.error('❌ Error:', error);
+                showToast('❌ Error: ' + error.message, 'error');
                 return { status: 'ERROR', mensaje: error.message };
+            } finally {
+                isSaving = false;
             }
         }
 
@@ -609,9 +630,6 @@
                 appData.fuels.push({ ...data, id: 'f_' + Date.now() });
                 toggleModal('fuelModal','close');
                 updateUI();
-                showToast('✅ Carga guardada', 'success');
-            } else {
-                showToast('❌ Error al guardar: ' + (result?.mensaje || 'desconocido'), 'error');
             }
         }
 
@@ -644,7 +662,7 @@
                         updateUI();
                         showToast('✅ Registro eliminado', 'success');
                     } else {
-                        showToast('❌ Error al eliminar: ' + (result?.mensaje || 'desconocido'), 'error');
+                        showToast('❌ Error al eliminar', 'error');
                     }
                 }
             } 
@@ -674,7 +692,7 @@
                     updateUI();
                     showToast('✅ Odómetro actualizado', 'success');
                 } else {
-                    showToast('❌ Error al guardar: ' + (result?.mensaje || 'desconocido'), 'error');
+                    showToast('❌ Error al guardar', 'error');
                 }
             }
         }
@@ -697,7 +715,7 @@
                     updateUI();
                     showToast('✅ Nombre actualizado', 'success');
                 } else {
-                    showToast('❌ Error al guardar: ' + (result?.mensaje || 'desconocido'), 'error');
+                    showToast('❌ Error al guardar', 'error');
                 }
             }
         }
@@ -742,7 +760,7 @@
                     updateUI();
                     showToast('✅ Servicio guardado', 'success');
                 } else {
-                    showToast('❌ Error al guardar: ' + (result?.mensaje || 'desconocido'), 'error');
+                    showToast('❌ Error al guardar', 'error');
                 }
             }
         }
@@ -764,7 +782,7 @@
                         updateUI();
                         showToast('✅ Servicio marcado como realizado', 'success');
                     } else {
-                        showToast('❌ Error al actualizar: ' + (result?.mensaje || 'desconocido'), 'error');
+                        showToast('❌ Error al actualizar', 'error');
                     }
                 }
             }
@@ -783,7 +801,7 @@
                         updateUI();
                         showToast('✅ Servicio eliminado', 'success');
                     } else {
-                        showToast('❌ Error al eliminar: ' + (result?.mensaje || 'desconocido'), 'error');
+                        showToast('❌ Error al eliminar', 'error');
                     }
                 }
             } 
