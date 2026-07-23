@@ -10,7 +10,6 @@
     <link rel="apple-touch-icon" sizes="512x512" href="/gasapp/icon-512.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/gasapp/icon-512.png">
     <meta name="theme-color" content="#667eea">
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <style>
@@ -37,25 +36,26 @@
         .car-name { font-size: 16px; font-weight: 600; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: background 0.2s; }
         .car-name:hover { background: #f0f2f5; }
         .inicio-header .odometer-row { display: flex; justify-content: center; align-items: center; gap: 4px; }
-        .odo-value { font-size: 32px; font-weight: 700; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: background 0.2s; }
+        .odo-value { font-size: 32px; font-weight: 700; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: background 0.2s; color: #667eea; }
         .odo-value:hover { background: #f0f2f5; }
         .odo-unit { font-size: 14px; color: #888; }
 
         .history-grid-4 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
         .history-summary-card { background: white; border-radius: 10px; padding: 8px 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .h-card-title { font-size: 10px; text-transform: uppercase; color: #999; font-weight: 600; margin-bottom: 2px; }
-        .h-card-value { font-size: 14px; font-weight: 700; }
+        .h-card-value { font-size: 14px; font-weight: 700; color: #667eea; }
 
         .month-select-container { margin-bottom: 10px; display: flex; justify-content: center; }
         .month-select { padding: 6px 12px; border-radius: 20px; border: 1px solid #ddd; font-size: 13px; font-weight: 600; color: #444; background: white; outline: none; }
 
         .history-list-compact { display: flex; flex-direction: column; gap: 6px; }
         .history-item-compact { background: white; border-radius: 10px; padding: 10px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); cursor: pointer; }
-        .history-row1 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
-        .history-date { font-size: 13px; font-weight: 500; color: #444; }
-        .history-km { font-size: 14px; font-weight: 600; }
+        .history-row1 { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; margin-bottom: 2px; }
+        .history-date { font-size: 13px; font-weight: 500; color: #444; text-align: left; }
+        .history-km { font-size: 14px; font-weight: 600; text-align: center; }
         .history-km-diff { font-size: 12px; color: #10b981; font-weight: 500; margin-left: 4px; }
-        .history-row2 { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; font-size: 13px; color: #666; margin-top: 2px; }
+        .history-km-right { text-align: right; }
+        .history-row2 { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; font-size: 13px; color: #666; margin-top: 2px; }
         .history-consumption-badge { font-weight: 600; padding: 2px 6px; border-radius: 4px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; }
 
         .badge-good { background: #e6f4ea; color: #137333; }
@@ -74,13 +74,16 @@
         .field-group label { display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 4px; }
         .field-group input { width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; background: #fafafa; }
         .field-group input::placeholder { color: #999; }
+        .field-group .ref-odometer { font-size: 12px; color: #667eea; font-weight: 600; margin-top: 4px; }
 
         .modal-buttons { display: flex; gap: 10px; margin-top: 18px; }
         .btn-modal { flex: 1; padding: 12px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
         .btn-modal-primary { background: #667eea; color: white; }
         .btn-modal-secondary { background: #f0f2f5; color: #4b5563; }
         
-        .btn-fab { position: fixed; bottom: 76px; right: 20px; width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 50%; font-size: 24px; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); z-index: 99; cursor: pointer; }
+        .btn-fab { position: fixed; bottom: 76px; right: 20px; width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 50%; font-size: 24px; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); z-index: 99; cursor: pointer; transition: transform 0.2s; }
+        .btn-fab:active { transform: scale(0.9); }
+        .btn-fab.hidden { display: none; }
 
         .nav-bar { background: white; height: 60px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-around; box-shadow: 0 -3px 10px rgba(0,0,0,0.05); border-top: 1px solid #eee; z-index: 10; }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: #888; cursor: pointer; background: none; border: none; padding: 6px 12px; }
@@ -98,7 +101,7 @@
         .status-green { background: #d1fae5; color: #065f46; }
         .status-yellow { background: #fef3c7; color: #92400e; }
         .status-red { background: #fecaca; color: #991b1b; }
-        .service-delete-btn { background: none; border: none; color: #ccc; font-size: 18px; cursor: pointer; }
+        .service-delete-btn { background: none; border: none; color: #ccc; font-size: 18px; cursor: pointer; padding: 4px; }
         .service-delete-btn:hover { color: #dc2626; }
 
         .add-service-btn { width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 12px; }
@@ -120,7 +123,7 @@
                     <span class="car-name" id="carNameDisplay" onclick="toggleModal('nameModal','open')">Mi Auto</span>
                 </div>
                 <div class="odometer-row">
-                    <span class="odo-value" id="mainOdometer" onclick="toggleModal('odoModal','open')">0</span>
+                    <span class="odo-value" id="mainOdometer" onclick="openOdoModal()">0</span>
                     <span class="odo-unit">km</span>
                 </div>
             </div>
@@ -146,11 +149,11 @@
         <!-- TAB SERVICIOS -->
         <div id="tab-servicios" class="tab-content">
             <div class="section-label">Servicios Programados</div>
-            <button class="add-service-btn" onclick="toggleModal('serviceModal','open')">+ Agregar Servicio</button>
+            <button class="add-service-btn" onclick="openServiceModal()">+ Agregar Servicio</button>
             <div class="history-list-compact" id="servicesList"></div>
         </div>
 
-        <button class="btn-fab" onclick="openNewFuel()">+</button>
+        <button class="btn-fab" id="fabBtn" onclick="openNewFuel()">+</button>
 
         <nav class="nav-bar">
             <button class="nav-item active" data-tab="inicio"><span class="nav-icon">📊</span><span class="nav-label">Resumen</span></button>
@@ -235,6 +238,7 @@
                 <div class="field-group">
                     <label>Odómetro de Servicio (km)</label>
                     <input type="number" id="serviceOdometer" step="1" required>
+                    <div class="ref-odometer" id="serviceOdometerRef">Odómetro actual: 0 km</div>
                 </div>
                 <div class="field-group">
                     <label>Fecha de Ingreso</label>
@@ -281,7 +285,7 @@
         }
 
         // ============================================
-        // FUNCIONES DE FORMATO (RESTAURADAS)
+        // FUNCIONES DE FORMATO
         // ============================================
         function formatNumber(n) { return new Intl.NumberFormat('es-MX').format(n); }
         function formatDateShort(d) { if(!d) return ''; let p = d.split('-'); return p.length===3 ? `${p[2]}-${mesesNombres[parseInt(p[1])-1]}-${p[0].substring(2)}` : d; }
@@ -289,6 +293,14 @@
             if (appData.manualOdometer !== null && appData.manualOdometer > 0) return appData.manualOdometer;
             if (appData.fuels.length) return Math.max(...appData.fuels.map(f => f.odometer));
             return 0; 
+        }
+        function getLastFuelOdometer() {
+            if (!appData.fuels.length) return 0;
+            return appData.fuels[appData.fuels.length - 1].odometer;
+        }
+        function getLastFuelPrice() {
+            if (!appData.fuels.length) return 0;
+            return appData.fuels[appData.fuels.length - 1].pricePerLiter || 0;
         }
 
         function calculateChrono(fuels) {
@@ -310,7 +322,7 @@
         }
 
         // ============================================
-        // UPDATE UI (RESTAURADO CON ESTILO CHINGÓN)
+        // UPDATE UI
         // ============================================
         function updateUI() {
             appData.fuels.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -320,7 +332,7 @@
             document.getElementById('carNameDisplay').innerText = appData.carName;
             document.getElementById('mainOdometer').innerText = formatNumber(getCurrentOdometer());
 
-            // INICIO - Últimas Cargas (con iconos y formato chingón)
+            // INICIO - Últimas Cargas
             const latest = document.getElementById('latestFuelContainer');
             if (view.length === 0) {
                 latest.innerHTML = `<div class="empty-state-mini">No hay registros</div>`;
@@ -362,7 +374,7 @@
             document.getElementById('summaryLiters').innerText = lit.toFixed(1) + ' L';
             document.getElementById('summaryAvg').innerText = (km>0 && lit>0) ? (km/lit).toFixed(1)+' km/L' : '0.0';
 
-            // HISTORIAL - Lista de cargas (con formato chingón)
+            // HISTORIAL - Lista de cargas (3 columnas: fecha | KM | diff)
             const historyList = document.getElementById('historyList');
             if (fView.length === 0) {
                 historyList.innerHTML = `<div class="empty-state-mini">Sin registros</div>`;
@@ -370,17 +382,18 @@
                 historyList.innerHTML = fView.map(f => {
                     let p = getStatusProps(f.avg);
                     let disp = f.avg ? f.avg.toFixed(1) + ' km/L' : 'Inicial';
-                    let diffDisplay = f.kmDiff > 0 ? `<span class="history-km-diff">(+${f.kmDiff})</span>` : '';
+                    let diffDisplay = f.kmDiff > 0 ? `+${f.kmDiff}` : '';
                     return `
                     <div class="history-item-compact" onclick="openEditFuel('${f.id}')">
                         <div class="history-row1">
                             <span class="history-date">📅 ${formatDateShort(f.date)}</span>
-                            <span class="history-km">${formatNumber(f.odometer)} km ${diffDisplay}</span>
+                            <span class="history-km">${formatNumber(f.odometer)} km</span>
+                            <span class="history-km-right" style="color:#10b981; font-weight:700;">${diffDisplay}</span>
                         </div>
                         <div class="history-row2">
                             <span>⛽ ${f.liters.toFixed(1)}L</span>
                             <span class="history-consumption-badge ${p.class}">${p.icon} ${disp}</span>
-                            <span style="font-weight:700;">💰 $${f.totalCost.toFixed(2)}</span>
+                            <span style="font-weight:700; text-align:right;">💰 $${f.totalCost.toFixed(2)}</span>
                         </div>
                     </div>`;
                 }).join('');
@@ -406,6 +419,15 @@
                     </div>`;
                 }).join('');
             }
+
+            // Mostrar/ocultar FAB (solo en Resumen)
+            const activeTab = document.querySelector('.tab-content.active');
+            const fab = document.getElementById('fabBtn');
+            if (activeTab && activeTab.id === 'tab-inicio') {
+                fab.classList.remove('hidden');
+            } else {
+                fab.classList.add('hidden');
+            }
         }
 
         // ============================================
@@ -417,6 +439,8 @@
                 this.classList.add('active');
                 document.getElementById('tab-'+this.dataset.tab).classList.add('active');
                 document.getElementById('appTitle').innerText = this.querySelector('.nav-label').innerText;
+                // Actualizar visibilidad del FAB
+                updateUI();
             };
         });
 
@@ -428,7 +452,7 @@
         }
 
         // ============================================
-        // FUEL CRUD (RESTAURADO)
+        // FUEL CRUD
         // ============================================
         function openNewFuel() { 
             document.getElementById('fuelForm').reset(); 
@@ -437,6 +461,9 @@
             document.getElementById('deleteFuelBtn').style.display = 'none'; 
             document.getElementById('fuelModalTitle').innerText = 'Nueva Carga';
             document.getElementById('liveTotal').innerText = '$0.00';
+            // PRECARGAR odómetro y precio
+            document.getElementById('fuelOdometer').value = getLastFuelOdometer();
+            document.getElementById('fuelPrice').value = getLastFuelPrice();
             toggleModal('fuelModal','open'); 
         }
 
@@ -489,11 +516,11 @@
         };
 
         // ============================================
-        // NOMBRE Y ODÓMETRO (RESTAURADO)
+        // ODÓMETRO (con precarga y color morado)
         // ============================================
-        function saveCarName() { 
-            let name = document.getElementById('carNameInput').value.trim();
-            if(name) { appData.carName = name; toggleModal('nameModal','close'); saveData(); }
+        function openOdoModal() {
+            document.getElementById('odoInput').value = getCurrentOdometer();
+            toggleModal('odoModal','open');
         }
 
         function saveManualOdo() { 
@@ -502,8 +529,23 @@
         }
 
         // ============================================
-        // SERVICIOS (RESTAURADO)
+        // NOMBRE
         // ============================================
+        function saveCarName() { 
+            let name = document.getElementById('carNameInput').value.trim();
+            if(name) { appData.carName = name; toggleModal('nameModal','close'); saveData(); }
+        }
+
+        // ============================================
+        // SERVICIOS (con odómetro actual como referencia)
+        // ============================================
+        function openServiceModal() {
+            document.getElementById('serviceForm').reset();
+            document.getElementById('serviceDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('serviceOdometerRef').innerText = `Odómetro actual: ${formatNumber(getCurrentOdometer())} km`;
+            toggleModal('serviceModal','open');
+        }
+
         function saveService() {
             let type = document.getElementById('serviceType').value.trim();
             let odo = parseInt(document.getElementById('serviceOdometer').value);
@@ -526,6 +568,13 @@
                 saveData(); 
             } 
         }
+
+        // ============================================
+        // FILTRO DE MESES (arreglado)
+        // ============================================
+        document.getElementById('monthSelect').addEventListener('change', function() {
+            updateUI();
+        });
 
         // ============================================
         // INICIO
