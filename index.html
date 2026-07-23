@@ -291,7 +291,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE SERVICIOS CON CAMPO OCULTO PARA EDICIÓN -->
+    <!-- MODAL DE SERVICIOS -->
     <div class="modal" id="serviceModal">
         <div class="modal-content">
             <div class="modal-title" id="serviceModalTitle">Agregar Servicio</div>
@@ -351,7 +351,7 @@
         }
 
         // ============================================================
-        // MODAL DE CONFIRMACIÓN BONITO
+        // MODAL DE CONFIRMACIÓN
         // ============================================================
         function showConfirmModal(message, onConfirm) {
             const modal = document.getElementById('confirmModal');
@@ -468,7 +468,7 @@
         }
 
         // ============================================================
-        // EXCEL SYNC - CON NO-CORS
+        // EXCEL SYNC - SIN LOCALSTORAGE
         // ============================================================
         async function callAction(action, data) {
             if (isSaving) {
@@ -500,39 +500,46 @@
             }
         }
 
+        // ============================================================
+        // loadData - SOLO EXCEL, SIN LOCALSTORAGE
+        // ============================================================
         async function loadData() {
-            showToast('⏳ Cargando datos...', 'saving', 3000);
+            showToast('⏳ Cargando datos desde Excel...', 'saving', 3000);
             try {
                 const response = await fetch(URL_API);
                 const data = await response.json();
-                console.log('📥 Datos cargados:', data);
+                console.log('📥 Datos cargados desde Excel:', data);
                 
                 if (data && data.fuels && Array.isArray(data.fuels)) {
-                    appData = data;
-                    if (!appData.services) appData.services = [];
-                    if (!appData.fuels) appData.fuels = [];
-                    if (!appData.carName) appData.carName = 'Mi Auto';
+                    // Reemplazar completamente, NO fusionar
+                    appData = {
+                        carName: data.carName || 'Mi Auto',
+                        manualOdometer: data.manualOdometer || null,
+                        fuels: data.fuels || [],
+                        services: data.services || []
+                    };
                     
+                    // Asignar IDs si no tienen (para la app)
                     appData.fuels.forEach(f => { if (!f.id) f.id = 'f_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6); });
                     appData.services.forEach(s => { if (!s.id) s.id = 's_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6); });
                     
                     updateUI();
-                    showToast('✅ Datos cargados', 'success');
+                    showToast('✅ Datos cargados desde Excel', 'success');
                 } else {
                     appData = { carName: 'Mi Auto', manualOdometer: null, fuels: [], services: [] };
                     updateUI();
-                    showToast('📝 Sin datos previos', 'warning');
+                    showToast('📝 Sin datos en Excel', 'warning');
                 }
             } catch (e) {
                 console.error('Error al cargar:', e);
-                showToast('❌ Error al cargar datos', 'error');
+                showToast('❌ Error al cargar datos desde Excel: ' + e.message, 'error');
                 appData = { carName: 'Mi Auto', manualOdometer: null, fuels: [], services: [] };
                 updateUI();
             }
         }
 
         // ============================================================
-        // UPDATE UI - ORIGINAL (SIN MODIFICACIONES)
+        // UPDATE UI
         // ============================================================
         function updateUI() {
             try {
@@ -561,7 +568,7 @@
                     }).join('');
                 }
 
-                // HISTORIAL - ORIGINAL
+                // HISTORIAL
                 const sel = document.getElementById('monthSelect').value || 'todos';
                 let mSet = new Set(); 
                 fuels.forEach(f => { if(f.date) mSet.add(f.date.substring(0,7)); });
@@ -609,7 +616,7 @@
                     }).join('');
                 }
 
-                // SERVICIOS - ORIGINAL
+                // SERVICIOS
                 const services = appData.services || [];
                 const slist = document.getElementById('servicesList');
                 if (services.length === 0) {
@@ -707,7 +714,7 @@
         }
 
         // ============================================================
-        // FUEL CRUD - ORIGINAL (YA FUNCIONA)
+        // FUEL CRUD
         // ============================================================
         function openNewFuel() { 
             document.getElementById('fuelForm').reset(); 
@@ -737,7 +744,6 @@
             };
             
             if (id) {
-                // EDITAR - ORIGINAL (YA FUNCIONA)
                 const oldFuel = appData.fuels.find(f => f.id === id);
                 if (oldFuel) {
                     const updateData = {
@@ -755,19 +761,20 @@
                             appData.fuels[idx] = { ...data, id: id };
                         }
                         toggleModal('fuelModal','close');
-                        updateUI();
+                        // Recargar desde Excel para asegurar consistencia
+                        await loadData();
                         showToast('✅ Carga actualizada', 'success');
                     }
                 }
             } else {
-                // NUEVO
                 const result = await callAction('addFuel', data);
                 if (result && result.status === 'OK') {
                     appData.fuels.push({ ...data, id: 'f_' + Date.now() });
                     await callAction('updateOdometer', { manualOdometer: odo });
                     appData.manualOdometer = odo;
                     toggleModal('fuelModal','close');
-                    updateUI();
+                    // Recargar desde Excel para asegurar consistencia
+                    await loadData();
                     showToast('✅ Carga guardada', 'success');
                 }
             }
@@ -801,7 +808,7 @@
                         });
                         if (result && result.status === 'OK') {
                             appData.fuels = appData.fuels.filter(f => f.id !== id);
-                            updateUI();
+                            await loadData();
                             showToast('🗑️ Registro eliminado', 'delete');
                         } else {
                             showToast('❌ Error al eliminar', 'error');
@@ -832,7 +839,7 @@
                 if (result && result.status === 'OK') {
                     appData.manualOdometer = odo;
                     toggleModal('odoModal','close');
-                    updateUI();
+                    await loadData();
                     showToast('✅ Odómetro actualizado', 'success');
                 } else {
                     showToast('❌ Error al guardar', 'error');
@@ -855,7 +862,7 @@
                 if (result && result.status === 'OK') {
                     appData.carName = name;
                     toggleModal('nameModal','close');
-                    updateUI();
+                    await loadData();
                     showToast('✅ Nombre actualizado', 'success');
                 } else {
                     showToast('❌ Error al guardar', 'error');
@@ -864,7 +871,7 @@
         }
 
         // ============================================================
-        // SERVICIOS - CON EDICIÓN FUNCIONAL
+        // SERVICIOS
         // ============================================================
         function openServiceModal() {
             document.getElementById('serviceForm').reset();
@@ -911,7 +918,6 @@
                 };
                 
                 if (id) {
-                    // EDITAR
                     const oldService = appData.services.find(s => s.id === id);
                     if (oldService) {
                         const updateData = {
@@ -929,17 +935,16 @@
                                 appData.services[idx] = { ...data, id: id };
                             }
                             toggleModal('serviceModal','close');
-                            updateUI();
+                            await loadData();
                             showToast('✅ Servicio actualizado', 'success');
                         }
                     }
                 } else {
-                    // NUEVO
                     const result = await callAction('addService', data);
                     if (result && result.status === 'OK') {
                         appData.services.push({ ...data, id: 's_' + Date.now() });
                         toggleModal('serviceModal','close');
-                        updateUI();
+                        await loadData();
                         showToast('✅ Servicio guardado', 'success');
                     } else {
                         showToast('❌ Error al guardar', 'error');
@@ -960,7 +965,7 @@
                         });
                         if (result && result.status === 'OK') {
                             appData.services = appData.services.filter(s => s.id !== id);
-                            updateUI();
+                            await loadData();
                             showToast('🗑️ Servicio eliminado', 'delete');
                         } else {
                             showToast('❌ Error al eliminar', 'error');
@@ -982,7 +987,7 @@
                         });
                         if (result && result.status === 'OK') {
                             service.status = 'realizado';
-                            updateUI();
+                            await loadData();
                             showToast('✅ Servicio marcado como realizado', 'success');
                         } else {
                             showToast('❌ Error al actualizar', 'error');
