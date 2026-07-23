@@ -162,7 +162,7 @@
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 99998;
+            z-index: 99999;
             padding: 20px;
             animation: fadeIn 0.3s ease;
         }
@@ -374,6 +374,7 @@
         const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         let toastTimeout = null;
         let isSaving = false;
+        let confirmCallback = null;
 
         // ============================================================
         // TOAST
@@ -403,8 +404,6 @@
         // ============================================================
         // MODAL DE CONFIRMACIÓN BONITO
         // ============================================================
-        let confirmCallback = null;
-
         function showConfirmModal(message, onConfirm) {
             const modal = document.getElementById('confirmModal');
             const msg = document.getElementById('confirmMessage');
@@ -419,17 +418,24 @@
             confirmCallback = null;
         }
 
-        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
-            closeConfirmModal();
+        // Eliminar el event listener anterior y agregar uno nuevo
+        document.getElementById('confirmDeleteBtn').onclick = function() {
             if (confirmCallback) {
-                confirmCallback();
-                confirmCallback = null;
+                const callback = confirmCallback;
+                closeConfirmModal();
+                // Ejecutar el callback después de cerrar el modal
+                setTimeout(callback, 200);
             }
-        });
+        };
 
         // Cerrar con tecla ESC
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') closeConfirmModal();
+        });
+
+        // Cerrar haciendo clic fuera del modal
+        document.getElementById('confirmModal').addEventListener('click', function(e) {
+            if (e.target === this) closeConfirmModal();
         });
 
         // ============================================================
@@ -781,15 +787,11 @@
                 totalCost: l * p
             };
             
-            // Guardar la carga
             const result = await callAction('addFuel', data);
             if (result && result.status === 'OK') {
                 appData.fuels.push({ ...data, id: 'f_' + Date.now() });
-                
-                // Actualizar el odómetro en la hoja "Datos"
                 await callAction('updateOdometer', { manualOdometer: odo });
                 appData.manualOdometer = odo;
-                
                 toggleModal('fuelModal','close');
                 updateUI();
                 showToast('✅ Carga guardada y odómetro actualizado', 'success');
@@ -814,6 +816,9 @@
             const id = document.getElementById('editFuelIndex').value;
             const fuel = appData.fuels.find(f => f.id === id);
             if (fuel) {
+                // Cerrar el modal de carga primero
+                toggleModal('fuelModal','close');
+                
                 showConfirmModal(
                     `¿Eliminar la carga del ${formatDateShort(fuel.date)} con ${fuel.liters}L?`,
                     async function() {
@@ -823,7 +828,6 @@
                         });
                         if (result && result.status === 'OK') {
                             appData.fuels = appData.fuels.filter(f => f.id !== id);
-                            toggleModal('fuelModal','close');
                             updateUI();
                             showToast('🗑️ Registro eliminado', 'delete');
                         } else {
