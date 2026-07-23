@@ -5,45 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>⛽ GasApp</title>
 
+    <!-- PWA CONFIG -->
     <link rel="manifest" href="/gasapp-web/manifest.json">
     <link rel="apple-touch-icon" sizes="512x512" href="/gasapp/icon-512.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/gasapp/icon-512.png">
     <meta name="theme-color" content="#667eea">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="GasApp">
 
     <style>
-        /* CSS ORIGINAL RESTAURADO COMPLETAMENTE */
+        /* ESTILOS ORIGINALES RESTAURADOS AL 100% */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; appearance: none; }
         body { background: #f5f7fa; color: #1a1a2e; font-size: 14px; line-height: 1.4; height: 100vh; overflow: hidden; }
         .app { max-width: 480px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; position: relative; }
-        ::-webkit-scrollbar { width: 3px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #c1c7cd; border-radius: 10px; }
-
+        
         .header-mini { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; flex-shrink: 0; z-index: 10; border-radius: 0 0 20px 20px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); position: relative; display: flex; justify-content: space-between; align-items: center; min-height: 70px; padding: 0 20px; }
         .header-left { display: flex; align-items: center; gap: 8px; }
         .header-left .icon { font-size: 20px; }
         .header-left .app-name { font-size: 16px; font-weight: 700; letter-spacing: 0.5px; }
         .header-right .header-title { font-size: 16px; font-weight: 600; opacity: 0.9; }
 
-        .inicio-header { background: white; border-radius: 16px; padding: 14px 18px 16px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); text-align: center; }
-        .car-name-row { display: flex; justify-content: center; align-items: center; gap: 6px; margin-bottom: 4px; }
-        .car-name { font-size: 16px; font-weight: 600; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: background 0.2s; }
-        .car-name:hover { background: #f0f2f5; }
-        .inicio-header .odometer-row { display: flex; justify-content: center; align-items: center; gap: 4px; }
-        .inicio-header .odo-value { font-size: 32px; font-weight: 700; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: background 0.2s; }
-        .inicio-header .odo-value:hover { background: #f0f2f5; }
-        .inicio-header .odo-unit { font-size: 14px; color: #888; }
+        .tab-content { display: none; flex: 1; overflow-y: auto; padding: 12px 16px 80px; }
+        .tab-content.active { display: block; }
 
+        .inicio-header { background: white; border-radius: 16px; padding: 14px 18px 16px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); text-align: center; }
+        .car-name { font-size: 16px; font-weight: 600; cursor: pointer; padding: 4px 8px; border-radius: 6px; }
+        .odo-value { font-size: 32px; font-weight: 700; cursor: pointer; padding: 4px 8px; }
+        .odo-unit { font-size: 14px; color: #888; }
+
+        /* GRID DE 4 CUADROS */
         .history-grid-4 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
         .history-summary-card { background: white; border-radius: 10px; padding: 8px 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .h-card-title { font-size: 10px; text-transform: uppercase; color: #999; font-weight: 600; margin-bottom: 2px; }
         .h-card-value { font-size: 14px; font-weight: 700; }
 
+        /* SELECTOR DE MESES CENTRADO */
         .month-select-container { margin-bottom: 10px; display: flex; justify-content: center; }
         .month-select { padding: 6px 12px; border-radius: 20px; border: 1px solid #ddd; font-size: 13px; font-weight: 600; color: #444; background: white; outline: none; }
 
@@ -52,18 +50,27 @@
         .history-row1 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
         .history-date { font-size: 13px; font-weight: 500; color: #444; }
         .history-km { font-size: 14px; font-weight: 600; }
-        .history-km-diff { font-size: 12px; color: #10b981; font-weight: 500; margin-left: 4px; }
-        .history-row2 { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; font-size: 13px; color: #666; margin-top: 2px; }
-        .history-consumption-badge { font-weight: 600; padding: 2px 6px; border-radius: 4px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; }
+        .history-km-diff { font-size: 12px; color: #10b981; font-weight: 500; }
 
+        .history-consumption-badge { font-weight: 600; padding: 2px 6px; border-radius: 4px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; }
         .badge-good { background: #e6f4ea; color: #137333; }
         .badge-warn { background: #fef7e0; color: #b06000; }
         .badge-bad { background: #fce8e6; color: #c5221f; }
         .badge-none { background: #f1f3f4; color: #5f6368; }
 
-        .latest-fuels-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
-        .single-line-fuel { background: white; border-radius: 10px; padding: 10px 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); font-size: 13px; font-weight: 500; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .section-label { font-size: 13px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .single-line-fuel { background: white; border-radius: 10px; padding: 10px 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); font-size: 13px; font-weight: 500; display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 6px; }
 
+        /* NAV BAR */
+        .nav-bar { background: white; height: 60px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-around; box-shadow: 0 -3px 10px rgba(0,0,0,0.05); border-top: 1px solid rgba(0,0,0,0.05); z-index: 10; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #888; cursor: pointer; gap: 2px; padding: 6px; border: none; background: none; }
+        .nav-item.active { color: #667eea; font-weight: 600; }
+        .nav-icon { font-size: 18px; }
+        .nav-label { font-size: 11px; }
+
+        .btn-fab { position: fixed; bottom: 76px; right: 20px; width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 50%; font-size: 24px; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); z-index: 99; }
+
+        /* MODALES */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 10000; padding: 16px; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
         .modal.active { opacity: 1; pointer-events: auto; }
         .modal-content { background: white; border-radius: 16px; padding: 20px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
@@ -71,27 +78,13 @@
         .field-group { margin-bottom: 12px; }
         .field-group label { display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 4px; }
         .field-group input { width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; background: #fafafa; }
-
         .modal-buttons { display: flex; gap: 10px; margin-top: 18px; }
         .btn-modal { flex: 1; padding: 12px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
         .btn-modal-primary { background: #667eea; color: white; }
         .btn-modal-secondary { background: #f0f2f5; color: #4b5563; }
-        .btn-fab { position: fixed; bottom: 76px; right: 20px; width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 50%; font-size: 24px; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); z-index: 999; }
-
-        .tab-content { display: none; flex: 1; overflow-y: auto; padding: 12px 16px 20px; }
-        .tab-content.active { display: block; }
-        .section-label { font-size: 13px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-        
-        .nav-bar { background: white; height: 60px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-around; box-shadow: 0 -3px 10px rgba(0,0,0,0.05); border-top: 1px solid rgba(0,0,0,0.05); z-index: 10; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #888; cursor: pointer; gap: 2px; padding: 6px; border: none; background: none; }
-        .nav-item.active { color: #667eea; font-weight: 600; }
-        .nav-icon { font-size: 18px; }
-        .nav-label { font-size: 11px; }
 
         .service-notification-banner { background: #fef7e0; border-left: 4px solid #f59e0b; padding: 12px 16px; border-radius: 10px; margin-bottom: 12px; display: none; }
         .service-notification-banner.show { display: block; }
-        .service-item { background: white; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center; }
-        .add-service-btn { width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 12px; }
     </style>
 </head>
 <body>
@@ -102,9 +95,12 @@
                 <span class="icon">⛽</span>
                 <span class="app-name">GasApp</span>
             </div>
-            <div class="header-right"><span class="header-title" id="appTitle">Resumen</span></div>
+            <div class="header-right">
+                <span class="header-title" id="appTitle">📊 Resumen</span>
+            </div>
         </header>
 
+        <!-- TABS -->
         <div id="tab-inicio" class="tab-content active">
             <div class="inicio-header">
                 <div class="car-name-row"><span class="car-name" id="carNameDisplay" onclick="toggleModal('nameModal','open')">Mi Auto</span></div>
@@ -131,17 +127,14 @@
         </div>
 
         <div id="tab-servicios" class="tab-content">
-            <div class="section-label">Servicios Programados</div>
-            <div id="serviceNotificationBanner" class="service-notification-banner">
-                <div class="notif-title">🔔 ¡Atención!</div>
-                <div class="notif-desc" id="serviceNotifDesc">Tienes servicios próximos a vencer.</div>
-            </div>
-            <button class="add-service-btn" id="addServiceBtn" onclick="toggleModal('serviceModal','open')">+ Agregar Servicio</button>
+            <div id="serviceBanner" class="service-notification-banner">🔔 Servicios próximos a vencer.</div>
+            <button class="btn-modal btn-modal-primary" style="width:100%; margin-bottom:12px" onclick="toggleModal('serviceModal','open')">+ Agregar Servicio</button>
             <div id="servicesList" class="history-list-compact"></div>
         </div>
 
         <button class="btn-fab" id="fabBtn" onclick="openNewFuel()">+</button>
 
+        <!-- NAV BAR -->
         <nav class="nav-bar">
             <div class="nav-item active" data-tab="inicio"><span class="nav-icon">📊</span><span class="nav-label">Resumen</span></div>
             <div class="nav-item" data-tab="historial"><span class="nav-icon">📅</span><span class="nav-label">Historial</span></div>
@@ -149,7 +142,7 @@
         </nav>
     </div>
 
-    <!-- MODAL FUEL -->
+    <!-- MODALES ORIGINALES -->
     <div class="modal" id="fuelModal">
         <div class="modal-content">
             <div class="modal-title" id="fuelModalTitle">Nueva Carga</div>
@@ -169,7 +162,6 @@
         </div>
     </div>
 
-    <!-- OTROS MODALES ORIGINALES -->
     <div class="modal" id="nameModal"><div class="modal-content"><div class="modal-title">Editar Nombre</div><div class="field-group"><label>Nombre</label><input type="text" id="carNameInput"></div><div class="modal-buttons"><button class="btn-modal btn-modal-secondary" onclick="toggleModal('nameModal','close')">Cancelar</button><button class="btn-modal btn-modal-primary" onclick="saveCarName()">Guardar</button></div></div></div>
     <div class="modal" id="odometerModal"><div class="modal-content"><div class="modal-title">Editar Odómetro</div><div class="field-group"><label>KM Actual</label><input type="number" id="odometerInput"></div><div class="modal-buttons"><button class="btn-modal btn-modal-secondary" onclick="toggleModal('odometerModal','close')">Cancelar</button><button class="btn-modal btn-modal-primary" onclick="saveOdometer()">Guardar</button></div></div></div>
     <div class="modal" id="serviceModal"><div class="modal-content"><div class="modal-title">Agregar Servicio</div><form id="serviceForm"><div class="field-group"><label>Tipo</label><input type="text" id="serviceType" required></div><div class="field-group"><label>KM Objetivo</label><input type="number" id="serviceOdometer" required></div><div class="field-group"><label>Fecha</label><input type="date" id="serviceDate" required></div><div class="modal-buttons"><button type="button" class="btn-modal btn-modal-secondary" onclick="toggleModal('serviceModal','close')">Cancelar</button><button type="submit" class="btn-modal btn-modal-primary">Guardar</button></div></form></div></div>
@@ -179,7 +171,7 @@
         let appData = { carName: 'Mi Auto', manualOdometer: null, fuels: [], services: [] };
         const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
-        // --- NUBE ---
+        // --- CLOUD SYNC ---
         async function saveData() {
             localStorage.setItem('gas_app_data', JSON.stringify(appData));
             updateUI();
@@ -193,12 +185,12 @@
             if (saved) { appData = JSON.parse(saved); updateUI(); }
             try {
                 const res = await fetch(CLOUD_URL);
-                const cloudData = await res.json();
-                if (cloudData && cloudData.fuels) { appData = cloudData; updateUI(); }
-            } catch (e) { console.log("Usando local"); }
+                const cloud = await res.json();
+                if (cloud && cloud.fuels) { appData = cloud; updateUI(); }
+            } catch (e) { console.log("Modo local"); }
         }
 
-        // --- LÓGICA ---
+        // --- LÓGICA ORIGINAL ---
         function formatNumber(n) { return new Intl.NumberFormat('es-MX').format(n); }
         function formatDateShort(d) { if(!d) return ''; let p = d.split('-'); return p.length===3 ? `${p[2]}-${mesesNombres[parseInt(p[1])-1]}` : d; }
         function getCurrentOdometer() { return appData.manualOdometer || (appData.fuels.length ? Math.max(...appData.fuels.map(f => f.odometer)) : 0); }
@@ -221,21 +213,21 @@
         }
 
         function updateUI() {
-            appData.fuels.sort((a, b) => new Date(a.date) - new Date(b.date));
+            appData.fuels.sort((a, b) => new Date(a.date) - new Date(b.date) || a.odometer - b.odometer);
             const chrono = calculateContinuousConsumption(appData.fuels);
             const view = [...chrono].reverse();
 
             document.getElementById('carNameDisplay').innerText = appData.carName;
             document.getElementById('mainOdometer').innerText = formatNumber(getCurrentOdometer());
 
-            // Render Inicio
+            // RENDER INICIO
             const latest = document.getElementById('latestFuelContainer');
-            latest.innerHTML = view.slice(0, 5).map(f => {
+            latest.innerHTML = view.length ? view.slice(0, 5).map(f => {
                 let p = getStatusProps(f.calculatedConsumption);
                 return `<div class="single-line-fuel" onclick="openEditFuel('${f.id}')"><span>${formatDateShort(f.date)}</span><span>⛽ ${f.liters.toFixed(1)}L</span><span>$${formatNumber(f.totalCost.toFixed(2))}</span><span>${p.icon} ${f.calculatedConsumption?f.calculatedConsumption.toFixed(1)+' km/L':'Inicial'}</span></div>`;
-            }).join('') || '<div class="empty-state-mini">No hay registros</div>';
+            }).join('') : '<div class="empty-state-mini">No hay registros</div>';
 
-            // Selector meses y tabs
+            // RENDER HISTORIAL CON FILTRO
             const sel = document.getElementById('monthSelect').value;
             const historyList = document.getElementById('historyList');
             let fView = sel === "todos" ? view : view.filter(f => f.date.startsWith(sel));
@@ -249,10 +241,18 @@
             document.getElementById('summaryLiters').innerText = `${lit.toFixed(1)} L`;
             document.getElementById('summaryAvg').innerText = (km>0 && lit>0) ? (km/lit).toFixed(1)+' km/L' : '0.0 km/L';
 
-            historyList.innerHTML = fView.map(f => {
+            historyList.innerHTML = fView.length ? fView.map(f => {
                 let p = getStatusProps(f.calculatedConsumption);
                 return `<div class="history-item-compact" onclick="openEditFuel('${f.id}')"><div class="history-row1"><span class="history-date">📅 ${formatDateShort(f.date)}</span><span class="history-km">${formatNumber(f.odometer)} km <span class="history-km-diff">${f.kmDiff?'+'+f.kmDiff:''}</span></span></div><div class="history-row2"><span>⛽ ${f.liters.toFixed(1)}L</span><span class="history-consumption-badge ${p.class}">${p.icon} ${f.calculatedConsumption?f.calculatedConsumption.toFixed(1)+' km/L':'Inicial'}</span><span style="font-weight:700;">$${f.totalCost.toFixed(2)}</span></div></div>`;
-            }).join('') || '<div class="empty-state-mini">Sin registros</div>';
+            }).join('') : '<div class="empty-state-mini">Sin registros</div>';
+
+            // MESES SELECTOR
+            let mSet = new Set(); appData.fuels.forEach(f => mSet.add(f.date.substring(0,7)));
+            let mHtml = '<option value="todos">Todos los meses</option>';
+            Array.from(mSet).sort().reverse().forEach(m => {
+                let p = m.split('-'); mHtml += `<option value="${m}">${mesesNombres[parseInt(p[1])-1]} ${p[0]}</option>`;
+            });
+            document.getElementById('monthSelect').innerHTML = mHtml; document.getElementById('monthSelect').value = sel;
 
             renderServices();
         }
@@ -263,7 +263,9 @@
                 document.querySelectorAll('.nav-item, .tab-content').forEach(el => el.classList.remove('active'));
                 this.classList.add('active');
                 document.getElementById('tab-'+this.dataset.tab).classList.add('active');
-                document.getElementById('appTitle').innerText = this.querySelector('.nav-label').innerText;
+                const label = this.querySelector('.nav-label').innerText;
+                const icon = this.querySelector('.nav-icon').innerText;
+                document.getElementById('appTitle').innerText = `${icon} ${label}`;
                 document.getElementById('fabBtn').style.display = this.dataset.tab === 'inicio' ? 'flex' : 'none';
             };
         });
@@ -275,4 +277,66 @@
             document.getElementById('editFuelIndex').value = '';
             document.getElementById('fuelDate').value = new Date().toISOString().split('T')[0];
             document.getElementById('deleteFuelBtn').style.display = 'none';
+            document.getElementById('fuelModalTitle').innerText = "Nueva Carga";
             toggleModal('fuelModal','open');
+        }
+
+        document.getElementById('fuelForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            let id = document.getElementById('editFuelIndex').value;
+            let l = parseFloat(document.getElementById('fuelLiters').value);
+            let p = parseFloat(document.getElementById('fuelPrice').value);
+            let itm = { id: id || 'f_'+Date.now(), odometer: parseInt(document.getElementById('fuelOdometer').value), liters: l, pricePerLiter: p, date: document.getElementById('fuelDate').value, totalCost: l*p };
+            if(id) { let idx = appData.fuels.findIndex(f => f.id === id); appData.fuels[idx] = itm; }
+            else appData.fuels.push(itm);
+            toggleModal('fuelModal','close'); saveData();
+        });
+
+        function openEditFuel(id) {
+            const f = appData.fuels.find(x => x.id === id); if(!f) return;
+            document.getElementById('editFuelIndex').value = f.id;
+            document.getElementById('fuelOdometer').value = f.odometer;
+            document.getElementById('fuelLiters').value = f.liters;
+            document.getElementById('fuelPrice').value = f.pricePerLiter;
+            document.getElementById('fuelDate').value = f.date;
+            document.getElementById('fuelModalTitle').innerText = "Editar Carga";
+            document.getElementById('deleteFuelBtn').style.display = 'block';
+            toggleModal('fuelModal','open');
+            document.getElementById('liveTotal').innerText = '$'+(f.liters*f.pricePerLiter).toFixed(2);
+        }
+
+        document.getElementById('deleteFuelBtn').onclick = () => {
+            if(confirm('¿Eliminar?')) { appData.fuels = appData.fuels.filter(f => f.id !== document.getElementById('editFuelIndex').value); toggleModal('fuelModal','close'); saveData(); }
+        }
+
+        document.getElementById('fuelLiters').oninput = document.getElementById('fuelPrice').oninput = function() {
+            let l = parseFloat(document.getElementById('fuelLiters').value) || 0;
+            let p = parseFloat(document.getElementById('fuelPrice').value) || 0;
+            document.getElementById('liveTotal').innerText = '$'+(l*p).toFixed(2);
+        };
+
+        function saveCarName() { appData.carName = document.getElementById('carNameInput').value; toggleModal('nameModal','close'); saveData(); }
+        function saveOdometer() { appData.manualOdometer = parseInt(document.getElementById('odometerInput').value); toggleModal('odometerModal','close'); saveData(); }
+
+        // --- SERVICIOS ---
+        document.getElementById('serviceForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            appData.services.push({ id:'s_'+Date.now(), type: document.getElementById('serviceType').value, serviceOdometer: parseInt(document.getElementById('serviceOdometer').value), date: document.getElementById('serviceDate').value });
+            toggleModal('serviceModal','close'); saveData();
+        });
+
+        function renderServices() {
+            const list = document.getElementById('servicesList');
+            const odo = getCurrentOdometer();
+            list.innerHTML = appData.services.map(s => {
+                let diff = s.serviceOdometer - odo;
+                let badge = diff < 500 ? 'status-red' : (diff < 1000 ? 'status-yellow' : 'status-green');
+                return `<div class="service-item"><div><b>${s.type}</b><br><small>${formatNumber(s.serviceOdometer)} km</small></div><span class="service-status-badge ${badge}">${diff} km restantes</span><button onclick="deleteService('${s.id}')" style="background:none; border:none; color:#ccc; font-size:18px; margin-left:10px">✕</button></div>`;
+            }).join('') || '<div class="empty-state-mini">Sin servicios</div>';
+        }
+        function deleteService(id) { if(confirm('¿Eliminar?')) { appData.services = appData.services.filter(s => s.id !== id); saveData(); } }
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>
