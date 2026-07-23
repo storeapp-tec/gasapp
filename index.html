@@ -111,7 +111,6 @@
         .add-service-btn { width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 12px; }
         .add-service-btn:hover { background: #5a6fd6; }
 
-        /* TOAST */
         #toast {
             position: fixed;
             bottom: 140px;
@@ -144,7 +143,6 @@
 
         <div id="toast"></div>
 
-        <!-- TAB RESUMEN -->
         <div id="tab-inicio" class="tab-content active">
             <div class="inicio-header">
                 <div class="car-name-row"><span class="car-name" id="carNameDisplay" onclick="openNameModal()">Mi Auto</span></div>
@@ -154,7 +152,6 @@
             <div class="latest-fuels-list" id="latestFuelContainer"></div>
         </div>
 
-        <!-- TAB HISTORIAL -->
         <div id="tab-historial" class="tab-content">
             <div class="month-select-container"><select id="monthSelect" class="month-select"><option value="todos">Todos los meses</option></select></div>
             <div class="history-grid-4">
@@ -167,7 +164,6 @@
             <div class="history-list-compact" id="historyList"></div>
         </div>
 
-        <!-- TAB SERVICIOS -->
         <div id="tab-servicios" class="tab-content">
             <div class="section-label">Servicios Programados</div>
             <button class="add-service-btn" onclick="openServiceModal()">+ Agregar Servicio</button>
@@ -225,7 +221,6 @@
         </div>
     </div>
 
-    <!-- MODAL SERVICIOS -->
     <div class="modal" id="serviceModal">
         <div class="modal-content">
             <div class="modal-title">Agregar Servicio</div>
@@ -252,13 +247,12 @@
 
     <script>
         // ============================================================
-        // CONFIGURACIÓN
+        // CONFIGURACIÓN - URL DE GOOGLE APPS SCRIPT
         // ============================================================
-        const CLOUD_URL = 'https://script.google.com/macros/s/AKfycbwOgNaWbmrtWZD73FLysANR6zZB2rVGxXi3CKU_1ptn2SOarqgGKgXRgBuT3-XB1SB3/exec';
+        const URL_API = 'https://script.google.com/macros/s/AKfycbwOwn8iyjeWIK7WiywZQ-Ph96NwDzQCmRKoBkRsylpMlhc4fO2ohppzIIkw5uQo7QUL/exec';
         let appData = { carName: 'Mi Auto', manualOdometer: null, fuels: [], services: [] };
         const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         let toastTimeout = null;
-        let isSaving = false;
 
         // ============================================================
         // TOAST
@@ -353,51 +347,37 @@
         }
 
         // ============================================================
-        // EXCEL SYNC - CON ACCIONES (COMO EL SCRIPT DE VENTAS)
+        // EXCEL SYNC - COMO LA APP DE TIENDA
         // ============================================================
         async function callAction(action, data) {
-            if (isSaving) return { status: 'ERROR', mensaje: 'Ya hay una operación en curso' };
-            isSaving = true;
-            
             try {
-                const response = await fetch(CLOUD_URL, {
+                const payload = { accion: action, datos: data };
+                console.log('📤 Enviando:', payload);
+                
+                const response = await fetch(URL_API, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ accion: action, datos: data })
+                    body: JSON.stringify(payload)
                 });
                 
-                const text = await response.text();
-                let result;
-                try {
-                    result = JSON.parse(text);
-                } catch (e) {
-                    return { status: 'ERROR', mensaje: 'Respuesta inválida: ' + text.substring(0, 50) };
-                }
-                
+                const result = await response.json();
+                console.log('📥 Respuesta:', result);
                 return result;
             } catch (error) {
+                console.error('❌ Error:', error);
                 return { status: 'ERROR', mensaje: error.message };
-            } finally {
-                isSaving = false;
             }
         }
 
         async function loadData() {
             showToast('⏳ Cargando...', 'saving');
             try {
-                const response = await fetch(CLOUD_URL + '?accion=getData');
-                if (!response.ok) throw new Error('Error: ' + response.status);
+                const response = await fetch(URL_API);
+                const data = await response.json();
+                console.log('📥 Datos cargados:', data);
                 
-                const text = await response.text();
-                let result;
-                try {
-                    result = JSON.parse(text);
-                } catch (e) {
-                    throw new Error('No es JSON válido: ' + text.substring(0, 50));
-                }
-                
-                if (result.status === 'OK' && result.data) {
-                    appData = result.data;
+                if (data && data.fuels && Array.isArray(data.fuels)) {
+                    appData = data;
                     if (!appData.services) appData.services = [];
                     if (!appData.fuels) appData.fuels = [];
                     if (!appData.carName) appData.carName = 'Mi Auto';
@@ -414,7 +394,7 @@
                 }
             } catch (e) {
                 console.error('Error al cargar:', e);
-                showToast('❌ Error al cargar datos: ' + e.message, 'error');
+                showToast('❌ Error al cargar datos', 'error');
                 appData = { carName: 'Mi Auto', manualOdometer: null, fuels: [], services: [] };
                 updateUI();
             }
@@ -611,7 +591,6 @@
         }
 
         async function saveFuel() {
-            let id = document.getElementById('editFuelIndex').value;
             let l = parseFloat(document.getElementById('fuelLiters').value); 
             let p = parseFloat(document.getElementById('fuelPrice').value);
             let dateValue = document.getElementById('fuelDate').value;
@@ -624,12 +603,6 @@
                 pricePerLiter: p,
                 totalCost: l * p
             };
-            
-            if (id) {
-                // Actualizar - por ahora solo agregamos uno nuevo (no implementamos edición en Sheets)
-                showToast('⚠️ Edición no soportada, crea un nuevo registro', 'error');
-                return;
-            }
             
             const result = await callAction('addFuel', data);
             if (result && result.status === 'OK') {
@@ -661,7 +634,6 @@
                 const id = document.getElementById('editFuelIndex').value;
                 const fuel = appData.fuels.find(f => f.id === id);
                 if (fuel) {
-                    // Para eliminar, usamos los datos únicos de la carga
                     const result = await callAction('deleteFuel', {
                         date: fuel.date,
                         odometer: fuel.odometer
