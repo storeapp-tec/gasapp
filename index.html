@@ -5,13 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>⛽ GasApp</title>
 
-    <!-- PWA -->
-    <link rel="manifest" href="/gasapp-web/manifest.json">
-    <link rel="apple-touch-icon" sizes="512x512" href="/gasapp/icon-512.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/gasapp/icon-512.png">
-    <meta name="theme-color" content="#667eea">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -259,9 +252,9 @@
 
     <script>
         // ============================================================
-        // CONFIGURACIÓN - NUEVA URL ACTUALIZADA
+        // CONFIGURACIÓN
         // ============================================================
-        const CLOUD_URL = 'https://script.google.com/macros/s/AKfycbwOwn8iyjeWIK7WiywZQ-Ph96NwDzQCmRKoBkRsylpMlhc4fO2ohppzIIkw5uQo7QUL/exec';
+        const CLOUD_URL = 'https://script.google.com/macros/s/AKfycbwOgNaWbmrtWZD73FLysANR6zZB2rVGxXi3CKU_1ptn2SOarqgGKgXRgBuT3-XB1SB3/exec';
         let appData = { carName: 'Mi Auto', manualOdometer: null, fuels: [], services: [] };
         const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         let toastTimeout = null;
@@ -360,50 +353,30 @@
         }
 
         // ============================================================
-        // EXCEL SYNC - VERSIÓN SIMPLE Y FUNCIONAL
+        // EXCEL SYNC - CON ACCIONES (COMO EL SCRIPT DE VENTAS)
         // ============================================================
-        async function saveData() {
-            if (isSaving) return;
+        async function callAction(action, data) {
+            if (isSaving) return { status: 'ERROR', mensaje: 'Ya hay una operación en curso' };
             isSaving = true;
-            showToast('⏳ Guardando...', 'saving');
             
             try {
-                // Enviar TODO (el script en Sheets se encarga de agregar solo lo nuevo)
-                const dataToSend = {
-                    carName: appData.carName,
-                    manualOdometer: appData.manualOdometer,
-                    fuels: appData.fuels.map(f => ({
-                        date: formatDateForExcel(f.date) || f.date,
-                        odometer: f.odometer,
-                        liters: f.liters,
-                        pricePerLiter: f.pricePerLiter,
-                        totalCost: f.totalCost
-                    })),
-                    services: appData.services.map(s => ({
-                        date: formatDateForExcel(s.date) || s.date,
-                        serviceOdometer: s.serviceOdometer,
-                        type: s.type,
-                        status: s.status || 'pendiente'
-                    }))
-                };
-                
                 const response = await fetch(CLOUD_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dataToSend)
+                    body: JSON.stringify({ accion: action, datos: data })
                 });
                 
                 const text = await response.text();
-                if (text === 'OK') {
-                    showToast('✅ Guardado en la nube', 'success');
-                } else if (text.startsWith('ERROR')) {
-                    showToast('❌ ' + text, 'error');
-                } else {
-                    showToast('✅ Datos guardados', 'success');
+                let result;
+                try {
+                    result = JSON.parse(text);
+                } catch (e) {
+                    return { status: 'ERROR', mensaje: 'Respuesta inválida: ' + text.substring(0, 50) };
                 }
-            } catch (e) {
-                console.error('Error al guardar:', e);
-                showToast('❌ Error al guardar', 'error');
+                
+                return result;
+            } catch (error) {
+                return { status: 'ERROR', mensaje: error.message };
             } finally {
                 isSaving = false;
             }
@@ -412,24 +385,23 @@
         async function loadData() {
             showToast('⏳ Cargando...', 'saving');
             try {
-                const response = await fetch(CLOUD_URL);
+                const response = await fetch(CLOUD_URL + '?accion=getData');
                 if (!response.ok) throw new Error('Error: ' + response.status);
                 
                 const text = await response.text();
-                let cloud;
+                let result;
                 try {
-                    cloud = JSON.parse(text);
+                    result = JSON.parse(text);
                 } catch (e) {
                     throw new Error('No es JSON válido: ' + text.substring(0, 50));
                 }
                 
-                if (cloud && cloud.fuels && Array.isArray(cloud.fuels)) {
-                    appData = cloud;
+                if (result.status === 'OK' && result.data) {
+                    appData = result.data;
                     if (!appData.services) appData.services = [];
                     if (!appData.fuels) appData.fuels = [];
                     if (!appData.carName) appData.carName = 'Mi Auto';
                     
-                    // Asignar IDs a los registros existentes
                     appData.fuels.forEach(f => { if (!f.id) f.id = 'f_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6); });
                     appData.services.forEach(s => { if (!s.id) s.id = 's_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6); });
                     
@@ -643,21 +615,31 @@
             let l = parseFloat(document.getElementById('fuelLiters').value); 
             let p = parseFloat(document.getElementById('fuelPrice').value);
             let dateValue = document.getElementById('fuelDate').value;
-            let itm = { 
-                id: id || 'f_' + Date.now(), 
-                odometer: parseInt(document.getElementById('fuelOdometer').value), 
-                liters: l, 
-                pricePerLiter: p, 
-                date: dateValue, 
-                totalCost: l*p 
+            let odo = parseInt(document.getElementById('fuelOdometer').value);
+            
+            const data = {
+                date: dateValue,
+                odometer: odo,
+                liters: l,
+                pricePerLiter: p,
+                totalCost: l * p
             };
-            if(id) { 
-                let idx = appData.fuels.findIndex(f => f.id === id); 
-                if(idx !== -1) appData.fuels[idx] = itm; 
-            } else appData.fuels.push(itm);
-            toggleModal('fuelModal','close'); 
-            await saveData();
-            updateUI();
+            
+            if (id) {
+                // Actualizar - por ahora solo agregamos uno nuevo (no implementamos edición en Sheets)
+                showToast('⚠️ Edición no soportada, crea un nuevo registro', 'error');
+                return;
+            }
+            
+            const result = await callAction('addFuel', data);
+            if (result && result.status === 'OK') {
+                appData.fuels.push({ ...data, id: 'f_' + Date.now() });
+                toggleModal('fuelModal','close');
+                updateUI();
+                showToast('✅ Carga guardada', 'success');
+            } else {
+                showToast('❌ Error al guardar: ' + (result?.mensaje || 'desconocido'), 'error');
+            }
         }
 
         function openEditFuel(id) {
@@ -676,10 +658,23 @@
 
         document.getElementById('deleteFuelBtn').onclick = async () => { 
             if(confirm('¿Eliminar este registro?')) { 
-                appData.fuels = appData.fuels.filter(f => f.id !== document.getElementById('editFuelIndex').value); 
-                toggleModal('fuelModal','close'); 
-                await saveData();
-                updateUI();
+                const id = document.getElementById('editFuelIndex').value;
+                const fuel = appData.fuels.find(f => f.id === id);
+                if (fuel) {
+                    // Para eliminar, usamos los datos únicos de la carga
+                    const result = await callAction('deleteFuel', {
+                        date: fuel.date,
+                        odometer: fuel.odometer
+                    });
+                    if (result && result.status === 'OK') {
+                        appData.fuels = appData.fuels.filter(f => f.id !== id);
+                        toggleModal('fuelModal','close');
+                        updateUI();
+                        showToast('✅ Registro eliminado', 'success');
+                    } else {
+                        showToast('❌ Error al eliminar: ' + (result?.mensaje || 'desconocido'), 'error');
+                    }
+                }
             } 
         };
 
@@ -700,10 +695,15 @@
         async function saveManualOdo() { 
             let odo = parseInt(document.getElementById('odoInput').value);
             if(odo > 0) { 
-                appData.manualOdometer = odo; 
-                toggleModal('odoModal','close'); 
-                await saveData();
-                updateUI();
+                const result = await callAction('updateOdometer', { manualOdometer: odo });
+                if (result && result.status === 'OK') {
+                    appData.manualOdometer = odo;
+                    toggleModal('odoModal','close');
+                    updateUI();
+                    showToast('✅ Odómetro actualizado', 'success');
+                } else {
+                    showToast('❌ Error al guardar: ' + (result?.mensaje || 'desconocido'), 'error');
+                }
             }
         }
 
@@ -718,10 +718,15 @@
         async function saveCarName() { 
             let name = document.getElementById('carNameInput').value.trim();
             if(name) { 
-                appData.carName = name; 
-                toggleModal('nameModal','close'); 
-                await saveData();
-                updateUI();
+                const result = await callAction('updateCarName', { carName: name });
+                if (result && result.status === 'OK') {
+                    appData.carName = name;
+                    toggleModal('nameModal','close');
+                    updateUI();
+                    showToast('✅ Nombre actualizado', 'success');
+                } else {
+                    showToast('❌ Error al guardar: ' + (result?.mensaje || 'desconocido'), 'error');
+                }
             }
         }
 
@@ -748,16 +753,25 @@
             }
             
             if(type && odo > 0 && dateValue) {
-                appData.services.push({ 
-                    id: 's_' + Date.now(), 
-                    type: type, 
-                    serviceOdometer: odo, 
+                const data = {
                     date: dateValue,
+                    serviceOdometer: odo,
+                    type: type,
                     status: 'pendiente'
-                });
-                toggleModal('serviceModal','close'); 
-                await saveData();
-                updateUI();
+                };
+                
+                const result = await callAction('addService', data);
+                if (result && result.status === 'OK') {
+                    appData.services.push({ 
+                        id: 's_' + Date.now(), 
+                        ...data
+                    });
+                    toggleModal('serviceModal','close');
+                    updateUI();
+                    showToast('✅ Servicio guardado', 'success');
+                } else {
+                    showToast('❌ Error al guardar: ' + (result?.mensaje || 'desconocido'), 'error');
+                }
             }
         }
 
@@ -769,18 +783,37 @@
             if (confirm('¿Marcar este servicio como REALIZADO?')) {
                 const service = appData.services.find(s => s.id === id);
                 if (service) {
-                    service.status = 'realizado';
-                    await saveData();
-                    updateUI();
+                    const result = await callAction('markServiceDone', {
+                        type: service.type,
+                        serviceOdometer: service.serviceOdometer
+                    });
+                    if (result && result.status === 'OK') {
+                        service.status = 'realizado';
+                        updateUI();
+                        showToast('✅ Servicio marcado como realizado', 'success');
+                    } else {
+                        showToast('❌ Error al actualizar: ' + (result?.mensaje || 'desconocido'), 'error');
+                    }
                 }
             }
         }
 
         async function deleteService(id) { 
             if(confirm('¿Eliminar este servicio?')) { 
-                appData.services = appData.services.filter(s => s.id !== id); 
-                await saveData();
-                updateUI();
+                const service = appData.services.find(s => s.id === id);
+                if (service) {
+                    const result = await callAction('deleteService', {
+                        type: service.type,
+                        serviceOdometer: service.serviceOdometer
+                    });
+                    if (result && result.status === 'OK') {
+                        appData.services = appData.services.filter(s => s.id !== id);
+                        updateUI();
+                        showToast('✅ Servicio eliminado', 'success');
+                    } else {
+                        showToast('❌ Error al eliminar: ' + (result?.mensaje || 'desconocido'), 'error');
+                    }
+                }
             } 
         }
 
