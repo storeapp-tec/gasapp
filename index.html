@@ -359,38 +359,40 @@
         }
 
         // ============================================================
-        // EXCEL SYNC - CON ACCIONES
+        // EXCEL SYNC - VERSIÓN SIMPLE (FUNCIONA)
         // ============================================================
-        async function callAction(action, data) {
+        async function saveData() {
+            showToast('⏳ Guardando...', 'saving');
             try {
-                const response = await fetch(CLOUD_URL + '?action=' + action, {
+                const dataToSend = {
+                    carName: appData.carName,
+                    manualOdometer: appData.manualOdometer,
+                    fuels: appData.fuels.map(f => ({ ...f, date: formatDateForExcel(f.date) || f.date })),
+                    services: appData.services.map(s => ({ ...s, date: formatDateForExcel(s.date) || s.date }))
+                };
+                
+                const response = await fetch(CLOUD_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: action, data: data })
+                    body: JSON.stringify(dataToSend)
                 });
-                const result = await response.json();
-                if (result.success) {
-                    console.log('✅ ' + result.message);
-                    return result;
-                } else {
-                    console.error('❌ ' + result.error);
-                    return result;
-                }
-            } catch (error) {
-                console.error('❌ Error en callAction:', error);
-                return { success: false, error: error.message };
+                if (!response.ok) throw new Error('Error: ' + response.status);
+                showToast('✅ Guardado en la nube', 'success');
+            } catch (e) {
+                console.error('Error al guardar:', e);
+                showToast('❌ Error al guardar', 'error');
             }
         }
 
         async function loadData() {
             showToast('⏳ Cargando...', 'saving');
             try {
-                const response = await fetch(CLOUD_URL + '?action=getData');
+                const response = await fetch(CLOUD_URL);
                 if (!response.ok) throw new Error('Error: ' + response.status);
-                const result = await response.json();
+                const cloud = await response.json();
                 
-                if (result.success && result.data) {
-                    appData = result.data;
+                if (cloud && cloud.fuels && Array.isArray(cloud.fuels)) {
+                    appData = cloud;
                     if (!appData.services) appData.services = [];
                     if (!appData.fuels) appData.fuels = [];
                     if (!appData.carName) appData.carName = 'Mi Auto';
@@ -414,12 +416,11 @@
         // ============================================================
         function updateUI() {
             try {
-                const fuels = appData.fuels || [];
-                fuels.sort((a, b) => new Date(a.date) - new Date(b.date));
-                const chrono = calculateChrono(fuels);
+                appData.fuels.sort((a, b) => new Date(a.date) - new Date(b.date));
+                const chrono = calculateChrono(appData.fuels);
                 const view = [...chrono].reverse();
 
-                document.getElementById('carNameDisplay').innerText = appData.carName || 'Mi Auto';
+                document.getElementById('carNameDisplay').innerText = appData.carName;
                 document.getElementById('mainOdometer').innerText = formatNumber(getCurrentOdometer());
 
                 // INICIO
@@ -442,7 +443,7 @@
                 // HISTORIAL
                 const sel = document.getElementById('monthSelect').value || 'todos';
                 let mSet = new Set(); 
-                fuels.forEach(f => { if(f.date) mSet.add(f.date.substring(0,7)); });
+                appData.fuels.forEach(f => { if(f.date) mSet.add(f.date.substring(0,7)); });
                 let mHtml = '<option value="todos">Todos los meses</option>';
                 Array.from(mSet).sort().reverse().forEach(m => {
                     let p = m.split('-'); 
@@ -488,13 +489,12 @@
                 }
 
                 // SERVICIOS
-                const services = appData.services || [];
                 const slist = document.getElementById('servicesList');
-                if (services.length === 0) {
+                if (appData.services.length === 0) {
                     slist.innerHTML = `<div class="empty-state-mini">No hay servicios programados</div>`;
                 } else {
                     const currentOdo = getCurrentOdometer();
-                    const sortedServices = [...services].sort((a, b) => {
+                    const sortedServices = [...appData.services].sort((a, b) => {
                         if (a.status === 'pendiente' && b.status !== 'pendiente') return -1;
                         if (a.status !== 'pendiente' && b.status === 'pendiente') return 1;
                         return a.serviceOdometer - b.serviceOdometer;
@@ -604,34 +604,21 @@
             let l = parseFloat(document.getElementById('fuelLiters').value); 
             let p = parseFloat(document.getElementById('fuelPrice').value);
             let dateValue = document.getElementById('fuelDate').value;
-            let odo = parseInt(document.getElementById('fuelOdometer').value);
-            
-            const data = {
-                date: dateValue,
-                odometer: odo,
-                liters: l,
-                pricePerLiter: p,
-                totalCost: l * p
+            let itm = { 
+                id: id || 'f_'+Date.now(), 
+                odometer: parseInt(document.getElementById('fuelOdometer').value), 
+                liters: l, 
+                pricePerLiter: p, 
+                date: dateValue, 
+                totalCost: l*p 
             };
-            
-            if (id) {
-                // Actualizar
-                data.index = appData.fuels.findIndex(f => f.id === id);
-                const result = await callAction('updateFuel', data);
-                if (result.success) {
-                    const idx = appData.fuels.findIndex(f => f.id === id);
-                    if (idx !== -1) appData.fuels[idx] = { ...appData.fuels[idx], ...data };
-                    updateUI();
-                }
-            } else {
-                // Agregar
-                const result = await callAction('addFuel', data);
-                if (result.success) {
-                    appData.fuels.push({ ...data, id: 'f_' + Date.now() });
-                    updateUI();
-                }
-            }
-            toggleModal('fuelModal','close');
+            if(id) { 
+                let idx = appData.fuels.findIndex(f => f.id === id); 
+                if(idx !== -1) appData.fuels[idx] = itm; 
+            } else appData.fuels.push(itm);
+            toggleModal('fuelModal','close'); 
+            await saveData();
+            updateUI();
         }
 
         function openEditFuel(id) {
@@ -649,15 +636,11 @@
         }
 
         document.getElementById('deleteFuelBtn').onclick = async () => { 
-            const id = document.getElementById('editFuelIndex').value;
             if(confirm('¿Eliminar este registro?')) { 
-                const idx = appData.fuels.findIndex(f => f.id === id);
-                const result = await callAction('deleteFuel', { index: idx });
-                if (result.success) {
-                    appData.fuels = appData.fuels.filter(f => f.id !== id);
-                    toggleModal('fuelModal','close');
-                    updateUI();
-                }
+                appData.fuels = appData.fuels.filter(f => f.id !== document.getElementById('editFuelIndex').value); 
+                toggleModal('fuelModal','close'); 
+                await saveData();
+                updateUI();
             } 
         };
 
@@ -678,14 +661,10 @@
         async function saveManualOdo() { 
             let odo = parseInt(document.getElementById('odoInput').value);
             if(odo > 0) { 
-                const result = await callAction('updateOdometer', { manualOdometer: odo });
-                if (result.success) {
-                    appData.manualOdometer = odo;
-                    toggleModal('odoModal','close');
-                    updateUI();
-                }
-            } else {
-                showToast('❌ Ingresa un valor válido', 'error');
+                appData.manualOdometer = odo; 
+                toggleModal('odoModal','close'); 
+                await saveData();
+                updateUI();
             }
         }
 
@@ -700,12 +679,10 @@
         async function saveCarName() { 
             let name = document.getElementById('carNameInput').value.trim();
             if(name) { 
-                const result = await callAction('updateCarName', { carName: name });
-                if (result.success) {
-                    appData.carName = name;
-                    toggleModal('nameModal','close');
-                    updateUI();
-                }
+                appData.carName = name; 
+                toggleModal('nameModal','close'); 
+                await saveData();
+                updateUI();
             }
         }
 
@@ -732,22 +709,16 @@
             }
             
             if(type && odo > 0 && dateValue) {
-                const data = {
+                appData.services.push({ 
+                    id: 's_'+Date.now(), 
+                    type: type, 
+                    serviceOdometer: odo, 
                     date: dateValue,
-                    serviceOdometer: odo,
-                    type: type,
                     status: 'pendiente'
-                };
-                
-                const result = await callAction('addService', data);
-                if (result.success) {
-                    appData.services.push({ 
-                        id: 's_'+Date.now(), 
-                        ...data
-                    });
-                    toggleModal('serviceModal','close');
-                    updateUI();
-                }
+                });
+                toggleModal('serviceModal','close'); 
+                await saveData();
+                updateUI();
             }
         }
 
@@ -759,31 +730,18 @@
             if (confirm('¿Marcar este servicio como REALIZADO?')) {
                 const service = appData.services.find(s => s.id === id);
                 if (service) {
-                    const idx = appData.services.findIndex(s => s.id === id);
-                    const data = {
-                        index: idx,
-                        date: service.date,
-                        serviceOdometer: service.serviceOdometer,
-                        type: service.type,
-                        status: 'realizado'
-                    };
-                    const result = await callAction('updateService', data);
-                    if (result.success) {
-                        service.status = 'realizado';
-                        updateUI();
-                    }
+                    service.status = 'realizado';
+                    await saveData();
+                    updateUI();
                 }
             }
         }
 
         async function deleteService(id) { 
             if(confirm('¿Eliminar este servicio?')) { 
-                const idx = appData.services.findIndex(s => s.id === id);
-                const result = await callAction('deleteService', { index: idx });
-                if (result.success) {
-                    appData.services = appData.services.filter(s => s.id !== id);
-                    updateUI();
-                }
+                appData.services = appData.services.filter(s => s.id !== id); 
+                await saveData();
+                updateUI();
             } 
         }
 
