@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>⛽ GasApp</title>
 
+    <!-- PWA -->
     <link rel="manifest" href="/gasapp-web/manifest.json">
     <link rel="apple-touch-icon" sizes="512x512" href="/gasapp/icon-512.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/gasapp/icon-512.png">
@@ -13,7 +14,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <style>
-        /* CSS ORIGINAL RESTAURADO */
+        /* ESTILOS ORIGINALES RESTAURADOS */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; appearance: none; }
@@ -26,42 +27,41 @@
         .header-left .app-name { font-size: 16px; font-weight: 700; letter-spacing: 0.5px; }
         .header-right .header-title { font-size: 16px; font-weight: 600; opacity: 0.9; }
 
-        .tab-content { display: none; flex: 1; overflow-y: auto; padding: 12px 16px 80px; }
+        .tab-content { display: none; flex: 1; overflow-y: auto; padding: 12px 16px 85px; }
         .tab-content.active { display: block; }
 
         .inicio-header { background: white; border-radius: 16px; padding: 14px 18px 16px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); text-align: center; }
-        .car-name { font-size: 16px; font-weight: 600; cursor: pointer; padding: 4px 8px; }
+        .car-name { font-size: 16px; font-weight: 600; cursor: pointer; padding: 4px; }
         .odo-value { font-size: 32px; font-weight: 700; cursor: pointer; }
         .odo-unit { font-size: 14px; color: #888; }
 
+        /* GRID RESUMEN HISTORIAL */
         .history-grid-4 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
-        .history-summary-card { background: white; border-radius: 10px; padding: 8px 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .history-summary-card { background: white; border-radius: 10px; padding: 8px 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); text-align: center; }
         .h-card-title { font-size: 10px; text-transform: uppercase; color: #999; font-weight: 600; }
         .h-card-value { font-size: 14px; font-weight: 700; }
 
         .month-select-container { margin-bottom: 10px; display: flex; justify-content: center; }
-        .month-select { padding: 6px 12px; border-radius: 20px; border: 1px solid #ddd; font-size: 13px; font-weight: 600; color: #444; background: white; outline: none; }
+        .month-select { padding: 6px 12px; border-radius: 20px; border: 1px solid #ddd; font-size: 13px; font-weight: 600; color: #444; background: white; }
 
-        /* DISEÑO DE CARGAS EN UNA SOLA LÍNEA (INICIO) */
-        .single-line-fuel { background: white; border-radius: 10px; padding: 10px 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); font-size: 13px; font-weight: 500; display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 6px; }
+        /* LISTA INICIO (UNA SOLA LÍNEA) */
+        .single-line-fuel { background: white; border-radius: 10px; padding: 10px 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); font-size: 13px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 6px; }
 
-        /* HISTORIAL EN 3 COLUMNAS */
+        /* LISTA HISTORIAL (3 COLUMNAS) */
         .history-item-compact { background: white; border-radius: 10px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); cursor: pointer; margin-bottom: 6px; }
-        .h-col-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; text-align: center; }
+        .h-col-row { display: grid; grid-template-columns: 1fr 1.2fr 1fr; align-items: center; }
         .h-left { text-align: left; }
+        .h-center { text-align: center; }
         .h-right { text-align: right; }
         
-        .history-consumption-badge { font-weight: 600; padding: 2px 6px; border-radius: 4px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; }
+        .history-consumption-badge { font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; }
         .badge-good { background: #e6f4ea; color: #137333; }
         .badge-warn { background: #fef7e0; color: #b06000; }
         .badge-bad { background: #fce8e6; color: #c5221f; }
         .badge-none { background: #f1f3f4; color: #5f6368; }
 
-        .section-label { font-size: 13px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-
-        /* NAV BAR */
-        .nav-bar { background: white; height: 60px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-around; box-shadow: 0 -3px 10px rgba(0,0,0,0.05); border-top: 1px solid rgba(0,0,0,0.05); z-index: 10; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #888; cursor: pointer; border: none; background: none; }
+        .nav-bar { background: white; height: 60px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-around; box-shadow: 0 -3px 10px rgba(0,0,0,0.05); border-top: 1px solid #eee; z-index: 10; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #888; cursor: pointer; background: none; border: none; }
         .nav-item.active { color: #667eea; font-weight: 600; }
         .nav-icon { font-size: 18px; }
         .nav-label { font-size: 11px; }
@@ -69,59 +69,48 @@
         .btn-fab { position: fixed; bottom: 76px; right: 20px; width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 50%; font-size: 24px; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); z-index: 99; }
 
         /* MODALES */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 10000; padding: 16px; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 10000; padding: 16px; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
         .modal.active { opacity: 1; pointer-events: auto; }
-        .modal-content { background: white; border-radius: 16px; padding: 20px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
-        .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; text-align: center; }
+        .modal-content { background: white; border-radius: 16px; padding: 20px; width: 100%; max-width: 400px; }
         .field-group { margin-bottom: 12px; }
         .field-group label { display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 4px; }
-        .field-group input { width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; background: #fafafa; }
-        .modal-buttons { display: flex; gap: 10px; margin-top: 18px; }
-        .btn-modal { flex: 1; padding: 12px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
-        .btn-modal-primary { background: #667eea; color: white; }
-        .btn-modal-secondary { background: #f0f2f5; color: #4b5563; }
+        .field-group input { width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 10px; }
     </style>
 </head>
 <body>
 
     <div class="app">
         <header class="header-mini">
-            <div class="header-left">
-                <span class="icon">⛽</span>
-                <span class="app-name">GasApp</span>
-            </div>
+            <div class="header-left"><span class="icon">⛽</span><span class="app-name">GasApp</span></div>
             <div class="header-right"><span class="header-title" id="appTitle">Resumen</span></div>
         </header>
 
-        <!-- INICIO -->
+        <!-- TABS -->
         <div id="tab-inicio" class="tab-content active">
             <div class="inicio-header">
                 <div onclick="toggleModal('nameModal','open')"><span class="car-name" id="carNameDisplay">Mi Auto</span></div>
                 <div onclick="toggleModal('odoModal','open')"><span class="odo-value" id="mainOdometer">0</span><span class="odo-unit">km</span></div>
             </div>
-            <div class="section-label">Últimas Cargas Recientes</div>
-            <div class="latest-fuels-list" id="latestFuelContainer"></div>
+            <p style="font-size:13px; font-weight:600; color:#666; text-transform:uppercase; margin-bottom:8px;">Últimas Cargas</p>
+            <div id="latestFuelContainer"></div>
         </div>
 
-        <!-- HISTORIAL -->
         <div id="tab-historial" class="tab-content">
             <div class="month-select-container">
                 <select id="monthSelect" class="month-select" onchange="updateUI()"><option value="todos">Todos los meses</option></select>
             </div>
             <div class="history-grid-4">
-                <div class="history-summary-card"><span class="h-card-title">Km Recorridos</span><span class="h-card-value" id="summaryKm">0 km</span></div>
-                <div class="history-summary-card"><span class="h-card-title">Gastos</span><span class="h-card-value" id="summaryTotal">$0.00</span></div>
-                <div class="history-summary-card"><span class="h-card-title">Litros</span><span class="h-card-value" id="summaryLiters">0.0 L</span></div>
-                <div class="history-summary-card"><span class="h-card-title">Rendimiento</span><span class="h-card-value" id="summaryAvg">0.0 km/L</span></div>
+                <div class="history-summary-card"><span class="h-card-title">Km</span><span class="h-card-value" id="summaryKm">0</span></div>
+                <div class="history-summary-card"><span class="h-card-title">Gasto</span><span class="h-card-value" id="summaryTotal">$0</span></div>
+                <div class="history-summary-card"><span class="h-card-title">Litros</span><span class="h-card-value" id="summaryLiters">0</span></div>
+                <div class="history-summary-card"><span class="h-card-title">Promedio</span><span class="h-card-value" id="summaryAvg">0</span></div>
             </div>
-            <div class="section-label">Historial de Cargas</div>
             <div id="historyList"></div>
         </div>
 
-        <!-- SERVICIOS -->
         <div id="tab-servicios" class="tab-content">
-            <button class="btn-modal btn-modal-primary" style="width:100%; margin-bottom:15px;" onclick="toggleModal('serviceModal','open')">+ Agregar Servicio</button>
-            <div id="servicesList"></div>
+            <button class="btn-modal" style="width:100%; padding:12px; background:#667eea; color:white; border:none; border-radius:10px; font-weight:bold; margin-bottom:15px;" onclick="toggleModal('serviceModal','open')">+ Agregar Servicio</button>
+            <div id="servicesList" class="history-list-compact"></div>
         </div>
 
         <button class="btn-fab" onclick="openNewFuel()">+</button>
@@ -143,19 +132,19 @@
                 <div class="field-group"><label>Litros</label><input type="number" id="fuelLiters" step="0.01" required></div>
                 <div class="field-group"><label>Precio/L</label><input type="number" id="fuelPrice" step="0.01" required></div>
                 <div class="field-group"><label>Fecha</label><input type="date" id="fuelDate" required></div>
-                <p style="text-align:right; font-weight:bold; margin:10px 0;">Total: <span id="liveTotal">$0.00</span></p>
-                <div class="modal-buttons">
-                    <button type="button" class="btn-modal btn-modal-secondary" onclick="toggleModal('fuelModal','close')">Cancelar</button>
-                    <button type="submit" class="btn-modal btn-modal-primary">Guardar</button>
+                <p style="text-align:right; font-weight:bold; margin-bottom:10px;">Total: <span id="liveTotal">$0.00</span></p>
+                <div style="display:flex; gap:10px;">
+                    <button type="button" class="btn-modal" style="flex:1; padding:10px; border-radius:8px; border:none;" onclick="toggleModal('fuelModal','close')">Cancelar</button>
+                    <button type="submit" class="btn-modal" style="flex:1; padding:10px; border-radius:8px; border:none; background:#667eea; color:white; font-weight:bold;">Guardar</button>
                 </div>
-                <button type="button" id="deleteFuelBtn" style="width:100%; margin-top:10px; color:red; background:#fce8e6; border:none; padding:12px; border-radius:10px; display:none;">Eliminar</button>
+                <button type="button" id="deleteFuelBtn" style="width:100%; margin-top:10px; color:red; background:#fce8e6; border:none; padding:10px; border-radius:8px; display:none;">Eliminar</button>
             </form>
         </div>
     </div>
 
-    <div class="modal" id="nameModal"><div class="modal-content"><h3>Nombre</h3><input type="text" id="carNameInput" style="width:100%; padding:10px; margin:15px 0;"><button class="btn-modal btn-modal-primary" onclick="saveCarName()">Guardar</button></div></div>
-    <div class="modal" id="odoModal"><div class="modal-content"><h3>KM</h3><input type="number" id="manualOdoInput" style="width:100%; padding:10px; margin:15px 0;"><button class="btn-modal btn-modal-primary" onclick="saveManualOdo()">Guardar</button></div></div>
-    <div class="modal" id="serviceModal"><div class="modal-content"><h3>Servicio</h3><form id="serviceForm" onsubmit="event.preventDefault(); saveService();"><div class="field-group"><label>Tipo</label><input type="text" id="serviceType" required></div><div class="field-group"><label>KM Meta</label><input type="number" id="serviceOdometer" required></div><div class="field-group"><label>Fecha</label><input type="date" id="serviceDate" required></div><button type="submit" class="btn-modal btn-modal-primary" style="width:100%">Guardar</button></form></div></div>
+    <div class="modal" id="nameModal"><div class="modal-content"><h3>Nombre</h3><input type="text" id="carNameInput" style="width:100%; padding:10px; margin:15px 0;"><button onclick="saveCarName()" style="width:100%; padding:10px; background:#667eea; color:white; border:none; border-radius:8px;">Guardar</button></div></div>
+    <div class="modal" id="odoModal"><div class="modal-content"><h3>Kilometraje</h3><input type="number" id="odoInput" style="width:100%; padding:10px; margin:15px 0;"><button onclick="saveManualOdo()" style="width:100%; padding:10px; background:#667eea; color:white; border:none; border-radius:8px;">Guardar</button></div></div>
+    <div class="modal" id="serviceModal"><div class="modal-content"><h3>Servicio</h3><form onsubmit="event.preventDefault(); saveService();"><div class="field-group"><label>Tipo</label><input type="text" id="serviceType" required></div><div class="field-group"><label>KM Meta</label><input type="number" id="serviceOdometer" required></div><div class="field-group"><label>Fecha</label><input type="date" id="serviceDate" required></div><button type="submit" style="width:100%; padding:10px; background:#667eea; color:white; border:none; border-radius:8px;">Guardar</button></form></div></div>
 
     <script>
         const CLOUD_URL = 'https://script.google.com/macros/s/AKfycbxq9p7ACA1TWykKEpsu08Xt4ZK-usyFY_dtUPnjGHEn-8q3y_FwIkqITDo3qtFW46KP/exec';
@@ -182,37 +171,37 @@
         function formatDateShort(d) { if(!d) return ''; let p = d.split('-'); return p.length===3 ? `${p[2]}-${mesesNombres[parseInt(p[1])-1]}` : d; }
         function getCurrentOdometer() { return appData.manualOdometer || (appData.fuels.length ? Math.max(...appData.fuels.map(f => f.odometer)) : 0); }
 
-        function calculateContinuousConsumption(chronoFuels) {
-            return chronoFuels.map((fuel, index) => {
-                if (index === 0) return { ...fuel, calculatedConsumption: null, kmDiff: 0 };
-                let kmDiff = fuel.odometer - chronoFuels[index - 1].odometer;
-                let totalKm = fuel.odometer - chronoFuels[0].odometer;
-                let totalLit = chronoFuels.slice(0, index).reduce((sum, f) => sum + f.liters, 0);
-                return { ...fuel, kmDiff, calculatedConsumption: (totalKm > 0 && totalLit > 0) ? totalKm / totalLit : null };
+        function calculateChrono(fuels) {
+            return fuels.map((f, i) => {
+                if (i === 0) return { ...f, kmDiff: 0, avg: null };
+                let diff = f.odometer - fuels[i-1].odometer;
+                let totalKm = f.odometer - fuels[0].odometer;
+                let totalLit = fuels.slice(0, i).reduce((s, x) => s + x.liters, 0);
+                return { ...f, kmDiff: diff, avg: (totalKm > 0 && totalLit > 0) ? totalKm / totalLit : null };
             });
         }
 
-        function getStatusProps(val) {
-            if (!val) return { class: 'badge-none', icon: '🔵' };
-            if (val >= 10.0) return { class: 'badge-good', icon: '🟢' };
-            if (val >= 8.5) return { class: 'badge-warn', icon: '🔸' };
+        function getStatusProps(v) {
+            if (!v) return { class: 'badge-none', icon: '🔵' };
+            if (v >= 10.0) return { class: 'badge-good', icon: '🟢' };
+            if (v >= 8.5) return { class: 'badge-warn', icon: '🔸' };
             return { class: 'badge-bad', icon: '🔴' };
         }
 
         function updateUI() {
             appData.fuels.sort((a, b) => new Date(a.date) - new Date(b.date));
-            const chrono = calculateContinuousConsumption(appData.fuels);
+            const chrono = calculateChrono(appData.fuels);
             const view = [...chrono].reverse();
 
             document.getElementById('carNameDisplay').innerText = appData.carName;
             document.getElementById('mainOdometer').innerText = formatNumber(getCurrentOdometer());
 
-            // INICIO (UNA SOLA LÍNEA)
+            // INICIO (UNA LÍNEA)
             const latest = document.getElementById('latestFuelContainer');
             latest.innerHTML = view.slice(0, 5).map(f => {
-                let p = getStatusProps(f.calculatedConsumption);
-                return `<div class="single-line-fuel" onclick="openEditFuel('${f.id}')"><span>${formatDateShort(f.date)}</span><span>⛽ ${f.liters.toFixed(1)}L</span><span>$${formatNumber(f.totalCost.toFixed(2))}</span><span>${p.icon} ${f.calculatedConsumption?f.calculatedConsumption.toFixed(1)+' km/L':'Inicial'}</span></div>`;
-            }).join('') || '<div class="empty-state-mini">No hay registros</div>';
+                let p = getStatusProps(f.avg);
+                return `<div class="single-line-fuel" onclick="openEditFuel('${f.id}')"><span>${formatDateShort(f.date)}</span><span>${f.liters.toFixed(1)}L</span><span>$${formatNumber(f.totalCost.toFixed(0))}</span><span>${p.icon} ${f.avg?f.avg.toFixed(1):'Ini'}</span></div>`;
+            }).join('') || '<p style="text-align:center; padding:20px; color:#999">Sin datos</p>';
 
             // HISTORIAL (3 COLUMNAS)
             const sel = document.getElementById('monthSelect').value;
@@ -220,40 +209,44 @@
             let fView = sel === "todos" ? view : view.filter(f => f.date.startsWith(sel));
             let fChrono = sel === "todos" ? chrono : chrono.filter(f => f.date.startsWith(sel));
 
-            let km = fChrono.reduce((sum, f) => sum + f.kmDiff, 0);
-            let cost = fChrono.reduce((sum, f) => sum + f.totalCost, 0);
-            let lit = fChrono.reduce((sum, f) => sum + f.liters, 0);
-            document.getElementById('summaryKm').innerText = `${formatNumber(km)} km`;
-            document.getElementById('summaryTotal').innerText = `$${formatNumber(cost.toFixed(2))}`;
-            document.getElementById('summaryLiters').innerText = `${lit.toFixed(1)} L`;
+            let km = fChrono.reduce((s, f) => s + f.kmDiff, 0);
+            let cost = fChrono.reduce((s, f) => s + f.totalCost, 0);
+            let lit = fChrono.reduce((s, f) => s + f.liters, 0);
+            document.getElementById('summaryKm').innerText = formatNumber(km) + ' km';
+            document.getElementById('summaryTotal').innerText = '$' + formatNumber(cost.toFixed(0));
+            document.getElementById('summaryLiters').innerText = lit.toFixed(1) + ' L';
             document.getElementById('summaryAvg').innerText = (km>0 && lit>0) ? (km/lit).toFixed(1)+' km/L' : '0.0';
 
             historyList.innerHTML = fView.map(f => {
-                let p = getStatusProps(f.calculatedConsumption);
+                let p = getStatusProps(f.avg);
                 return `
                 <div class="history-item-compact" onclick="openEditFuel('${f.id}')">
-                    <div class="h-col-grid" style="margin-bottom: 5px;">
+                    <div class="h-col-row" style="margin-bottom: 5px;">
                         <span class="h-left" style="font-size:12px; font-weight:600; color:#666;">${formatDateShort(f.date)}</span>
                         <span style="font-weight:700;">${formatNumber(f.odometer)} km</span>
                         <span class="h-right" style="color:#10b981; font-weight:700;">${f.kmDiff ? '+'+f.kmDiff : ''}</span>
                     </div>
-                    <div class="h-col-grid">
+                    <div class="h-col-row">
                         <span class="h-left">${f.liters.toFixed(1)} L</span>
-                        <span><span class="history-consumption-badge ${p.class}">${p.icon} ${f.calculatedConsumption ? f.calculatedConsumption.toFixed(1) : 'Ini'}</span></span>
+                        <span class="h-center"><span class="history-consumption-badge ${p.class}">${p.icon} ${f.avg ? f.avg.toFixed(1) : 'Ini'}</span></span>
                         <span class="h-right" style="font-weight:700;">$${formatNumber(f.totalCost.toFixed(0))}</span>
                     </div>
                 </div>`;
             }).join('') || '<div class="empty-state-mini">Sin registros</div>';
 
-            // Meses
             let mSet = new Set(); appData.fuels.forEach(f => mSet.add(f.date.substring(0,7)));
             let mHtml = '<option value="todos">Todos los meses</option>';
             Array.from(mSet).sort().reverse().forEach(m => {
                 let p = m.split('-'); mHtml += `<option value="${m}">${mesesNombres[parseInt(p[1])-1]} ${p[0]}</option>`;
             });
             document.getElementById('monthSelect').innerHTML = mHtml; document.getElementById('monthSelect').value = sel;
-
-            renderServices();
+            
+            const slist = document.getElementById('servicesList');
+            slist.innerHTML = appData.services.map(s => {
+                let diff = s.serviceOdometer - getCurrentOdometer();
+                let b = diff < 500 ? 'status-red' : (diff < 1000 ? 'status-yellow' : 'status-green');
+                return `<div class="service-item"><b>${s.type}</b><span class="service-status-badge ${b}" style="padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700;">${diff} km rest.</span><button onclick="deleteService('${s.id}')" style="background:none;border:none;color:#ccc;font-size:18px">✕</button></div>`;
+            }).join('') || '<p style="text-align:center; padding:20px; color:#999">Sin servicios</p>';
         }
 
         // NAV
@@ -299,16 +292,6 @@
 
         function saveCarName() { appData.carName = document.getElementById('carNameInput').value; toggleModal('nameModal','close'); saveData(); }
         function saveManualOdo() { appData.manualOdometer = parseInt(document.getElementById('manualOdoInput').value); toggleModal('odoModal','close'); saveData(); }
-
-        function renderServices() {
-            const list = document.getElementById('servicesList'), odo = getCurrentOdometer();
-            list.innerHTML = appData.services.map(s => {
-                let diff = s.serviceOdometer - odo, badge = diff < 500 ? 'status-red' : (diff < 1000 ? 'status-yellow' : 'status-green');
-                return `<div class="service-item" style="background:white; padding:12px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 1px 3px rgba(0,0,0,0.1)">
-                    <b>${s.type}</b><span class="service-status-badge ${badge}" style="padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700">${diff} km rest.</span>
-                    <button onclick="deleteService('${s.id}')" style="background:none; border:none; color:#ccc; font-size:18px">✕</button></div>`;
-            }).join('') || '<p style="text-align:center; padding:20px; color:#999">No hay servicios</p>';
-        }
         function saveService() { appData.services.push({ id:'s_'+Date.now(), type: document.getElementById('serviceType').value, serviceOdometer: parseInt(document.getElementById('serviceOdometer').value), date: document.getElementById('serviceDate').value }); toggleModal('serviceModal','close'); saveData(); }
         function deleteService(id) { if(confirm('¿Eliminar?')) { appData.services = appData.services.filter(s => s.id !== id); saveData(); } }
 
