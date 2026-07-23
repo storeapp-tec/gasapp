@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>⛽ GasApp</title>
 
+    <!-- PWA -->
     <link rel="manifest" href="/gasapp-web/manifest.json">
     <link rel="apple-touch-icon" sizes="512x512" href="/gasapp/icon-512.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/gasapp/icon-512.png">
@@ -12,7 +13,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <style>
-        /* ESTILOS COMPLETOS (los mismos que ya tenías) */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; appearance: none; }
@@ -320,7 +320,7 @@
         // ============================================================
         // CONFIGURACIÓN
         // ============================================================
-        const URL_API = 'https://script.google.com/macros/s/AKfycbzXIts40Xh_kTBDbNvt-vD0ehczLTYZqTIfn7Mflz6geVd9FKq22gFvN4fBqXvfItDO/exec';
+        const URL_API = 'https://script.google.com/macros/s/AKfycbyCIe9Xyho8-93kN_K04GCSQmqvrM13ia4mwYGHJ-akuyQ6gLSvh7zH8Hai2dLqb8zW/exec';
         let appData = { carName: 'Mi Auto', manualOdometer: null, fuels: [], services: [] };
         const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         let toastTimeout = null;
@@ -536,162 +536,162 @@
         }
 
         // ============================================================
-        // UPDATE UI
+        // UPDATE UI - CORREGIDA (FILTRO Y TARJETAS FUNCIONALES)
         // ============================================================
-       function updateUI() {
-        try {
-            const allFuels = appData.fuels || [];
-            allFuels.sort((a, b) => new Date(a.date) - new Date(b.date));
-            const chrono = calculateChrono(allFuels);
-            const view = [...chrono].reverse();
-    
-            document.getElementById('carNameDisplay').innerText = appData.carName || 'Mi Auto';
-            document.getElementById('mainOdometer').innerText = formatNumber(getCurrentOdometer());
-    
-            // === INICIO: Últimas 5 cargas (sin filtro) ===
-            const latest = document.getElementById('latestFuelContainer');
-            if (view.length === 0) {
-                latest.innerHTML = `<div class="empty-state-mini">No hay registros</div>`;
-            } else {
-                latest.innerHTML = view.slice(0, 5).map(f => {
-                    let p = getStatusProps(f.avg);
-                    let disp = f.avg ? f.avg.toFixed(1) + " km/L" : "Inicial";
-                    return `<div class="single-line-fuel" onclick="openEditFuel('${f.id}')">
-                        <span>📅 ${formatDateShort(f.date)}</span>
-                        <span>⛽ ${f.liters.toFixed(1)}L</span>
-                        <span>💰 $${formatNumber(f.totalCost.toFixed(2))}</span>
-                        <span>${p.icon} ${disp}</span>
-                    </div>`;
-                }).join('');
-            }
-    
-            // === HISTORIAL: Selector de meses ===
-            const sel = document.getElementById('monthSelect').value || 'todos';
-            let mSet = new Set(); 
-            allFuels.forEach(f => { if(f.date) mSet.add(f.date.substring(0,7)); });
-            let mHtml = '<option value="todos">Todos los meses</option>';
-            Array.from(mSet).sort().reverse().forEach(m => {
-                let p = m.split('-'); 
-                if(p.length === 2) mHtml += `<option value="${m}">${mesesNombres[parseInt(p[1])-1]} ${p[0]}</option>`;
-            });
-            document.getElementById('monthSelect').innerHTML = mHtml; 
-            document.getElementById('monthSelect').value = sel;
-    
-            // === FILTRADO: Aplicar filtro de meses ===
-            let fView = sel === "todos" ? view : view.filter(f => f.date && f.date.startsWith(sel));
-            let fChrono = sel === "todos" ? chrono : chrono.filter(f => f.date && f.date.startsWith(sel));
-    
-            // === TARJETAS: Calcular con los datos filtrados ===
-            let km = fChrono.reduce((s, f) => s + (f.kmDiff || 0), 0);
-            let cost = fChrono.reduce((s, f) => s + (f.totalCost || 0), 0);
-            let lit = fChrono.reduce((s, f) => s + (f.liters || 0), 0);
-            
-            document.getElementById('summaryKm').innerText = formatNumber(km) + ' km';
-            document.getElementById('summaryTotal').innerText = '$' + formatNumber(cost.toFixed(2));
-            document.getElementById('summaryLiters').innerText = lit.toFixed(1) + ' L';
-            document.getElementById('summaryAvg').innerText = (km>0 && lit>0) ? (km/lit).toFixed(1)+' km/L' : '0.0';
-    
-            // === LISTA HISTORIAL: Mostrar con filtro ===
-            const historyList = document.getElementById('historyList');
-            if (fView.length === 0) {
-                historyList.innerHTML = `<div class="empty-state-mini">Sin registros</div>`;
-            } else {
-                historyList.innerHTML = fView.map(f => {
-                    let p = getStatusProps(f.avg);
-                    let disp = f.avg ? f.avg.toFixed(1) + ' km/L' : 'Inicial';
-                    let diffDisplay = f.kmDiff > 0 ? `+${f.kmDiff}` : '';
-                    return `
-                    <div class="history-item-compact" onclick="openEditFuel('${f.id}')">
-                        <div class="history-row1">
-                            <span class="history-date">📅 ${formatDateShort(f.date)}</span>
-                            <span class="history-km">${formatNumber(f.odometer)} km</span>
-                            <span class="history-km-right" style="color:#10b981; font-weight:700;">${diffDisplay}</span>
-                        </div>
-                        <div class="history-row2">
+        function updateUI() {
+            try {
+                const allFuels = appData.fuels || [];
+                allFuels.sort((a, b) => new Date(a.date) - new Date(b.date));
+                const chrono = calculateChrono(allFuels);
+                const view = [...chrono].reverse();
+
+                document.getElementById('carNameDisplay').innerText = appData.carName || 'Mi Auto';
+                document.getElementById('mainOdometer').innerText = formatNumber(getCurrentOdometer());
+
+                // INICIO: Últimas 5 cargas
+                const latest = document.getElementById('latestFuelContainer');
+                if (view.length === 0) {
+                    latest.innerHTML = `<div class="empty-state-mini">No hay registros</div>`;
+                } else {
+                    latest.innerHTML = view.slice(0, 5).map(f => {
+                        let p = getStatusProps(f.avg);
+                        let disp = f.avg ? f.avg.toFixed(1) + " km/L" : "Inicial";
+                        return `<div class="single-line-fuel" onclick="openEditFuel('${f.id}')">
+                            <span>📅 ${formatDateShort(f.date)}</span>
                             <span>⛽ ${f.liters.toFixed(1)}L</span>
-                            <span class="history-consumption-badge ${p.class}">${p.icon} ${disp}</span>
-                            <span style="font-weight:700; text-align:right;">💰 $${f.totalCost.toFixed(2)}</span>
-                        </div>
-                    </div>`;
-                }).join('');
-            }
-    
-            // === SERVICIOS (no cambia) ===
-            const services = appData.services || [];
-            const slist = document.getElementById('servicesList');
-            if (services.length === 0) {
-                slist.innerHTML = `<div class="empty-state-mini">No hay servicios programados</div>`;
-            } else {
-                const currentOdo = getCurrentOdometer();
-                const sortedServices = [...services].sort((a, b) => {
-                    if (a.status === 'pendiente' && b.status !== 'pendiente') return -1;
-                    if (a.status !== 'pendiente' && b.status === 'pendiente') return 1;
-                    return a.serviceOdometer - b.serviceOdometer;
+                            <span>💰 $${formatNumber(f.totalCost.toFixed(2))}</span>
+                            <span>${p.icon} ${disp}</span>
+                        </div>`;
+                    }).join('');
+                }
+
+                // HISTORIAL: Selector de meses
+                const sel = document.getElementById('monthSelect').value || 'todos';
+                let mSet = new Set(); 
+                allFuels.forEach(f => { if(f.date) mSet.add(f.date.substring(0,7)); });
+                let mHtml = '<option value="todos">Todos los meses</option>';
+                Array.from(mSet).sort().reverse().forEach(m => {
+                    let p = m.split('-'); 
+                    if(p.length === 2) mHtml += `<option value="${m}">${mesesNombres[parseInt(p[1])-1]} ${p[0]}</option>`;
                 });
-    
-                let pendientesHtml = '';
-                let realizadosHtml = '';
-    
-                sortedServices.forEach(s => {
-                    const diff = s.serviceOdometer - currentOdo;
-                    let kmClass, kmDisplay;
-    
-                    if (s.status === 'realizado') {
-                        kmClass = 'done';
-                        kmDisplay = '✅ Realizado';
-                    } else {
-                        if (diff > 1000) { kmClass = 'green'; kmDisplay = `🟢 ${formatNumber(diff)} km`; }
-                        else if (diff > 500) { kmClass = 'yellow'; kmDisplay = `🟡 ${formatNumber(diff)} km`; }
-                        else { kmClass = 'red'; kmDisplay = diff > 0 ? `🔴 ${formatNumber(diff)} km` : '🔴 VENCIDO'; }
-                    }
-    
-                    const itemHtml = `
-                        <div class="service-item">
-                            <div class="service-row">
-                                <div class="service-info">
-                                    <span class="service-date">📅 ${formatDateShort(s.date)}</span>
-                                    <span class="service-type">${s.type}</span>
-                                    <span class="service-km-restante ${kmClass}">${kmDisplay}</span>
-                                    <span class="service-odo-final">📌 ${formatNumber(s.serviceOdometer)} km</span>
-                                </div>
-                                <div class="service-actions">
-                                    ${s.status === 'pendiente' ? `<button class="service-btn edit" onclick="openEditService('${s.id}')" title="Editar">✏️</button>` : ''}
-                                    <button class="service-btn delete" onclick="requestDeleteService('${s.id}')" title="Eliminar">✕</button>
-                                </div>
+                document.getElementById('monthSelect').innerHTML = mHtml; 
+                document.getElementById('monthSelect').value = sel;
+
+                // FILTRADO
+                let fView = sel === "todos" ? view : view.filter(f => f.date && f.date.startsWith(sel));
+                let fChrono = sel === "todos" ? chrono : chrono.filter(f => f.date && f.date.startsWith(sel));
+
+                // TARJETAS DE RESUMEN (CON FILTRO)
+                let km = fChrono.reduce((s, f) => s + (f.kmDiff || 0), 0);
+                let cost = fChrono.reduce((s, f) => s + (f.totalCost || 0), 0);
+                let lit = fChrono.reduce((s, f) => s + (f.liters || 0), 0);
+                
+                document.getElementById('summaryKm').innerText = formatNumber(km) + ' km';
+                document.getElementById('summaryTotal').innerText = '$' + formatNumber(cost.toFixed(2));
+                document.getElementById('summaryLiters').innerText = lit.toFixed(1) + ' L';
+                document.getElementById('summaryAvg').innerText = (km>0 && lit>0) ? (km/lit).toFixed(1)+' km/L' : '0.0';
+
+                // LISTA HISTORIAL (CON FILTRO)
+                const historyList = document.getElementById('historyList');
+                if (fView.length === 0) {
+                    historyList.innerHTML = `<div class="empty-state-mini">Sin registros</div>`;
+                } else {
+                    historyList.innerHTML = fView.map(f => {
+                        let p = getStatusProps(f.avg);
+                        let disp = f.avg ? f.avg.toFixed(1) + ' km/L' : 'Inicial';
+                        let diffDisplay = f.kmDiff > 0 ? `+${f.kmDiff}` : '';
+                        return `
+                        <div class="history-item-compact" onclick="openEditFuel('${f.id}')">
+                            <div class="history-row1">
+                                <span class="history-date">📅 ${formatDateShort(f.date)}</span>
+                                <span class="history-km">${formatNumber(f.odometer)} km</span>
+                                <span class="history-km-right" style="color:#10b981; font-weight:700;">${diffDisplay}</span>
                             </div>
-                            ${s.status === 'pendiente' ? 
-                                `<div class="service-row" style="margin-top:4px;">
-                                    <button class="service-btn done-btn" onclick="requestMarkDone('${s.id}')">✅ Marcar realizado</button>
-                                    <span class="service-status-badge status-pendiente">⏳ Pendiente</span>
-                                </div>` :
-                                `<div class="service-row" style="margin-top:4px;">
-                                    <span class="service-status-badge status-realizado">✅ Realizado</span>
-                                </div>`
-                            }
-                        </div>
-                    `;
-    
-                    if (s.status === 'pendiente') pendientesHtml += itemHtml;
-                    else realizadosHtml += itemHtml;
-                });
-    
-                let finalHtml = '';
-                if (pendientesHtml) finalHtml += `<div style="font-size:12px; font-weight:600; color:#666; margin-bottom:6px; margin-top:4px;">📌 Pendientes</div>${pendientesHtml}`;
-                if (realizadosHtml) finalHtml += `<div style="font-size:12px; font-weight:600; color:#666; margin-bottom:6px; margin-top:12px;">✅ Realizados</div>${realizadosHtml}`;
-                slist.innerHTML = finalHtml;
+                            <div class="history-row2">
+                                <span>⛽ ${f.liters.toFixed(1)}L</span>
+                                <span class="history-consumption-badge ${p.class}">${p.icon} ${disp}</span>
+                                <span style="font-weight:700; text-align:right;">💰 $${f.totalCost.toFixed(2)}</span>
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+
+                // SERVICIOS
+                const services = appData.services || [];
+                const slist = document.getElementById('servicesList');
+                if (services.length === 0) {
+                    slist.innerHTML = `<div class="empty-state-mini">No hay servicios programados</div>`;
+                } else {
+                    const currentOdo = getCurrentOdometer();
+                    const sortedServices = [...services].sort((a, b) => {
+                        if (a.status === 'pendiente' && b.status !== 'pendiente') return -1;
+                        if (a.status !== 'pendiente' && b.status === 'pendiente') return 1;
+                        return a.serviceOdometer - b.serviceOdometer;
+                    });
+
+                    let pendientesHtml = '';
+                    let realizadosHtml = '';
+
+                    sortedServices.forEach(s => {
+                        const diff = s.serviceOdometer - currentOdo;
+                        let kmClass, kmDisplay;
+
+                        if (s.status === 'realizado') {
+                            kmClass = 'done';
+                            kmDisplay = '✅ Realizado';
+                        } else {
+                            if (diff > 1000) { kmClass = 'green'; kmDisplay = `🟢 ${formatNumber(diff)} km`; }
+                            else if (diff > 500) { kmClass = 'yellow'; kmDisplay = `🟡 ${formatNumber(diff)} km`; }
+                            else { kmClass = 'red'; kmDisplay = diff > 0 ? `🔴 ${formatNumber(diff)} km` : '🔴 VENCIDO'; }
+                        }
+
+                        const itemHtml = `
+                            <div class="service-item">
+                                <div class="service-row">
+                                    <div class="service-info">
+                                        <span class="service-date">📅 ${formatDateShort(s.date)}</span>
+                                        <span class="service-type">${s.type}</span>
+                                        <span class="service-km-restante ${kmClass}">${kmDisplay}</span>
+                                        <span class="service-odo-final">📌 ${formatNumber(s.serviceOdometer)} km</span>
+                                    </div>
+                                    <div class="service-actions">
+                                        ${s.status === 'pendiente' ? `<button class="service-btn edit" onclick="openEditService('${s.id}')" title="Editar">✏️</button>` : ''}
+                                        <button class="service-btn delete" onclick="requestDeleteService('${s.id}')" title="Eliminar">✕</button>
+                                    </div>
+                                </div>
+                                ${s.status === 'pendiente' ? 
+                                    `<div class="service-row" style="margin-top:4px;">
+                                        <button class="service-btn done-btn" onclick="requestMarkDone('${s.id}')">✅ Marcar realizado</button>
+                                        <span class="service-status-badge status-pendiente">⏳ Pendiente</span>
+                                    </div>` :
+                                    `<div class="service-row" style="margin-top:4px;">
+                                        <span class="service-status-badge status-realizado">✅ Realizado</span>
+                                    </div>`
+                                }
+                            </div>
+                        `;
+
+                        if (s.status === 'pendiente') pendientesHtml += itemHtml;
+                        else realizadosHtml += itemHtml;
+                    });
+
+                    let finalHtml = '';
+                    if (pendientesHtml) finalHtml += `<div style="font-size:12px; font-weight:600; color:#666; margin-bottom:6px; margin-top:4px;">📌 Pendientes</div>${pendientesHtml}`;
+                    if (realizadosHtml) finalHtml += `<div style="font-size:12px; font-weight:600; color:#666; margin-bottom:6px; margin-top:12px;">✅ Realizados</div>${realizadosHtml}`;
+                    slist.innerHTML = finalHtml;
+                }
+
+                // FAB
+                const activeTab = document.querySelector('.tab-content.active');
+                const fab = document.getElementById('fabBtn');
+                if (activeTab && activeTab.id === 'tab-inicio') fab.classList.remove('hidden');
+                else fab.classList.add('hidden');
+
+            } catch (error) {
+                console.error('Error en updateUI:', error);
+                showToast('❌ Error al mostrar datos', 'error');
             }
-    
-            // FAB
-            const activeTab = document.querySelector('.tab-content.active');
-            const fab = document.getElementById('fabBtn');
-            if (activeTab && activeTab.id === 'tab-inicio') fab.classList.remove('hidden');
-            else fab.classList.add('hidden');
-    
-        } catch (error) {
-            console.error('Error en updateUI:', error);
-            showToast('❌ Error al mostrar datos', 'error');
         }
-    }
 
         // ============================================================
         // NAVEGACIÓN
