@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>⛽ GasApp</title>
 
-    <!-- PWA -->
     <link rel="manifest" href="/gasapp-web/manifest.json">
     <link rel="apple-touch-icon" sizes="512x512" href="/gasapp/icon-512.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/gasapp/icon-512.png">
@@ -13,6 +12,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <style>
+        /* ESTILOS COMPLETOS (los mismos que ya tenías) */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; appearance: none; }
@@ -291,7 +291,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE SERVICIOS -->
     <div class="modal" id="serviceModal">
         <div class="modal-content">
             <div class="modal-title" id="serviceModalTitle">Agregar Servicio</div>
@@ -321,7 +320,7 @@
         // ============================================================
         // CONFIGURACIÓN
         // ============================================================
-        const URL_API = 'https://script.google.com/macros/s/AKfycbzLKbqaHW1-HVK7E6NSPplxNb_C-v-XBZu1lNggW0Gxr-wplkQWe87tDe61SgWEI5li/exec';
+        const URL_API = 'https://script.google.com/macros/s/AKfycbzXIts40Xh_kTBDbNvt-vD0ehczLTYZqTIfn7Mflz6geVd9FKq22gFvN4fBqXvfItDO/exec';
         let appData = { carName: 'Mi Auto', manualOdometer: null, fuels: [], services: [] };
         const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         let toastTimeout = null;
@@ -468,7 +467,7 @@
         }
 
         // ============================================================
-        // EXCEL SYNC - SIN LOCALSTORAGE
+        // EXCEL SYNC - CON NO-CORS
         // ============================================================
         async function callAction(action, data) {
             if (isSaving) {
@@ -511,7 +510,6 @@
                 console.log('📥 Datos cargados desde Excel:', data);
                 
                 if (data && data.fuels && Array.isArray(data.fuels)) {
-                    // Reemplazar completamente, NO fusionar
                     appData = {
                         carName: data.carName || 'Mi Auto',
                         manualOdometer: data.manualOdometer || null,
@@ -519,7 +517,6 @@
                         services: data.services || []
                     };
                     
-                    // Asignar IDs si no tienen (para la app)
                     appData.fuels.forEach(f => { if (!f.id) f.id = 'f_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6); });
                     appData.services.forEach(s => { if (!s.id) s.id = 's_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6); });
                     
@@ -761,7 +758,6 @@
                             appData.fuels[idx] = { ...data, id: id };
                         }
                         toggleModal('fuelModal','close');
-                        // Recargar desde Excel para asegurar consistencia
                         await loadData();
                         showToast('✅ Carga actualizada', 'success');
                     }
@@ -773,7 +769,6 @@
                     await callAction('updateOdometer', { manualOdometer: odo });
                     appData.manualOdometer = odo;
                     toggleModal('fuelModal','close');
-                    // Recargar desde Excel para asegurar consistencia
                     await loadData();
                     showToast('✅ Carga guardada', 'success');
                 }
