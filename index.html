@@ -154,7 +154,7 @@
         <!-- TAB RESUMEN -->
         <div id="tab-inicio" class="tab-content active">
             <div class="inicio-header">
-                <div class="car-name-row"><span class="car-name" id="carNameDisplay" onclick="toggleModal('nameModal','open')">Mi Auto</span></div>
+                <div class="car-name-row"><span class="car-name" id="carNameDisplay" onclick="openNameModal()">Mi Auto</span></div>
                 <div class="odometer-row"><span class="odo-value" id="mainOdometer" onclick="openOdoModal()">0</span><span class="odo-unit">km</span></div>
             </div>
             <div class="section-label">Últimas Cargas Recientes</div>
@@ -232,7 +232,7 @@
         </div>
     </div>
 
-    <!-- MODAL SERVICIOS - CON ODÓMETRO PRECARGADO -->
+    <!-- MODAL SERVICIOS -->
     <div class="modal" id="serviceModal">
         <div class="modal-content">
             <div class="modal-title">Agregar Servicio</div>
@@ -258,17 +258,17 @@
     </div>
 
     <script>
-        // ============================================
+        // ============================================================
         // CONFIGURACIÓN
-        // ============================================
+        // ============================================================
         const CLOUD_URL = 'https://script.google.com/macros/s/AKfycbxq9p7ACA1TWykKEpsu08Xt4ZK-usyFY_dtUPnjGHEn-8q3y_FwIkqITDo3qtFW46KP/exec';
         let appData = { carName: 'Mi Auto', manualOdometer: null, fuels: [], services: [] };
         const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         let toastTimeout = null;
 
-        // ============================================
+        // ============================================================
         // TOAST
-        // ============================================
+        // ============================================================
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -277,9 +277,9 @@
             toastTimeout = setTimeout(() => toast.classList.remove('show'), 2500);
         }
 
-        // ============================================
+        // ============================================================
         // FORMATO DE FECHAS
-        // ============================================
+        // ============================================================
         function formatDateShort(d) {
             if (!d) return '';
             if (typeof d === 'string' && d.includes('GMT')) {
@@ -322,71 +322,9 @@
             return d;
         }
 
-        // ============================================
-        // EXCEL SYNC
-        // ============================================
-        async function saveData() {
-            showToast('⏳ Guardando...', 'saving');
-            try {
-                const dataToSend = {
-                    carName: appData.carName,
-                    manualOdometer: appData.manualOdometer,
-                    fuels: appData.fuels.map(f => ({ ...f, date: formatDateForExcel(f.date) || f.date })),
-                    services: appData.services.map(s => ({ ...s, date: formatDateForExcel(s.date) || s.date }))
-                };
-                
-                const response = await fetch(CLOUD_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dataToSend)
-                });
-                if (!response.ok) throw new Error('Error: ' + response.status);
-                showToast('✅ Guardado en la nube', 'success');
-            } catch (e) {
-                console.error('Error al guardar:', e);
-                showToast('❌ Error al guardar', 'error');
-            }
-        }
-
-        async function loadData() {
-            showToast('⏳ Cargando...', 'saving');
-            try {
-                const response = await fetch(CLOUD_URL);
-                if (!response.ok) throw new Error('Error: ' + response.status);
-                const cloud = await response.json();
-                
-                if (cloud && cloud.fuels && Array.isArray(cloud.fuels)) {
-                    appData = cloud;
-                    if (!appData.services) appData.services = [];
-                    if (!appData.fuels) appData.fuels = [];
-                    if (!appData.carName) appData.carName = 'Mi Auto';
-                    updateUI();
-                    showToast('✅ Datos cargados', 'success');
-                } else {
-                    appData = { carName: 'Mi Auto', manualOdometer: null, fuels: [], services: [] };
-                    updateUI();
-                    showToast('📝 Sin datos previos', 'success');
-                }
-            } catch (e) {
-                console.error('Error al cargar:', e);
-                showToast('❌ Error al cargar datos', 'error');
-                try {
-                    const saved = localStorage.getItem('gas_app_data');
-                    if (saved) {
-                        appData = JSON.parse(saved);
-                        updateUI();
-                        showToast('📂 Datos locales cargados', 'success');
-                    }
-                } catch(localError) {
-                    appData = { carName: 'Mi Auto', manualOdometer: null, fuels: [], services: [] };
-                    updateUI();
-                }
-            }
-        }
-
-        // ============================================
+        // ============================================================
         // FUNCIONES DE FORMATO
-        // ============================================
+        // ============================================================
         function formatNumber(n) { return new Intl.NumberFormat('es-MX').format(n); }
         function getCurrentOdometer() { 
             if (appData.manualOdometer !== null && appData.manualOdometer > 0) return appData.manualOdometer;
@@ -420,16 +358,68 @@
             return { class: 'badge-bad', icon: '🔴' };
         }
 
-        // ============================================
+        // ============================================================
+        // EXCEL SYNC - CON ACCIONES
+        // ============================================================
+        async function callAction(action, data) {
+            try {
+                const response = await fetch(CLOUD_URL + '?action=' + action, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: action, data: data })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    console.log('✅ ' + result.message);
+                    return result;
+                } else {
+                    console.error('❌ ' + result.error);
+                    return result;
+                }
+            } catch (error) {
+                console.error('❌ Error en callAction:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function loadData() {
+            showToast('⏳ Cargando...', 'saving');
+            try {
+                const response = await fetch(CLOUD_URL + '?action=getData');
+                if (!response.ok) throw new Error('Error: ' + response.status);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    appData = result.data;
+                    if (!appData.services) appData.services = [];
+                    if (!appData.fuels) appData.fuels = [];
+                    if (!appData.carName) appData.carName = 'Mi Auto';
+                    updateUI();
+                    showToast('✅ Datos cargados', 'success');
+                } else {
+                    appData = { carName: 'Mi Auto', manualOdometer: null, fuels: [], services: [] };
+                    updateUI();
+                    showToast('📝 Sin datos previos', 'success');
+                }
+            } catch (e) {
+                console.error('Error al cargar:', e);
+                showToast('❌ Error al cargar datos', 'error');
+                appData = { carName: 'Mi Auto', manualOdometer: null, fuels: [], services: [] };
+                updateUI();
+            }
+        }
+
+        // ============================================================
         // UPDATE UI
-        // ============================================
+        // ============================================================
         function updateUI() {
             try {
-                appData.fuels.sort((a, b) => new Date(a.date) - new Date(b.date));
-                const chrono = calculateChrono(appData.fuels);
+                const fuels = appData.fuels || [];
+                fuels.sort((a, b) => new Date(a.date) - new Date(b.date));
+                const chrono = calculateChrono(fuels);
                 const view = [...chrono].reverse();
 
-                document.getElementById('carNameDisplay').innerText = appData.carName;
+                document.getElementById('carNameDisplay').innerText = appData.carName || 'Mi Auto';
                 document.getElementById('mainOdometer').innerText = formatNumber(getCurrentOdometer());
 
                 // INICIO
@@ -452,7 +442,7 @@
                 // HISTORIAL
                 const sel = document.getElementById('monthSelect').value || 'todos';
                 let mSet = new Set(); 
-                appData.fuels.forEach(f => { if(f.date) mSet.add(f.date.substring(0,7)); });
+                fuels.forEach(f => { if(f.date) mSet.add(f.date.substring(0,7)); });
                 let mHtml = '<option value="todos">Todos los meses</option>';
                 Array.from(mSet).sort().reverse().forEach(m => {
                     let p = m.split('-'); 
@@ -498,12 +488,13 @@
                 }
 
                 // SERVICIOS
+                const services = appData.services || [];
                 const slist = document.getElementById('servicesList');
-                if (appData.services.length === 0) {
+                if (services.length === 0) {
                     slist.innerHTML = `<div class="empty-state-mini">No hay servicios programados</div>`;
                 } else {
                     const currentOdo = getCurrentOdometer();
-                    const sortedServices = [...appData.services].sort((a, b) => {
+                    const sortedServices = [...services].sort((a, b) => {
                         if (a.status === 'pendiente' && b.status !== 'pendiente') return -1;
                         if (a.status !== 'pendiente' && b.status === 'pendiente') return 1;
                         return a.serviceOdometer - b.serviceOdometer;
@@ -514,7 +505,7 @@
 
                     sortedServices.forEach(s => {
                         const diff = s.serviceOdometer - currentOdo;
-                        let badgeClass, kmDisplay, kmClass;
+                        let kmClass, kmDisplay;
 
                         if (s.status === 'realizado') {
                             kmClass = 'done';
@@ -573,9 +564,9 @@
             }
         }
 
-        // ============================================
+        // ============================================================
         // NAVEGACIÓN
-        // ============================================
+        // ============================================================
         document.querySelectorAll('.nav-item').forEach(item => {
             item.onclick = function() {
                 document.querySelectorAll('.nav-item, .tab-content').forEach(el => el.classList.remove('active'));
@@ -586,16 +577,16 @@
             };
         });
 
-        // ============================================
+        // ============================================================
         // MODALES
-        // ============================================
+        // ============================================================
         function toggleModal(id, act) { 
             document.getElementById(id).classList[act === 'open' ? 'add' : 'remove']('active'); 
         }
 
-        // ============================================
+        // ============================================================
         // FUEL CRUD
-        // ============================================
+        // ============================================================
         function openNewFuel() { 
             document.getElementById('fuelForm').reset(); 
             document.getElementById('editFuelIndex').value = ''; 
@@ -608,25 +599,39 @@
             toggleModal('fuelModal','open'); 
         }
 
-        function saveFuel() {
+        async function saveFuel() {
             let id = document.getElementById('editFuelIndex').value;
             let l = parseFloat(document.getElementById('fuelLiters').value); 
             let p = parseFloat(document.getElementById('fuelPrice').value);
             let dateValue = document.getElementById('fuelDate').value;
-            let itm = { 
-                id: id || 'f_'+Date.now(), 
-                odometer: parseInt(document.getElementById('fuelOdometer').value), 
-                liters: l, 
-                pricePerLiter: p, 
-                date: dateValue, 
-                totalCost: l*p 
+            let odo = parseInt(document.getElementById('fuelOdometer').value);
+            
+            const data = {
+                date: dateValue,
+                odometer: odo,
+                liters: l,
+                pricePerLiter: p,
+                totalCost: l * p
             };
-            if(id) { 
-                let idx = appData.fuels.findIndex(f => f.id === id); 
-                if(idx !== -1) appData.fuels[idx] = itm; 
-            } else appData.fuels.push(itm);
-            toggleModal('fuelModal','close'); 
-            saveData();
+            
+            if (id) {
+                // Actualizar
+                data.index = appData.fuels.findIndex(f => f.id === id);
+                const result = await callAction('updateFuel', data);
+                if (result.success) {
+                    const idx = appData.fuels.findIndex(f => f.id === id);
+                    if (idx !== -1) appData.fuels[idx] = { ...appData.fuels[idx], ...data };
+                    updateUI();
+                }
+            } else {
+                // Agregar
+                const result = await callAction('addFuel', data);
+                if (result.success) {
+                    appData.fuels.push({ ...data, id: 'f_' + Date.now() });
+                    updateUI();
+                }
+            }
+            toggleModal('fuelModal','close');
         }
 
         function openEditFuel(id) {
@@ -643,11 +648,16 @@
             toggleModal('fuelModal','open');
         }
 
-        document.getElementById('deleteFuelBtn').onclick = () => { 
+        document.getElementById('deleteFuelBtn').onclick = async () => { 
+            const id = document.getElementById('editFuelIndex').value;
             if(confirm('¿Eliminar este registro?')) { 
-                appData.fuels = appData.fuels.filter(f => f.id !== document.getElementById('editFuelIndex').value); 
-                toggleModal('fuelModal','close'); 
-                saveData(); 
+                const idx = appData.fuels.findIndex(f => f.id === id);
+                const result = await callAction('deleteFuel', { index: idx });
+                if (result.success) {
+                    appData.fuels = appData.fuels.filter(f => f.id !== id);
+                    toggleModal('fuelModal','close');
+                    updateUI();
+                }
             } 
         };
 
@@ -657,61 +667,87 @@
             document.getElementById('liveTotal').innerText = '$'+(l*p).toFixed(2);
         };
 
-        // ============================================
+        // ============================================================
         // ODÓMETRO
-        // ============================================
+        // ============================================================
         function openOdoModal() {
             document.getElementById('odoInput').value = getCurrentOdometer();
             toggleModal('odoModal','open');
         }
 
-        function saveManualOdo() { 
+        async function saveManualOdo() { 
             let odo = parseInt(document.getElementById('odoInput').value);
-            if(odo > 0) { appData.manualOdometer = odo; toggleModal('odoModal','close'); saveData(); }
+            if(odo > 0) { 
+                const result = await callAction('updateOdometer', { manualOdometer: odo });
+                if (result.success) {
+                    appData.manualOdometer = odo;
+                    toggleModal('odoModal','close');
+                    updateUI();
+                }
+            } else {
+                showToast('❌ Ingresa un valor válido', 'error');
+            }
         }
 
-        // ============================================
+        // ============================================================
         // NOMBRE
-        // ============================================
-        function saveCarName() { 
-            let name = document.getElementById('carNameInput').value.trim();
-            if(name) { appData.carName = name; toggleModal('nameModal','close'); saveData(); }
+        // ============================================================
+        function openNameModal() {
+            document.getElementById('carNameInput').value = appData.carName || 'Mi Auto';
+            toggleModal('nameModal','open');
         }
 
-        // ============================================
-        // SERVICIOS - CON ODÓMETRO PRECARGADO
-        // ============================================
+        async function saveCarName() { 
+            let name = document.getElementById('carNameInput').value.trim();
+            if(name) { 
+                const result = await callAction('updateCarName', { carName: name });
+                if (result.success) {
+                    appData.carName = name;
+                    toggleModal('nameModal','close');
+                    updateUI();
+                }
+            }
+        }
+
+        // ============================================================
+        // SERVICIOS
+        // ============================================================
         function openServiceModal() {
             document.getElementById('serviceForm').reset();
             document.getElementById('serviceDate').value = new Date().toISOString().split('T')[0];
             const currentOdo = getCurrentOdometer();
-            // PRECARGAR el odómetro actual como valor
             document.getElementById('serviceOdometer').value = currentOdo;
             toggleModal('serviceModal','open');
         }
 
-        function saveService() {
+        async function saveService() {
             let type = document.getElementById('serviceType').value.trim();
             let odo = parseInt(document.getElementById('serviceOdometer').value);
             let dateValue = document.getElementById('serviceDate').value;
             const currentOdo = getCurrentOdometer();
             
-            // Validar que el odómetro sea MAYOR al actual
             if (odo <= currentOdo) {
                 showToast('❌ El odómetro debe ser mayor al actual', 'error');
                 return;
             }
             
             if(type && odo > 0 && dateValue) {
-                appData.services.push({ 
-                    id: 's_'+Date.now(), 
-                    type: type, 
-                    serviceOdometer: odo, 
+                const data = {
                     date: dateValue,
+                    serviceOdometer: odo,
+                    type: type,
                     status: 'pendiente'
-                });
-                toggleModal('serviceModal','close'); 
-                saveData();
+                };
+                
+                const result = await callAction('addService', data);
+                if (result.success) {
+                    appData.services.push({ 
+                        id: 's_'+Date.now(), 
+                        ...data
+                    });
+                    toggleModal('serviceModal','close');
+                    updateUI();
+                }
             }
         }
 
@@ -719,33 +755,48 @@
             showToast('✏️ Editar servicio (próximamente)', 'saving');
         }
 
-        function markServiceDone(id) {
+        async function markServiceDone(id) {
             if (confirm('¿Marcar este servicio como REALIZADO?')) {
                 const service = appData.services.find(s => s.id === id);
                 if (service) {
-                    service.status = 'realizado';
-                    saveData();
+                    const idx = appData.services.findIndex(s => s.id === id);
+                    const data = {
+                        index: idx,
+                        date: service.date,
+                        serviceOdometer: service.serviceOdometer,
+                        type: service.type,
+                        status: 'realizado'
+                    };
+                    const result = await callAction('updateService', data);
+                    if (result.success) {
+                        service.status = 'realizado';
+                        updateUI();
+                    }
                 }
             }
         }
 
-        function deleteService(id) { 
+        async function deleteService(id) { 
             if(confirm('¿Eliminar este servicio?')) { 
-                appData.services = appData.services.filter(s => s.id !== id); 
-                saveData(); 
+                const idx = appData.services.findIndex(s => s.id === id);
+                const result = await callAction('deleteService', { index: idx });
+                if (result.success) {
+                    appData.services = appData.services.filter(s => s.id !== id);
+                    updateUI();
+                }
             } 
         }
 
-        // ============================================
+        // ============================================================
         // FILTRO MESES
-        // ============================================
+        // ============================================================
         document.getElementById('monthSelect').addEventListener('change', function() {
             updateUI();
         });
 
-        // ============================================
+        // ============================================================
         // INICIO
-        // ============================================
+        // ============================================================
         window.onload = loadData;
     </script>
 </body>
