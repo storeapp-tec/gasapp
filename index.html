@@ -4,14 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>⛽ GasApp</title>
-
-    <!-- PWA -->
     <link rel="manifest" href="/gasapp-web/manifest.json">
     <link rel="apple-touch-icon" sizes="512x512" href="/gasapp/icon-512.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/gasapp/icon-512.png">
     <meta name="theme-color" content="#667eea">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -93,7 +90,6 @@
         .nav-label { font-size: 11px; }
         .empty-state-mini { text-align: center; color: #999; padding: 30px 10px; font-size: 13px; }
 
-        /* Servicios */
         .service-item { background: white; border-radius: 10px; padding: 10px 14px; margin-bottom: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); display: flex; flex-direction: column; gap: 4px; }
         .service-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; }
         .service-info { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -282,18 +278,16 @@
 
     <script>
         // ============================================================
-        // CONFIGURACIÓN
+        // CONFIGURACIÓN - CAMBIA ESTA URL
         // ============================================================
         const URL_API = 'https://script.google.com/macros/s/AKfycbyiUGxrzqM5i4pPgAtd2IIPZvmHoVfYlZe4T0UXRP67EpUXcKjeSvbqwZQBXu1B2zUX/exec';
+
         let appData = { carName: 'Mi Auto', manualOdometer: null, fuels: [], services: [] };
         const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         let toastTimeout = null;
         let isSaving = false;
         let confirmCallback = null;
 
-        // ============================================================
-        // TOAST
-        // ============================================================
         function showToast(message, type = 'success', duration = 2500) {
             const toast = document.getElementById('toast');
             clearTimeout(toastTimeout);
@@ -311,9 +305,6 @@
             toastTimeout = setTimeout(() => toast.classList.remove('show'), duration);
         }
 
-        // ============================================================
-        // MODAL DE CONFIRMACIÓN
-        // ============================================================
         function showConfirmModal(message, onConfirm) {
             const modal = document.getElementById('confirmModal');
             const msg = document.getElementById('confirmMessage');
@@ -341,9 +332,6 @@
         document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeConfirmModal(); });
         document.getElementById('confirmModal').addEventListener('click', function(e) { if (e.target === this) closeConfirmModal(); });
 
-        // ============================================================
-        // FORMATO DE FECHAS
-        // ============================================================
         function formatDateShort(d) {
             if (!d) return '';
             if (typeof d === 'string' && d.match(/^\d{2}\/\d{2}\/\d{4}/)) {
@@ -369,21 +357,6 @@
             return d;
         }
 
-        function formatDateForExcel(d) {
-            if (!d) return '';
-            if (typeof d === 'string' && d.match(/^\d{2}\/\d{2}\/\d{4}/)) return d;
-            if (d instanceof Date) {
-                const day = String(d.getDate()).padStart(2, '0');
-                const mes = String(d.getMonth() + 1).padStart(2, '0');
-                const year = d.getFullYear();
-                return day + '/' + mes + '/' + year;
-            }
-            return d;
-        }
-
-        // ============================================================
-        // FUNCIONES DE FORMATO
-        // ============================================================
         function formatNumber(n) { return new Intl.NumberFormat('es-MX').format(n); }
 
         function getCurrentOdometer() {
@@ -432,9 +405,43 @@
             return { class: 'badge-bad', icon: '🔴' };
         }
 
-        // ============================================================
-        // EXCEL SYNC
-        // ============================================================
+        function convertirFechaInput(fechaStr) {
+            if (!fechaStr) return '';
+            // Si ya está en YYYY-MM-DD
+            if (fechaStr.match(/^\d{4}-\d{2}-\d{2}/)) return fechaStr;
+            // Si está en DD/MM/YYYY
+            if (fechaStr.match(/^\d{2}\/\d{2}\/\d{4}/)) {
+                var parts = fechaStr.split('/');
+                return parts[2] + '-' + parts[1] + '-' + parts[0];
+            }
+            // Si es un objeto Date o string raro
+            var dateObj = new Date(fechaStr);
+            if (!isNaN(dateObj.getTime())) {
+                var year = dateObj.getFullYear();
+                var month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                var day = String(dateObj.getDate()).padStart(2, '0');
+                return year + '-' + month + '-' + day;
+            }
+            return fechaStr;
+        }
+
+        function convertirFechaGuardar(fechaStr) {
+            if (!fechaStr) return '';
+            if (fechaStr.match(/^\d{2}\/\d{2}\/\d{4}/)) return fechaStr;
+            if (fechaStr.match(/^\d{4}-\d{2}-\d{2}/)) {
+                var parts = fechaStr.split('-');
+                return parts[2] + '/' + parts[1] + '/' + parts[0];
+            }
+            var dateObj = new Date(fechaStr);
+            if (!isNaN(dateObj.getTime())) {
+                var day = String(dateObj.getDate()).padStart(2, '0');
+                var month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                var year = dateObj.getFullYear();
+                return day + '/' + month + '/' + year;
+            }
+            return fechaStr;
+        }
+
         async function callAction(action, data) {
             if (isSaving) {
                 showToast('⏳ Espera...', 'warning');
@@ -466,7 +473,7 @@
         }
 
         async function loadData() {
-            showToast('⏳ Cargando datos desde Excel...', 'saving', 3000);
+            showToast('⏳ Cargando datos...', 'saving', 3000);
             try {
                 const response = await fetch(URL_API);
                 const data = await response.json();
@@ -477,26 +484,21 @@
                         fuels: data.fuels || [],
                         services: data.services || []
                     };
-                    appData.fuels.forEach(f => { if (!f.id) f.id = 'f_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6); });
-                    appData.services.forEach(s => { if (!s.id) s.id = 's_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6); });
                     updateUI();
-                    showToast('✅ Datos cargados desde Excel', 'success');
+                    showToast('✅ Datos cargados', 'success');
                 } else {
                     appData = { carName: 'Mi Auto', manualOdometer: null, fuels: [], services: [] };
                     updateUI();
-                    showToast('📝 Sin datos en Excel', 'warning');
+                    showToast('📝 Sin datos', 'warning');
                 }
             } catch (e) {
-                console.error('Error al cargar:', e);
-                showToast('❌ Error al cargar datos desde Excel: ' + e.message, 'error');
+                console.error('Error:', e);
+                showToast('❌ Error al cargar: ' + e.message, 'error');
                 appData = { carName: 'Mi Auto', manualOdometer: null, fuels: [], services: [] };
                 updateUI();
             }
         }
 
-        // ============================================================
-        // UPDATE UI
-        // ============================================================
         function updateUI() {
             appData.fuels.sort((a, b) => {
                 const dateA = new Date(a.date.split('/').reverse().join('-'));
@@ -514,7 +516,6 @@
             document.getElementById('carNameDisplay').innerText = appData.carName;
             document.getElementById('mainOdometer').innerText = formatNumber(getCurrentOdometer());
 
-            // INICIO
             const latestContainer = document.getElementById('latestFuelContainer');
             if (computedView.length === 0) {
                 latestContainer.innerHTML = `<div class="empty-state-mini">No hay registros</div>`;
@@ -528,7 +529,6 @@
                 latestContainer.innerHTML = html;
             }
 
-            // SELECTOR MESES
             const monthSelect = document.getElementById('monthSelect');
             const currentSel = monthSelect.value || "todos";
             let sets = new Set();
@@ -552,7 +552,6 @@
             monthSelect.innerHTML = sHtml;
             monthSelect.value = currentSel;
 
-            // HISTORIAL FILTRADO
             const selectedMonth = monthSelect.value;
             let filteredView = selectedMonth === "todos" ? computedView : computedView.filter(f => {
                 if (!f.date) return false;
@@ -580,7 +579,6 @@
             document.getElementById('summaryLiters').innerText = `${totalLitersPeriodo.toFixed(1)} L`;
             document.getElementById('summaryAvg').innerText = rendimientoPeriodo;
 
-            // LISTA HISTORIAL
             const historyContainer = document.getElementById('historyList');
             if (filteredView.length === 0) {
                 historyContainer.innerHTML = `<div class="empty-state-mini">Sin registros</div>`;
@@ -605,19 +603,14 @@
             });
             historyContainer.innerHTML = html;
 
-            // SERVICIOS
             renderServices();
 
-            // FAB
             const activeTab = document.querySelector('.tab-content.active');
             const fab = document.getElementById('fabBtn');
             if (activeTab && activeTab.id === 'tab-inicio') fab.classList.remove('hidden');
             else fab.classList.add('hidden');
         }
 
-        // ============================================================
-        // RENDER SERVICIOS
-        // ============================================================
         function renderServices() {
             const services = appData.services || [];
             const slist = document.getElementById('servicesList');
@@ -685,9 +678,6 @@
             slist.innerHTML = html;
         }
 
-        // ============================================================
-        // NAVEGACIÓN
-        // ============================================================
         document.querySelectorAll('.nav-bar .nav-item').forEach(item => {
             item.addEventListener('click', () => {
                 document.querySelectorAll('.nav-bar .nav-item, .tab-content').forEach(el => el.classList.remove('active'));
@@ -699,16 +689,10 @@
             });
         });
 
-        // ============================================================
-        // MODALES
-        // ============================================================
         function toggleModal(id, act) { 
             document.getElementById(id).classList[act === 'open' ? 'add' : 'remove']('active'); 
         }
 
-        // ============================================================
-        // FUEL CRUD
-        // ============================================================
         function openNewFuel() { 
             document.getElementById('fuelForm').reset(); 
             document.getElementById('editFuelIndex').value = ''; 
@@ -728,6 +712,9 @@
             let p = parseFloat(document.getElementById('fuelPrice').value);
             let dateValue = document.getElementById('fuelDate').value;
             let odo = parseInt(document.getElementById('fuelOdometer').value);
+            
+            // Convertir fecha a DD/MM/YYYY para guardar
+            dateValue = convertirFechaGuardar(dateValue);
             
             const data = {
                 date: dateValue,
@@ -767,18 +754,22 @@
                     appData.manualOdometer = odo;
                     toggleModal('fuelModal','close');
                     await loadData();
-                    showToast('✅ Carga guardada y odómetro actualizado', 'success');
+                    showToast('✅ Carga guardada', 'success');
                 }
             }
         }
 
         function openEditFuel(id) {
-            let f = appData.fuels.find(x => String(x.id) === String(id)); if(!f) return;
+            let f = appData.fuels.find(x => String(x.id) === String(id)); 
+            if(!f) return;
             document.getElementById('editFuelIndex').value = f.id;
             document.getElementById('fuelOdometer').value = f.odometer;
             document.getElementById('fuelLiters').value = f.liters;
             document.getElementById('fuelPrice').value = f.pricePerLiter;
-            document.getElementById('fuelDate').value = f.date;
+            
+            // Convertir fecha a YYYY-MM-DD para el input
+            document.getElementById('fuelDate').value = convertirFechaInput(f.date);
+            
             document.getElementById('deleteFuelBtn').style.display = 'block';
             document.getElementById('fuelModalTitle').innerText = 'Editar Carga';
             document.getElementById('liveTotal').innerText = '$'+(f.liters*f.pricePerLiter).toFixed(2);
@@ -817,9 +808,6 @@
         document.getElementById('fuelLiters').addEventListener('input', liveCalc);
         document.getElementById('fuelPrice').addEventListener('input', liveCalc);
 
-        // ============================================================
-        // ODÓMETRO
-        // ============================================================
         function openOdoModal() {
             document.getElementById('odoInput').value = getCurrentOdometer();
             toggleModal('odoModal','open');
@@ -833,16 +821,13 @@
                     appData.manualOdometer = odo;
                     toggleModal('odoModal','close');
                     await loadData();
-                    showToast('✅ Odómetro manual actualizado', 'success');
+                    showToast('✅ Odómetro actualizado', 'success');
                 } else {
                     showToast('❌ Error al guardar', 'error');
                 }
             }
         }
 
-        // ============================================================
-        // NOMBRE
-        // ============================================================
         function openNameModal() {
             document.getElementById('carNameInput').value = appData.carName || 'Mi Auto';
             toggleModal('nameModal','open');
@@ -863,9 +848,6 @@
             }
         }
 
-        // ============================================================
-        // SERVICIOS
-        // ============================================================
         function openServiceModal() {
             document.getElementById('serviceForm').reset();
             document.getElementById('editServiceId').value = '';
@@ -885,7 +867,10 @@
             document.getElementById('serviceSaveBtn').innerText = 'Actualizar Servicio';
             document.getElementById('serviceType').value = service.type;
             document.getElementById('serviceOdometer').value = service.serviceOdometer;
-            document.getElementById('serviceDate').value = service.date;
+            
+            // Convertir fecha a YYYY-MM-DD para el input
+            document.getElementById('serviceDate').value = convertirFechaInput(service.date);
+            
             toggleModal('serviceModal','open');
         }
 
@@ -895,6 +880,9 @@
             let odo = parseInt(document.getElementById('serviceOdometer').value);
             let dateValue = document.getElementById('serviceDate').value;
             const currentOdo = getCurrentOdometer();
+            
+            // Convertir fecha a DD/MM/YYYY para guardar
+            dateValue = convertirFechaGuardar(dateValue);
             
             if (odo <= currentOdo) {
                 showToast('❌ El odómetro debe ser mayor al actual', 'error');
@@ -989,9 +977,6 @@
             }
         }
 
-        // ============================================================
-        // FILTROS
-        // ============================================================
         document.getElementById('monthSelect').addEventListener('change', function() {
             updateUI();
         });
@@ -1000,9 +985,6 @@
             renderServices();
         });
 
-        // ============================================================
-        // INICIO
-        // ============================================================
         window.onload = loadData;
     </script>
 </body>
