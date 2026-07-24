@@ -316,7 +316,7 @@
         // ============================================================
         // CONFIGURACIÓN
         // ============================================================
-        const URL_API = 'https://script.google.com/macros/s/AKfycbyCIe9Xyho8-93kN_K04GCSQmqvrM13ia4mwYGHJ-akuyQ6gLSvh7zH8Hai2dLqb8zW/exec';
+        const URL_API = 'https://script.google.com/macros/s/AKfycby1baGfLAkISx6kRwL2hi5zF2uxxvsQqEZuFOErFa7O8W-xiwFm3yEY8VMtwKPW7oZv/exec';
         let appData = { carName: 'Mi Auto', manualOdometer: null, fuels: [], services: [] };
         const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         let toastTimeout = null;
@@ -432,11 +432,9 @@
         function formatNumber(n) { return new Intl.NumberFormat('es-MX').format(n); }
 
         function getCurrentOdometer() {
-            // Si hay odómetro manual, usarlo
             if (appData.manualOdometer !== null && appData.manualOdometer > 0) {
                 return appData.manualOdometer;
             }
-            // Si no, usar el máximo de los registros
             if (appData.fuels.length > 0) {
                 return Math.max(...appData.fuels.map(f => f.odometer));
             }
@@ -538,21 +536,19 @@
         }
 
         // ============================================================
-        // UPDATE UI - REESCRITO DESDE CERO
+        // UPDATE UI
         // ============================================================
         function updateUI() {
             try {
-                // ====== 1. OBTENER TODOS LOS DATOS ======
                 const allFuels = appData.fuels || [];
                 allFuels.sort((a, b) => new Date(a.date) - new Date(b.date));
                 const chrono = calculateChrono(allFuels);
                 const view = [...chrono].reverse();
 
-                // ====== 2. NOMBRE Y ODÓMETRO ======
                 document.getElementById('carNameDisplay').innerText = appData.carName || 'Mi Auto';
                 document.getElementById('mainOdometer').innerText = formatNumber(getCurrentOdometer());
 
-                // ====== 3. ÚLTIMAS CARGAS (SIN FILTRO) ======
+                // ÚLTIMAS CARGAS
                 const latest = document.getElementById('latestFuelContainer');
                 if (view.length === 0) {
                     latest.innerHTML = `<div class="empty-state-mini">No hay registros</div>`;
@@ -569,17 +565,15 @@
                     }).join('');
                 }
 
-                // ====== 4. CONSTRUIR SELECTOR DE MESES ======
+                // SELECTOR DE MESES
                 const monthSelect = document.getElementById('monthSelect');
                 const selectedMonth = monthSelect.value || 'todos';
                 
-                // Obtener meses únicos
                 const monthSet = new Set();
                 allFuels.forEach(f => {
                     if (f.date) monthSet.add(f.date.substring(0, 7));
                 });
                 
-                // Construir HTML del selector
                 let monthHtml = '<option value="todos">Todos los meses</option>';
                 const sortedMonths = Array.from(monthSet).sort().reverse();
                 sortedMonths.forEach(m => {
@@ -592,7 +586,7 @@
                 monthSelect.innerHTML = monthHtml;
                 monthSelect.value = selectedMonth;
 
-                // ====== 5. APLICAR FILTRO ======
+                // FILTRADO
                 const filteredView = selectedMonth === 'todos' 
                     ? view 
                     : view.filter(f => f.date && f.date.startsWith(selectedMonth));
@@ -601,7 +595,7 @@
                     ? chrono 
                     : chrono.filter(f => f.date && f.date.startsWith(selectedMonth));
 
-                // ====== 6. TARJETAS DE RESUMEN (CON FILTRO) ======
+                // TARJETAS
                 const totalKm = filteredChrono.reduce((sum, f) => sum + (f.kmDiff || 0), 0);
                 const totalCost = filteredChrono.reduce((sum, f) => sum + (f.totalCost || 0), 0);
                 const totalLiters = filteredChrono.reduce((sum, f) => sum + (f.liters || 0), 0);
@@ -613,7 +607,7 @@
                     ? (totalKm / totalLiters).toFixed(1) + ' km/L' 
                     : '0.0';
 
-                // ====== 7. LISTA HISTORIAL (CON FILTRO) ======
+                // LISTA HISTORIAL
                 const historyList = document.getElementById('historyList');
                 if (filteredView.length === 0) {
                     historyList.innerHTML = `<div class="empty-state-mini">Sin registros</div>`;
@@ -638,7 +632,7 @@
                     }).join('');
                 }
 
-                // ====== 8. SERVICIOS (NO CAMBIA) ======
+                // SERVICIOS
                 const services = appData.services || [];
                 const slist = document.getElementById('servicesList');
                 if (services.length === 0) {
@@ -703,7 +697,7 @@
                     slist.innerHTML = finalHtml;
                 }
 
-                // ====== 9. FAB ======
+                // FAB
                 const activeTab = document.querySelector('.tab-content.active');
                 const fab = document.getElementById('fabBtn');
                 if (activeTab && activeTab.id === 'tab-inicio') fab.classList.remove('hidden');
@@ -1018,7 +1012,7 @@
         }
 
         // ============================================================
-        // FILTRO MESES - EVENTO
+        // FILTRO MESES
         // ============================================================
         document.getElementById('monthSelect').addEventListener('change', function() {
             updateUI();
